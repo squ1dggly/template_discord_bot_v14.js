@@ -1,0 +1,23 @@
+{
+    "creatorID": "",
+
+    "clientPresence": {
+        "default": {
+            "STATUS": "online",
+            "activity": {
+                "TYPE": "LISTENING",
+                "NAME": "/invite || s!invite",
+                "URL": ""
+            }
+        },
+
+        "dev": {
+            "STATUS": "dnd",
+            "activity": {
+                "TYPE": "PLAYING",
+                "NAME": "with unstable substances",
+                "URL": ""
+            }
+        }
+    }
+}
