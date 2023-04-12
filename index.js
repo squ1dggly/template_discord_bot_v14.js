@@ -4,14 +4,14 @@ require('dotenv').config();
 const fs = require('fs');
 
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
-// const { PushSlashCommands, DeleteSlashCommands } = require('./modules/slshCmdHandler');
-
+const slashCommandManager = require('./modules/slashCommandManager');
 const logger = require('./modules/logger');
 
 logger.log("initializing...");
 
 const client = new Client({
     intents: [
+        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
@@ -34,8 +34,9 @@ importers_dir.forEach(fn => {
 // Connect the client to discord
 logger.log("connecting to Discord...");
 client.login(process.env.TOKEN).then(async () => {
-    // await PushSlashCommands(client);
-    // await DeleteSlashCommands(client);
+    // await slashCommandManager.push(client);
+    // await slashCommandManager.remove(client);
+    // await slashCommandManager.refresh(client);
 });
 
 // Export the client

@@ -5,8 +5,8 @@
         "default": {
             "STATUS": "online",
             "activity": {
-                "TYPE": "LISTENING",
-                "NAME": "/invite || s!invite",
+                "TYPE": "WATCHING",
+                "NAME": "/invite",
                 "URL": ""
             }
         },

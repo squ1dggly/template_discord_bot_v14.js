@@ -15,9 +15,9 @@ mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => logger.success("successfully connected to MongoDB"))
     .catch(err => logger.error("failed to connect to MongoDB", null, err));
 
-// ! Database Functions
+//! Database Functions
 module.exports = {
 
 };
 
-// ! Helper Functions
+//! Helper Functions
