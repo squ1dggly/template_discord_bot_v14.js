@@ -14,4 +14,4 @@ module.exports = {
     execute: async (client) => {
         logger.success(`${name} successfully connected to Discord`);
     }
-}
+};

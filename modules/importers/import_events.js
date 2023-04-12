@@ -16,22 +16,22 @@ module.exports = {
             ready: importEvents('../../events/ready'),
 
             guild: {
-                // create: importEventFunctions('../../events/guild_create'),
-                // delete: importEventFunctions('../../events/guild_delete'),
+                // create: importEventFunctions('../../events/guild/create'),
+                // delete: importEventFunctions('../../events/guild/delete'),
 
                 /* member: {
-                    add: importEventFunctions('../../events/guild_member_add')
+                    add: importEventFunctions('../../events/guild/member/add')
                 } */
             },
 
             message: {
-                // create: importEventFunctions('../../events/message_create'),
-                // update: importEventFunctions('../../events/message_update'),
-                // delete: importEventFunctions('../../events/message_delete')
+                // create: importEventFunctions('../../events/message/create'),
+                // update: importEventFunctions('../../events/message/update'),
+                // delete: importEventFunctions('../../events/message/delete')
             },
 
             interaction: {
-                create: importEvents('../../events/interaction_create')
+                create: importEvents('../../events/interaction/create')
             }
         }
 
