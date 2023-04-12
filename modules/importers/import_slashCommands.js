@@ -1,14 +1,13 @@
 // Imports all slash commands found in ('../../slash_commands').
 
 const { readdirSync } = require('fs');
-const { join } = require('path');
 
 const client = require('../../index');
 const logger = require('../logger');
 
 function importSlashCommands(dir) {
     let slash_commands = [];
-    let files = readdirSync(dir.substring(1));
+    let files = readdirSync(`.${dir}`);
 
     for (let entry of files) if (entry.endsWith('.js')) {
         try {
@@ -17,12 +16,12 @@ function importSlashCommands(dir) {
             logger.error("Failed to import slash command", `at: \'${join(dir, entry)}\'`, err);
         }
     } else { // In the case of a folder within the root slash command directory
-        let _nested = readdirSync(join(dir.substring(1), entry)).filter(file_name => file_name.endsWith('.js'));
+        let _nested = readdirSync(`.${dir}/${entry}`).filter(file_name => file_name.endsWith('.js'));
 
         for (let file_name of _nested) try {
-            slash_commands.push(require(join(dir, entry, file_name)));
+            slash_commands.push(require(`${dir}/${entry}/${file_name}`));
         } catch (err) {
-            logger.error("Failed to import slash command", `at: \'${join(dir, entry, file_name)}\'`, err);
+            logger.error("Failed to import slash command", `at: \'${`${dir}/${entry}/${file_name}`}\'`, err);
         }
     }
 

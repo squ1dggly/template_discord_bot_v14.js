@@ -1,7 +1,6 @@
 // Imports our event scripts and binds them to their intended event triggers.
 
 const fs = require('fs');
-const { join } = require('path');
 
 const client = require('../../index');
 const logger = require('../logger');
@@ -90,10 +89,10 @@ module.exports = {
 
 // ! Helper Functions
 function importEvents(dir) {
-    let files = fs.readdirSync(dir.substring(1)).filter(fn => fn.endsWith('.js'));
+    let files = fs.readdirSync(`.${dir}`).filter(fn => fn.endsWith('.js'));
     let funcs = [];
 
-    files.forEach(fn => funcs.push(require(join(dir, fn))));
+    files.forEach(fn => funcs.push(require(`${dir}/${fn}`)));
     return funcs;
 }
 

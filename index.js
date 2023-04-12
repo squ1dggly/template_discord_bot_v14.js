@@ -3,12 +3,12 @@
 require('dotenv').config();
 const fs = require('fs');
 
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
-const { PushSlashCommands, DeleteSlashCommands } = require('./modules/slshCmdHandler');
+const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+// const { PushSlashCommands, DeleteSlashCommands } = require('./modules/slshCmdHandler');
 
 const logger = require('./modules/logger');
 
-console.log(logger.log("initializing..."));
+logger.log("initializing...");
 
 const client = new Client({
     intents: [
@@ -28,7 +28,7 @@ client.slashCommands = new Collection();
 let importers_dir = fs.readdirSync('./modules/importers').filter(fn => fn.startsWith('import_') && fn.endsWith('.js'));
 importers_dir.forEach(fn => {
     try { require(`./modules/importers/${fn}`).init(client); }
-    catch (err) { logger.error("Importer failed to load:", `${fn} is not a valid importer`, err); }
+    catch (err) { logger.error("Importer failed to load", `${fn} is not a valid importer`, err); }
 });
 
 // Connect the client to discord
