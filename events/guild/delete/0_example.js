@@ -1,7 +1,6 @@
 // An example of an event function.
 
-const { Guild } = require('discord.js');
-const client = require('../../../index');
+const { Client, Guild } = require('discord.js');
 const logger = require('../../../modules/logger');
 
 module.exports = {
@@ -9,7 +8,7 @@ module.exports = {
     event: "guild_delete",
 
     /**
-     * @param {client} client 
+     * @param {Client} client 
      * @param {{ guild: Guild }} args
      */
     execute: async (client, args) => {

@@ -1,15 +1,14 @@
 // Runs as soon as the bot's connected to discord.
 
-const { ActivityType } = require('discord.js');
+const { Client, ActivityType } = require('discord.js');
 const { clientPresence } = require('../../configs/clientSettings.json');
-const client = require('../../index');
 
 module.exports = {
     name: "SET_PRESENCE",
     event: "ready",
 
     /**
-     * @param {client} client 
+     * @param {Client} client 
      */
     execute: async (client) => {
         let presence = process.env.DEVMODE ? clientPresence.dev : clientPresence.default;

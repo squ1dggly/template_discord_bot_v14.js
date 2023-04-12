@@ -2,7 +2,7 @@
 
 const { readdirSync } = require('fs');
 
-const client = require('../../index');
+const { Client } = require('discord.js');
 const logger = require('../logger');
 
 function importSlashCommands(dir) {
@@ -30,7 +30,7 @@ function importSlashCommands(dir) {
 
 module.exports = {
     /**
-     * @param {client} client 
+     * @param {Client} client 
      */
     init: (client) => {
         let slash_commands = importSlashCommands('../../slash_commands');

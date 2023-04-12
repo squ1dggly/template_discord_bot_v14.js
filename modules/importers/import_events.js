@@ -2,13 +2,13 @@
 
 const fs = require('fs');
 
-const client = require('../../index');
+const { Client } = require('discord.js');
 const logger = require('../logger');
 // const mongo = require('../mongo');
 
 module.exports = {
     /**
-     * @param {client} client 
+     * @param {Client} client 
      */
     init: (client) => {
         let events = {
