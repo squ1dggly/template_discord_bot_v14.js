@@ -6,6 +6,7 @@ const fs = require('fs');
 const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
 const slashCommandManager = require('./modules/slashCommandManager');
 const logger = require('./modules/logger');
+const mongo = require('./modules/mongo');
 
 logger.log("initializing...");
 
@@ -34,6 +35,8 @@ importers_dir.forEach(fn => {
 // Connect the client to discord
 logger.log("connecting to Discord...");
 client.login(process.env.TOKEN).then(async () => {
+    // mongo.connect();
+
     // await slashCommandManager.push(client);
     // await slashCommandManager.remove(client);
     // await slashCommandManager.refresh(client);
