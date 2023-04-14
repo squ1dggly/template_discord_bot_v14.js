@@ -96,7 +96,7 @@ function importEvents(dir) {
     return funcs;
 }
 
-function executeEvent(foo, ...args ) {
+function executeEvent(foo, ...args) {
     try {
         foo.execute.apply(null, args);
     } catch (err) {

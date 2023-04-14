@@ -24,6 +24,6 @@ module.exports = {
         }
 
         client.user.setActivity({ name: presence.activity.NAME, type: presence.activity.TYPE, url: presence.activity.URL });
-        client.user.setStatus(presence.activity.NAME);
+        client.user.setStatus(presence.STATUS);
     }
 };

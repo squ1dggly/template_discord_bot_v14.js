@@ -21,9 +21,10 @@ module.exports = {
         // Try to execute the slash command function
         if (slashCommand) try {
             // Execute the command function
-            slashCommand.execute(client, args.interaction);
+            return await slashCommand.execute(client, args.interaction);
         } catch (err) {
-            logger.error("Failed to execute slash command", `\"${args.interaction.commandName}\"`, err);
+            // Log the error
+            return logger.error("Failed to execute slash command", `\"${args.interaction.commandName}\"`, err);
         }
     }
 };

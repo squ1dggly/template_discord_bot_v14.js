@@ -11,7 +11,7 @@ function importSlashCommands(dir) {
 
     for (let entry of files) if (entry.endsWith('.js')) {
         try {
-            slash_commands.push(require(join(dir, entry)));
+            slash_commands.push(require(`${dir}/${entry}`));
         } catch (err) {
             logger.error("Failed to import slash command", `at: \'${join(dir, entry)}\'`, err);
         }

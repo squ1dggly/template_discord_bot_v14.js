@@ -1,3 +1,5 @@
+// Push, remove, or refresh all slash commands in a Guild.
+
 const { Client, REST, Routes } = require('discord.js');
 const logger = require('./logger');
 
@@ -11,7 +13,7 @@ module.exports = {
      * @param {boolean} global Whether to push the slash commands globally. False is locally per server.
      */
     push: async (client, guildIDs, global = false) => {
-        let slash_commands = [...client.slashCommands.values()];
+        let slash_commands = [...client.slashCommands.values()].map(slsh => slsh.builder);
 
         // Push slash commands globally
         if (global) try {
