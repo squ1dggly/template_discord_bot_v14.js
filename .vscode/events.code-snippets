@@ -1,5 +1,5 @@
 {
-	"Guild Create Event": {
+	"Guild Create": {
 		"scope": "javascript",
 		"prefix": "event_guildCreate",
 		"body": [
@@ -23,7 +23,7 @@
 		]
 	},
 
-	"Guild Delete Event": {
+	"Guild Delete": {
 		"scope": "javascript",
 		"prefix": "event_guildDelete",
 		"body": [
@@ -47,7 +47,7 @@
 		]
 	},
 
-	"Message Create Event": {
+	"Message Create": {
 		"scope": "javascript",
 		"prefix": "event_messageCreate",
 		"body": [
@@ -71,7 +71,7 @@
 		]
 	},
 
-	"Message Delete Event": {
+	"Message Delete": {
 		"scope": "javascript",
 		"prefix": "event_messageDelete",
 		"body": [
@@ -95,7 +95,7 @@
 		]
 	},
 
-	"Message Update Event": {
+	"Message Update": {
 		"scope": "javascript",
 		"prefix": "event_messageUpdate",
 		"body": [
@@ -119,7 +119,7 @@
 		]
 	},
 
-	"Interaction Create Event": {
+	"Interaction Create": {
 		"scope": "javascript",
 		"prefix": "event_interactionCreate",
 		"body": [
