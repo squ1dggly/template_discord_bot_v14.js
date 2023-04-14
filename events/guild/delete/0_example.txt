@@ -12,6 +12,6 @@ module.exports = {
      * @param {{ guild: Guild }} args
      */
     execute: async (client, args) => {
-        return logger.log(`lefted a guild named \"${args.guild.name}\"`);
+        return logger.log(`left a guild named \"${args.guild.name}\"`);
     }
 };

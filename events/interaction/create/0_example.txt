@@ -12,6 +12,6 @@ module.exports = {
      * @param {{ interaction: BaseInteraction }} args
      */
     execute: async (client, args) => {
-        logger.log(`${args.interaction.user.username} triggered an interaction`);
+        return logger.log(`${args.interaction.user.username} triggered an interaction`);
     }
 };

@@ -16,11 +16,7 @@ module.exports = {
 
             guild: {
                 // create: importEventFunctions('../../events/guild/create'),
-                // delete: importEventFunctions('../../events/guild/delete'),
-
-                /* member: {
-                    add: importEventFunctions('../../events/guild/member/add')
-                } */
+                // delete: importEventFunctions('../../events/guild/delete')
             },
 
             message: {
@@ -48,15 +44,9 @@ module.exports = {
         }); */
 
         // Guild -> Delete
-        /* client.on("guildCreate", async (guild) => {
+        /* client.on("guildDelete", async (guild) => {
             let args = { guild };
-            events.guild.create.forEach(foo => executeEvent(foo, client, args));
-        }); */
-
-        // Guild -> Member -> Add
-        /* client.on("guildMemberAdd", async (guildMember) => {
-            let args = { guildMember };
-            events.guild.member.add.forEach(foo => executeEvent(foo, client, args));
+            events.guild.delete.forEach(foo => executeEvent(foo, client, args));
         }); */
 
         // * Message

@@ -1,0 +1,30 @@
+{
+	"Slash Command": {
+		"scope": "javascript",
+		"prefix": "slash",
+		"body": [
+			"const { Client, CommandInteraction, SlashCommandBuilder } = require('discord.js');\n",
+
+			"const { randomTools } = require('../modules/jsTools');\n",
+
+			"module.exports = {",
+			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
+			"        .setDescription(\"${2:Get a cookie, or a glass of milk.}\"),\n",
+
+			"    /**",
+			"     * @param {Client} client",
+			"     * @param {CommandInteraction} interaction",
+			"     */",
+			"    execute: async (client, interaction) => {",
+			"        let choices = [",
+			"            \"Hey, %USER! Have a cookie! :cookie:\",",
+			"            \"%USER. It's your lucky day! Have a glass of milk! :milk:\",",
+			"        ];\n",
+
+			"        let response = randomTools.choice(choices).replace(\"%USER\", interaction.user);",
+			"        return await interaction.reply({ content: response });$0",
+			"    }",
+			"};"
+		]
+	}
+}
