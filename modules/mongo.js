@@ -4,7 +4,7 @@ const logger = require('./logger');
 
 // Models
 const models = {
-    // users: require('../models/users');
+    // users: require('../models/userModel');
 };
 
 const mongoose = require('mongoose');
