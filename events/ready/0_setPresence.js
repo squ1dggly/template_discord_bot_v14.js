@@ -23,7 +23,11 @@ module.exports = {
             case "competing": presence.activity.TYPE = ActivityType.Competing; break;
         }
 
-        client.user.setActivity({ name: presence.activity.NAME, type: presence.activity.TYPE, url: presence.activity.URL });
+        client.user.setActivity({
+            name: presence.activity.NAME,
+            type: presence.activity.TYPE,
+            url: presence.activity.URL ? presence.activity.URL : null
+        });
         client.user.setStatus(presence.STATUS);
     }
 };

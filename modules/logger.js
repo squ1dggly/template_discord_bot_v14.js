@@ -4,7 +4,7 @@ const chalk = require('chalk');
 
 module.exports = {
     success: (msg) => console.log(chalk.green(msg)),
-    error: (header, msg, err) => console.error(chalk.black.bgRed(header) + " " + chalk.magenta(msg), err),
+    error: (header, msg, err = "") => console.error(chalk.black.bgRed(header) + " " + chalk.magenta(msg), err),
 
     log: (msg) => console.log(chalk.gray(msg)),
     debug: (msg) => console.log(chalk.magenta(msg))

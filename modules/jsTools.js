@@ -15,6 +15,22 @@ function array_chunk(arr, size) {
     return arr_new;
 }
 
+/** Return an array with only unique items based on the given filter.
+ * @param {Array} arr The array to filter.
+ * @param {(itemCurrent, itemToCompare) => void} filter The method to filter.
+ */
+function array_unique(arr, filter) {
+    let arr_new = [];
+
+    arr.forEach(itemCurrent => {
+        // let existsInArray = arr_new.findIndex(e => filter(e, )) >= 0;
+        let existsInArray = arr_new.findIndex(itemToCompare => filter(itemCurrent, itemToCompare)) >= 0;
+        if (!existsInArray) arr_new.push(itemCurrent);
+    });
+
+    return arr_new;
+}
+
 // ! String
 /** Capitalize the first letter of each word in a string.
  * @param {string} str The string you wish to convert. 
@@ -117,10 +133,10 @@ function number_clamp(num, min, max) {
  * @param {number} unixInSeconds The UNIX date in seconds.
  * @param {boolean} ignorePast If true, returns null if the given date is before the current time.
  */
-function date_eta(unixInSeconds, ignorePast = false) {
-    if (!unixInSeconds) return null;
+function date_eta(unixInMilliseconds, ignorePast = false) {
+    if (!unixInMilliseconds) return null;
 
-    let duration = unixInSeconds - number_milliToSeconds(Date.now());
+    let duration = number_milliToSeconds(unixInMilliseconds - Date.now());
     if (ignorePast && duration < 0) return null;
 
     let formatter = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
@@ -143,6 +159,60 @@ function date_eta(unixInSeconds, ignorePast = false) {
     });
 
     return formatter.format(duration.toFixed(), div.name);
+}
+
+/** Return a unix time from now + a given time string.
+ * @param {string} str The time to add.
+ * @param {"s" | "ms"} type The return type. (seconds | milliseconds)
+ * @example timeFromNow("1h"): 1681534527237
+ */
+function date_fromNow(str, type = "ms") {
+    let timeToAdd = str.match(/[a-zA-Z]+|[0-9]+/g);
+    let unix = Date.now();
+
+    switch (timeToAdd[1]) {
+        case "y": unix += (+timeToAdd[0] * 12 * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "m": unix += (+timeToAdd[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "w": unix += (+timeToAdd[0] * 7 * 24 * 60 * 60 * 1000); break;
+        case "d": unix += (+timeToAdd[0] * 24 * 60 * 60 * 1000); break;
+        case "h": unix += (+timeToAdd[0] * 60 * 60 * 1000); break;
+        case "m": unix += (+timeToAdd[0] * 60 * 1000); break;
+        case "s": unix += (+timeToAdd[0] * 1000); break;
+        case "ms": unix += (+timeToAdd[0]); break;
+    }
+
+    switch (type) {
+        case "s": return number_milliToSeconds(unix);
+        case "ms": return unix;
+        default: return unix;
+    }
+}
+
+/** Parse a given time string into milliseconds/seconds.
+ * @param {string} str The time string to parse.
+ * @param {"s" | "ms"} type The return type. (seconds | milliseconds)
+ * @example parseStr("1m"): 60000
+ */
+function date_parseStr(str, type = "ms") {
+    let time = str.match(/[a-zA-Z]+|[0-9]+/g);
+    let parsed = 0;
+
+    switch (time[1]) {
+        case "y": parsed = (+time[0] * 12 * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "m": parsed = (+time[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "w": parsed = (+time[0] * 7 * 24 * 60 * 60 * 1000); break;
+        case "d": parsed = (+time[0] * 24 * 60 * 60 * 1000); break;
+        case "h": parsed = (+time[0] * 60 * 60 * 1000); break;
+        case "m": parsed = (+time[0] * 60 * 1000); break;
+        case "s": parsed = (+time[0] * 1000); break;
+        case "ms": parsed = (+time[0]); break;
+    }
+
+    switch (type) {
+        case "s": return number_milliToSeconds(parsed);
+        case "ms": return parsed;
+        default: return parsed;
+    }
 }
 
 // ! Random
@@ -287,7 +357,8 @@ async function async_wait(ms) {
 module.exports = {
     /** Functions useful for dealing with arrays. */
     arrayTools: {
-        chunk: array_chunk
+        chunk: array_chunk,
+        unique: array_unique
     },
 
     /** Functions useful for dealing with strings. */
@@ -307,7 +378,9 @@ module.exports = {
 
     /** Functions useful for dealing with dates. */
     dateTools: {
-        eta: date_eta
+        eta: date_eta,
+        fromNow: date_fromNow,
+        parseStr: date_parseStr
     },
 
     /** Functions useful for dealing with random. */

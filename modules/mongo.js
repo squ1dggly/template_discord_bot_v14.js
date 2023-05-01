@@ -10,7 +10,8 @@ const models = {
 const mongoose = require('mongoose');
 const MONGO_URI = process.env.MONGO_URI;
 
-//! Database Functions
+//! Database Operations
+
 module.exports = {
     /** Connect to MongoDB */
     connect: () => {
@@ -19,5 +20,3 @@ module.exports = {
             .catch(err => logger.error("failed to connect to MongoDB", null, err));
     }
 };
-
-//! Helper Functions
