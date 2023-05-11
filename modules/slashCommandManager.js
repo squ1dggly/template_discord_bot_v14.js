@@ -3,8 +3,10 @@
 const { Client, REST, Routes } = require('discord.js');
 const logger = require('./logger');
 
+const TOKEN = process.env.TOKEN || require('../configs/clientSettings.json').TOKEN;
+
 // Create an instance of the REST api
-const rest = new REST().setToken(process.env.TOKEN);
+const rest = new REST().setToken(TOKEN);
 
 module.exports = {
     /** Push slash commands to one or more guilds.
