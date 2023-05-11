@@ -1,6 +1,6 @@
 // Executes commands requested by a command interaction.
 
-const { Client, BaseInteraction } = require('discord.js');
+const { Client, BaseInteraction, PermissionsBitField } = require('discord.js');
 
 const { ownerID, adminIDs } = require('../../../configs/clientSettings.json');
 const logger = require('../../../modules/logger');

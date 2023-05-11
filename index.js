@@ -3,7 +3,7 @@
 require('dotenv').config();
 const fs = require('fs');
 
-const { Client, GatewayIntentBits, Partials, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, /* Partials, */ Collection } = require('discord.js');
 const slashCommandManager = require('./modules/slashCommandManager');
 const logger = require('./modules/logger');
 const mongo = require('./modules/mongo');
@@ -41,13 +41,7 @@ logger.log("connecting to Discord...");
 client.login(TOKEN).then(async () => {
     // await mongo.connect();
 
-    // Push all commands including admin to a specific server (use this if the bot is using local commands) (this is local)
-    // await slashCommandManager.push(client, "your_server_id", false, true);
-    
-    // Push only admin commands to a specific server (use this if the bot is using global commands) (this is local)
-    // await slashCommandManager.push(client, "your_server_id", false, true, true);
-
-    // Push all commands excluding admin to a specific server (this is local) - use this to refresh local also
+    // Push all commands to a specific server (this is local) - use this to refresh local also
     // await slashCommandManager.push(client, "your_server_id");
 
     // Push all commands excluding admin (this is global) - use this to refresh global also
