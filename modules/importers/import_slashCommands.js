@@ -32,8 +32,5 @@ module.exports = {
 
         for (let slash_command of slash_commands)
             client.slashCommands.set(slash_command.builder.name, slash_command);
-
-        for (let slash_command_admin of slash_commands_admin)
-            client.slashCommands_admin.set(slash_command_admin.builder.name, slash_command_admin);
     }
 };
