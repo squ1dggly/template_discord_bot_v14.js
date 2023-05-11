@@ -1,2 +1,6 @@
+package-lock.json
 node_modules
 .env
+
+# Other files
+TODO.txt

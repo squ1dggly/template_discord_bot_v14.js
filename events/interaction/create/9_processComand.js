@@ -1,6 +1,8 @@
 // Executes commands requested by a command interaction.
 
 const { Client, BaseInteraction } = require('discord.js');
+
+const { ownerID, adminIDs } = require('../../../configs/clientSettings.json');
 const logger = require('../../../modules/logger');
 
 module.exports = {
@@ -20,6 +22,18 @@ module.exports = {
 
         // Try to execute the slash command function
         if (slashCommand) try {
+            // Check if the command is only available to the owner and bot admins
+            if (slashCommand.ownerOnly && ![ownerID, ...adminIDs].includes(args.interaction.user.id))
+                return await args.interaction.reply({ content: "You are not allowed to use this command!", ephemeral: true });
+
+            // Check if the command requires the user to have admin in the guild
+            if (slashCommand.requireGuildAdmin) {
+                let userHasAdmin = args.interaction.member.permissions.has(PermissionsBitField.Flags.Administrator);
+
+                if (![ownerID, ...adminIDs].includes(args.interaction.user.id) && !userHasAdmin)
+                    return await args.interaction.reply({ content: "You need admin to use this command!", ephemeral: true });
+            }
+
             // Execute the command function
             return await slashCommand.execute(client, args.interaction);
         } catch (err) {

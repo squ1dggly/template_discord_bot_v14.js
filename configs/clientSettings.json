@@ -1,6 +1,10 @@
 {
+    "TOKEN": "",
+    "MONGO_URI": "",
+    "DEVMODE": false,
+
     "ownerID": "",
-    "admins": [""],
+    "adminIDs": [""],
 
     "clientPresence": {
         "default": {

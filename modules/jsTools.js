@@ -195,11 +195,12 @@ function date_fromNow(str, type = "ms") {
  */
 function date_parseStr(str, type = "ms") {
     let time = str.match(/[a-zA-Z]+|[0-9]+/g);
+
     let parsed = 0;
 
     switch (time[1]) {
         case "y": parsed = (+time[0] * 12 * 4 * 7 * 24 * 60 * 60 * 1000); break;
-        case "m": parsed = (+time[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "mth": parsed = (+time[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
         case "w": parsed = (+time[0] * 7 * 24 * 60 * 60 * 1000); break;
         case "d": parsed = (+time[0] * 24 * 60 * 60 * 1000); break;
         case "h": parsed = (+time[0] * 60 * 60 * 1000); break;

@@ -11,26 +11,29 @@ const {
 } = require('discord.js');
 
 const { botSettings } = require('../configs/heejinSettings.json');
+const { randomTools, arrayTools, dateTools } = require('./jsTools');
 const logger = require('./logger');
 
 //! Message Tools
 /** Create a simple embed with a description. */
 class message_Embedinator {
     /** @param {CommandInteraction} interaction */
-    constructor(interaction, options = { author: null, title: "", description: "" }) {
-        options = { author: null, title: "title", description: "", ...options };
+    constructor(interaction, options = { author: null, title: "", description: "", footer: "" }) {
+        options = { author: null, title: "title", description: "", footer: "", ...options };
 
         this.interaction = interaction;
         this.author = options.author;
         this.title = options.title
             .replace("%USER", options.author?.username || interaction.user.username);
         this.description = options.description;
+        this.footer = options.footer;
 
         // Create the embed
-        this.embed = new EmbedBuilder().setColor(botSettings.embedColor || null);
+        this.embed = new EmbedBuilder().setColor(botSettings.embed.color || null);
 
-        if (this.description) this.embed.setDescription(this.description);
         if (this.title) this.embed.setAuthor({ name: this.title });
+        if (this.description) this.embed.setDescription(this.description);
+        if (this.footer) this.embed.setFooter({ text: this.footer });
         if (this.author) this.embed.setAuthor({
             name: this.embed.data.author.name,
             iconURL: this.author.avatarURL({ dynamic: true })
@@ -49,18 +52,30 @@ class message_Embedinator {
      */
     setAuthor(author) { this.author = author; }
 
+    /** Set the description. */
+    setDescription(description) { this.description = description; }
+
+    /** Add embed fields.
+     * @param {{name: String, value: String, inline: Boolean}} fields
+     */
+    addFields(...fields) { this.embed.addFields(fields) }
+
     /** Send the embed.
      * @param {string} description The description of the embed.
-     * @param {{followUp: boolean, ephemeral: boolean}} options Optional options.
+     * @param {{sendSeparate: boolean, followUp: boolean, ephemeral: boolean}} options Optional options.
      */
-    async send(description, options = { followUp: false, ephemeral: false }) {
-        options = { followUp: false, ephemeral: false, ...options };
+    async send(description = "", options = { sendSeparate: false, followUp: false, ephemeral: false }) {
+        options = { sendSeparate: false, followUp: false, ephemeral: false, ...options };
 
-        if (description) this.embed.setDescription(description);
+        if (description) this.description = description;
+
+        this.embed.setDescription(this.description);
 
         // Send the embed
         if (options.followUp)
             return await this.interaction.followUp({ embeds: [this.embed], ephemeral: options.ephemeral });
+        else if (options.sendSeparate)
+            return await this.interaction.channel.send({ embeds: [this.embed] });
         else
             try {
                 return await this.interaction.reply({ embeds: [this.embed], ephemeral: options.ephemeral });
@@ -78,8 +93,12 @@ class message_Navigationify {
      * @param {CommandInteraction} interaction
      * @param {Array<Embed | Array<Embed>} embedViews
      */
-    constructor(interaction, embedViews, options = { ephemeral: false, followUp: false, timeout: 10000 }) {
-        options = { ephemeral: false, followUp: false, timeout: 10000, ...options };
+    constructor(interaction, embedViews, options = { pagination: false, selectMenu: false, ephemeral: false, followUp: false, timeout: 0 }) {
+        options = {
+            pagination: false, selectMenu: false, ephemeral: false, followUp: false,
+            timeout: dateTools.parseStr(botSettings.timeout.pagination),
+            ...options
+        };
 
         this.interaction = interaction;
         this.fetchedReply = null;
@@ -87,9 +106,9 @@ class message_Navigationify {
         this.views = embedViews;
         this.options = options;
 
-        this.selectMenu_enabled = false;
+        this.selectMenu_enabled = options.selectMenu;
         this.selectMenu_values = [];
-        this.pagination_enabled = false;
+        this.pagination_enabled = options.pagination;
 
         this.viewIndex = 0; this.nestedPageIndex = 0;
 
@@ -319,16 +338,84 @@ class message_Navigationify {
         });
 
         // When the collector times out remove the message's components
-        try { collector.on("end", () => this.fetchedReply.edit({ components: [] })); }
-        catch (err) { logger.error("Failed to remove message components", "navigationify", err) };
+        collector.on("end", async () => {
+            let msg = null;
+
+            try { msg = await this.interaction.channel.messages.fetch(this.fetchedReply.id) } catch { };
+
+            if (msg) await this.fetchedReply.edit({ components: [] });
+        });
     }
 }
 
-async function message_deleteAfter(message, time) {
-    let m;
+async function message_awaitConfirmation(interaction, options = { title: "", description: "", footer: "", showAuthor: true, deleteAfter: true, timeout: 0 }) {
+    options = {
+        title: "Please confirm this action", description: null, showAuthor: true, footer: "",
+        deleteAfter: true,
+        timeout: dateTools.parseStr(botSettings.timeout.confirmation),
+        ...options
+    };
 
-    setTimeout(async () => m = await message.delete(), time);
-    return m;
+    let confirmed = false;
+
+    // Format a dynamic title
+    options.title = options.title
+        .replace("%USER", options.author?.username || interaction.user.username);
+
+    // Create the embed
+    let embed = new EmbedBuilder()
+        .setAuthor({ name: options.title })
+        .setColor(botSettings.embed.color || null);
+
+    // Set the author of the embed if applicable
+    if (options.showAuthor) embed.setAuthor({
+        name: embed.data.author.name,
+        iconURL: interaction.user.avatarURL({ dynamic: true })
+    });
+
+    // Set the embed description
+    if (options.description) embed.setDescription(options.description);
+
+    // Set the embed footer
+    if (options.footer) embed.setFooter({ text: options.footer });
+
+    // Create the confirm/cancel buttons
+    let btn_confirm = new ButtonBuilder({ label: "Confirm", style: ButtonStyle.Success, custom_id: "btn_confirm" });
+    let btn_cancel = new ButtonBuilder({ label: "Cancel", style: ButtonStyle.Danger, custom_id: "btn_cancel" });
+
+    // Create the action row
+    let actionRow = new ActionRowBuilder()
+        .addComponents(btn_confirm, btn_cancel);
+
+    // Send the confirmation message embed
+    let message = await interaction.followUp({ embeds: [embed], components: [actionRow] });
+
+    // Create a promise to await the user's decision
+    return new Promise(resolve => {
+        // Collect button interactions
+        let filter = i => (i.componentType === ComponentType.Button) && (i.user.id === interaction.user.id);
+        message.awaitMessageComponent({ filter, time: options.timeout }).then(async i => {
+            // Will return true since the user clicked the comfirm button
+            if (i.customId === "btn_confirm") confirmed = true;
+
+            // Delete the confirmation message
+            if (options.deleteAfter) message.delete();
+            else await message.edit({ components: [] });
+
+            // Resolve the promise with the confirmation
+            return resolve(confirmed);
+        }).catch(async () => {
+            // Delete the confirmation message if it still exists
+            try { await message.delete() } catch { };
+
+            // Return false since the user didn't click anything
+            return resolve(confirmed);
+        });
+    });
+}
+
+async function message_deleteAfter(message, time) {
+    setTimeout(async () => { try { await message.delete() } catch { } }, time); return null;
 }
 
 //! Markdown
@@ -376,8 +463,8 @@ module.exports = {
         Embedinator: message_Embedinator,
         Navigationify: message_Navigationify,
 
-        deleteAfter: message_deleteAfter,
-        paginationify: message_paginationify
+        awaitConfirmation: message_awaitConfirmation,
+        deleteAfter: message_deleteAfter
     },
 
     markdown: { bold, italic, inline, quote, link, space }

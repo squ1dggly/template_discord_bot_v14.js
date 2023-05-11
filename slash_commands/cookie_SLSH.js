@@ -6,6 +6,9 @@ module.exports = {
     builder: new SlashCommandBuilder().setName("cookie")
         .setDescription("Get a cookie, or a glass of milk."),
 
+    // ownerOnly: true, // Only allow the owner and admins defined in clientSettings.json to use this command
+    // requireGuildAdmin: true, // Only allow users with admin to use this command
+
     /**
      * @param {Client} client
      * @param {CommandInteraction} interaction

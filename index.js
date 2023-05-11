@@ -8,19 +8,22 @@ const slashCommandManager = require('./modules/slashCommandManager');
 const logger = require('./modules/logger');
 const mongo = require('./modules/mongo');
 
+const TOKEN = process.env.TOKEN || require('./configs/clientSettings.json').TOKEN;
+
 logger.log("initializing...");
 
 const client = new Client({
     intents: [
-        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.Guilds,
+        // GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.GuildPresences,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.DirectMessages
+        GatewayIntentBits.MessageContent
+        // GatewayIntentBits.DirectMessages
     ],
 
-    partials: [Partials.Channel] // Allows the bot to read its own DMs
+    // partials: [Partials.Channel] // Allows the bot to read its own DMs
 });
 
 // Collections that hold valuable information for the client
@@ -35,13 +38,24 @@ importers_dir.forEach(fn => {
 
 // Connect the client to discord
 logger.log("connecting to Discord...");
-client.login(process.env.TOKEN).then(async () => {
-    // mongo.connect();
+client.login(TOKEN).then(async () => {
+    // await mongo.connect();
 
-    // await slashCommandManager.push(client);
-    // await slashCommandManager.remove(client);
-    // await slashCommandManager.refresh(client);
+    // Push all commands including admin to a specific server (use this if the bot is using local commands) (this is local)
+    // await slashCommandManager.push(client, "your_server_id", false, true);
+    
+    // Push only admin commands to a specific server (use this if the bot is using global commands) (this is local)
+    // await slashCommandManager.push(client, "your_server_id", false, true, true);
+
+    // Push all commands excluding admin to a specific server (this is local) - use this to refresh local also
+    // await slashCommandManager.push(client, "your_server_id");
+
+    // Push all commands excluding admin (this is global) - use this to refresh global also
+    // await slashCommandManager.push(client, null, true);
+
+    // Remove all commands (this is local | does not work if using global commands) (this is local)
+    // await slashCommandManager.remove(client, "your_server_id")
+
+    // Remove all commands (this is global | does not work if using local commands) (this is global)
+    // await slashCommandManager.remove(client, null, true);
 });
-
-// Export the client
-module.exports = client;

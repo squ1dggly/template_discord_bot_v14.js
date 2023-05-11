@@ -13,20 +13,27 @@ module.exports = {
     init: (client) => {
         let events = {
             ready: importEvents('../../events/ready'),
+            // ready: importEvents('./events/ready'), // Use instead when uploaded to a host
 
             guild: {
                 // create: importEventFunctions('../../events/guild/create'),
+                // create: importEventFunctions('./events/guild/create'), // Use instead when uploaded to a host
                 // delete: importEventFunctions('../../events/guild/delete')
+                // delete: importEventFunctions('./events/guild/delete') // Use instead when uploaded to a host
             },
 
             message: {
                 // create: importEventFunctions('../../events/message/create'),
+                // create: importEventFunctions('./events/message/create'), // Use instead when uploaded to a host
                 // update: importEventFunctions('../../events/message/update'),
+                // update: importEventFunctions('./events/message/update'), // Use instead when uploaded to a host
                 // delete: importEventFunctions('../../events/message/delete')
+                // delete: importEventFunctions('./events/message/delete') // Use instead when uploaded to a host
             },
 
             interaction: {
                 create: importEvents('../../events/interaction/create')
+                // create: importEvents('./events/interaction/create') // Use instead when uploaded to a host
             }
         }
 
@@ -80,9 +87,11 @@ module.exports = {
 // ! Helper Functions
 function importEvents(dir) {
     let files = fs.readdirSync(`.${dir}`).filter(fn => fn.endsWith('.js'));
+    // let files = fs.readdirSync(`${dir}`).filter(fn => fn.endsWith('.js')); // Use instead when uploaded to a host
     let funcs = [];
 
     files.forEach(fn => funcs.push(require(`${dir}/${fn}`)));
+    // files.forEach(fn => funcs.push(require(`../.${dir}/${fn}`))); // Use instead when uploaded to a host
     return funcs;
 }
 
