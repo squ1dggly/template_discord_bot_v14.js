@@ -1,7 +1,7 @@
 // Runs as soon as the bot's connected to discord.
 
 const { Client, ActivityType } = require('discord.js');
-const { clientPresence } = require('../../configs/clientSettings.json');
+const { DEVMODE, clientPresence } = require('../../configs/clientSettings.json');
 
 module.exports = {
     name: "SET_PRESENCE",
@@ -11,7 +11,7 @@ module.exports = {
      * @param {Client} client 
      */
     execute: async (client) => {
-        let presence = process.env.DEVMODE ? clientPresence.dev : clientPresence.default;
+        let presence = (process.env.DEVMODE || DEVMODE) ? clientPresence.dev : clientPresence.default;
 
         // Replace presence.avtivity.TYPE with the proper ActivityType enum
         switch (presence.activity.TYPE.toLowerCase()) {
@@ -26,7 +26,7 @@ module.exports = {
         client.user.setActivity({
             name: presence.activity.NAME,
             type: presence.activity.TYPE,
-            url: presence.activity.URL ? presence.activity.URL : null
+            url: presence.activity.STREAM_URL ? presence.activity.STREAM_URL : null
         });
         client.user.setStatus(presence.STATUS);
     }

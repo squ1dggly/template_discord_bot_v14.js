@@ -12,7 +12,7 @@
             "activity": {
                 "TYPE": "WATCHING",
                 "NAME": "/invite",
-                "URL": ""
+                "STREAM_URL": ""
             }
         },
 
@@ -21,7 +21,7 @@
             "activity": {
                 "TYPE": "PLAYING",
                 "NAME": "with unstable substances",
-                "URL": ""
+                "STREAM_URL": ""
             }
         }
     }
