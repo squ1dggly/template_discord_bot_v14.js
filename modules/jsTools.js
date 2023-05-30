@@ -172,7 +172,7 @@ function date_fromNow(str, type = "ms") {
 
     switch (timeToAdd[1]) {
         case "y": unix += (+timeToAdd[0] * 12 * 4 * 7 * 24 * 60 * 60 * 1000); break;
-        case "m": unix += (+timeToAdd[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
+        case "mth": unix += (+timeToAdd[0] * 4 * 7 * 24 * 60 * 60 * 1000); break;
         case "w": unix += (+timeToAdd[0] * 7 * 24 * 60 * 60 * 1000); break;
         case "d": unix += (+timeToAdd[0] * 24 * 60 * 60 * 1000); break;
         case "h": unix += (+timeToAdd[0] * 60 * 60 * 1000); break;
@@ -194,6 +194,8 @@ function date_fromNow(str, type = "ms") {
  * @example parseStr("1m"): 60000
  */
 function date_parseStr(str, type = "ms") {
+    if (!isNaN(str)) return str;
+
     let time = str.match(/[a-zA-Z]+|[0-9]+/g);
 
     let parsed = 0;

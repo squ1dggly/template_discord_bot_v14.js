@@ -1,471 +1,729 @@
 const {
-    CommandInteraction,
-    Embed,
-    EmbedBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuOptionBuilder,
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    ComponentType
+    CommandInteraction, GuildMember, User, Message,
+    EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder,
+    ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType
 } = require('discord.js');
 
-const { botSettings } = require('../configs/heejinSettings.json');
-const { randomTools, arrayTools, dateTools } = require('./jsTools');
+const { dateTools } = require('./jsTools');
 const logger = require('./logger');
 
-//! Message Tools
-/** Create a simple embed with a description. */
-class message_Embedinator {
-    /** @param {CommandInteraction} interaction */
-    constructor(interaction, options = { author: null, title: "", description: "", footer: "" }) {
-        options = { author: null, title: "title", description: "", footer: "", ...options };
+/// Configuration
+const embed_defaults = {
+    color: "#2B2D31"
+};
 
-        this.interaction = interaction;
-        this.author = options.author;
-        this.title = options.title
-            .replace("%USER", options.author?.username || interaction.user.username);
-        this.description = options.description;
-        this.footer = options.footer;
+const timeouts = {
+    pagination: "30s",
+    confirmation: "15s",
+    errorMessage: "5s"
+};
 
-        // Create the embed
-        this.embed = new EmbedBuilder().setColor(botSettings.embed.color || null);
+const nav_emojis = {
+    toFirst: { name: "◀◀", emoji: "◀◀" },
+    back: { name: "◀", emoji: "◀" },
+    jump: { name: "📄", emoji: "📄" },
+    next: { name: "▶", emoji: "▶" },
+    toLast: { name: "▶▶", emoji: "▶▶" }
+};
 
-        if (this.title) this.embed.setAuthor({ name: this.title });
-        if (this.description) this.embed.setDescription(this.description);
-        if (this.footer) this.embed.setFooter({ text: this.footer });
-        if (this.author) this.embed.setAuthor({
-            name: this.embed.data.author.name,
-            iconURL: this.author.avatarURL({ dynamic: true })
-        });
-    }
+/// Quality of Life
+class bE_constructorOptions {
+    constructor() {
+        /** @type {CommandInteraction | null} */
+        this.interaction = null;
 
-    /** Change the title.
-     * @param {string} title The title.
-     */
-    setTitle(title) {
-        this.title = title
-            .replace("%USER", this.author.username || this.interaction.user.username);;
-    }
-    /** Change the embed's author.
-     * @param {string} author The author.
-     */
-    setAuthor(author) { this.author = author; }
+        this.author = {
+            /** @type {GuildMember | User | null} */
+            user: null, text: "", iconURL: "", linkURL: ""
+        };
 
-    /** Set the description. */
-    setDescription(description) { this.description = description; }
+        this.title = { text: "", linkURL: "" };
+        this.imageURL = "";
+        this.description = "";
+        this.footer = { text: "", iconURL: "" };
 
-    /** Add embed fields.
-     * @param {{name: String, value: String, inline: Boolean}} fields
-     */
-    addFields(...fields) { this.embed.addFields(fields) }
+        this.color = embed_defaults.color || null;
 
-    /** Send the embed.
-     * @param {string} description The description of the embed.
-     * @param {{sendSeparate: boolean, followUp: boolean, ephemeral: boolean}} options Optional options.
-     */
-    async send(description = "", options = { sendSeparate: false, followUp: false, ephemeral: false }) {
-        options = { sendSeparate: false, followUp: false, ephemeral: false, ...options };
-
-        if (description) this.description = description;
-
-        this.embed.setDescription(this.description);
-
-        // Send the embed
-        if (options.followUp)
-            return await this.interaction.followUp({ embeds: [this.embed], ephemeral: options.ephemeral });
-        else if (options.sendSeparate)
-            return await this.interaction.channel.send({ embeds: [this.embed] });
-        else
-            try {
-                return await this.interaction.reply({ embeds: [this.embed], ephemeral: options.ephemeral });
-            } catch {
-                // If you edit a reply you can't change the message to ephemeral unfortunately
-                // unless you do a follow up message and then delete the original reply but that's pretty scuffed
-                return await this.interaction.editReply({ embeds: [this.embed] });
-            }
+        this.showTimestamp = false;
     }
 }
 
-/** Send a message with a select menu/pagination to switch to different views. */
-class message_Navigationify {
+class bE_sendOptions {
+    constructor() {
+        /** Add a message outside of the embed. */
+        this.messageContent = "";
+
+        /** Send the embed with additional components.
+         * @type {ActionRowBuilder | Array<ActionRowBuilder>} */
+        this.components = [];
+
+        /** Send the embed with a new description.
+         * 
+         * Useful for cleaner code. */
+        this.description = "";
+
+        /** Send the embed with a new image.
+         * 
+         * Useful for cleaner code. */
+        this.imageURL = "";
+
+        /** The method to send the embed.
+         * 
+         * If "reply" isn't possible, it will fallback to "editReply".
+         * 
+         * @type {"reply" | "editReply" | "followUp" | "send"} */
+        this.method = "reply";
+
+        /** Send the message as ephemeral. */
+        this.ephemeral = false;
+    }
+}
+
+/** A better embed builder. */
+class BetterEmbed extends EmbedBuilder {
     /**
-     * @param {CommandInteraction} interaction
-     * @param {Array<Embed | Array<Embed>} embedViews
-     */
-    constructor(interaction, embedViews, options = { pagination: false, selectMenu: false, ephemeral: false, followUp: false, timeout: 0 }) {
-        options = {
-            pagination: false, selectMenu: false, ephemeral: false, followUp: false,
-            timeout: dateTools.parseStr(botSettings.timeout.pagination),
-            ...options
-        };
+     * @example
+     // Text formatting shorthand:
+     * "%AUTHOR_NAME" = "the author's display/user name"
+     * 
+     * @param {bE_constructorOptions} options */
+    constructor(options) {
+        super(); options = { ...new bE_constructorOptions(), ...options };
 
-        this.interaction = interaction;
-        this.fetchedReply = null;
+        /// Variables
+        this.interaction = options.interaction;
+        this.author = options.author;
 
-        this.views = embedViews;
-        this.options = options;
+        /// Configure the embed
+        //* Embed Author
+        if (this.author.text) this.setAuthor({
+            name: this.author.text
+                // Formatting shorthand
+                .replace("%AUTHOR_NAME", this.author.user?.displayName || this.author.user?.username)
+        });
 
-        this.selectMenu_enabled = options.selectMenu;
-        this.selectMenu_values = [];
-        this.pagination_enabled = options.pagination;
+        if ((this.author.iconURL || this.author.user) && this.author.iconURL !== null) this.setAuthor({
+            name: this.data.author?.name || null, iconURL: this.author.iconURL
+                || (this.author.user?.user?.avatarURL({ dynamic: true }) || this.author.user?.avatarURL({ dynamic: true }))
+        });
 
-        this.viewIndex = 0; this.nestedPageIndex = 0;
+        if (this.author.linkURL) this.setAuthor({
+            name: this.data.author?.name, iconURL: this.data.author.icon_url,
+            url: this.author.linkURL
+        });
 
-        this.actionRow = {
-            selectMenu: new ActionRowBuilder(),
-            pagination: new ActionRowBuilder()
-        };
-
-        this.components = {
-            stringSelectMenu: new StringSelectMenuBuilder()
-                .setCustomId("menu_view")
-                .setPlaceholder("make a selection..."),
-
-            pagination: {
-                skipFirst: new ButtonBuilder({ label: "◀◀", style: ButtonStyle.Primary, custom_id: "btn_skipFirst" }),
-                pageBack: new ButtonBuilder({ label: "◀", style: ButtonStyle.Primary, custom_id: "btn_back" }),
-                jump: new ButtonBuilder({ label: "📄", style: ButtonStyle.Primary, custom_id: "btn_jump" }),
-                pageNext: new ButtonBuilder({ label: "▶", style: ButtonStyle.Primary, custom_id: "btn_next" }),
-                skipLast: new ButtonBuilder({ label: "▶▶", style: ButtonStyle.Primary, custom_id: "btn_skipLast" })
-            }
-        };
-
-        // Add the select menu component to the selectMenu action row
-        this.actionRow.selectMenu.addComponents(this.components.stringSelectMenu);
-    }
-
-    addSelectMenuOption(options = { emoji: "", label: "", description: "", isDefault: false }) {
-        options = {
-            emoji: "",
-            label: `option ${this.selectMenu_values.length + 1}`,
-            description: "",
-            value: `view_${this.selectMenu_values.length + 1}`,
-            isDefault: false,
-            ...options
-        }; this.selectMenu_values.push(options.value);
-
-        // Create a new select menu option
-        let newOption = new StringSelectMenuOptionBuilder()
-            .setLabel(options.label)
-            .setValue(options.value)
-            .setDefault(options.isDefault);
-
-        // Add a description if provided
-        if (options.description) newOption.setDescription(options.description);
-
-        // Add an emoji if provided
-        if (options.emoji) newOption.setEmoji(options.emoji);
-
-        // Add the new option to the select menu
-        this.components.stringSelectMenu.addOptions(newOption);
-    }
-
-    removeSelectMenuOption(index) {
-        this.components.stringSelectMenu.spliceOptions(index);
-    }
-
-    determinePageinationStyle() {
-        let nestedPageCount = this.views[this.viewIndex]?.length || 0;
-
-        if (nestedPageCount > 1) this.actionRow.pagination.setComponents(
-            this.components.pagination.pageBack,
-            this.components.pagination.pageNext
+        //* Embed Title
+        if (options.title.text) this.setTitle(options.title.text
+            // Formatting shorthand
+            .replace("%AUTHOR_NAME", options.author.user?.displayName || options.author.user?.username)
         );
 
-        if (nestedPageCount > 3) this.actionRow.pagination.setComponents(
-            this.components.pagination.skipFirst,
-            this.components.pagination.pageBack,
-            this.components.pagination.jump,
-            this.components.pagination.pageNext,
-            this.components.pagination.skipLast
-        );
-    }
+        if (options.title.linkURL) this.setURL(options.title.linkURL);
 
-    async setSelectMenuDisabled(disabled = true) {
-        this.components.stringSelectMenu.setDisabled(disabled);
-        await this.updateMessageComponents();
-    }
+        //* Embed Description
+        if (options.description) this.setDescription(options.description);
 
-    async setPaginationDisabled(disabled = true) {
-        this.actionRow.pagination.components.forEach(btn => btn.setDisabled(disabled));
-        await this.updateMessageComponents();
-    }
-
-    toggleSelectMenu() {
-        this.selectMenu_enabled = !this.selectMenu_enabled;
-    }
-
-    togglePagination() {
-        this.pagination_enabled = !this.pagination_enabled;
-    }
-
-    async send() {
-        let view = this.views[this.viewIndex];
-        if (Array.isArray(view)) view = view[this.nestedPageIndex];
-
-        let replyOptions = {
-            embeds: [view],
-            components: [],
-            ephemeral: this.options.ephemeral
-        };
-
-        // If enabled, add in the select menu action row
-        if (this.selectMenu_enabled) replyOptions.components.push(this.actionRow.selectMenu);
-
-        // If enabled, add in the pagination action row
-        if (this.views[this.viewIndex]?.length > 1 && this.pagination_enabled) {
-            this.determinePageinationStyle();
-            replyOptions.components.push(this.actionRow.pagination);
+        //* Embed Image
+        if (options.imageURL) try {
+            this.setImage(options.imageURL);
+        } catch {
+            logger.error("Failed to create embed", `invalid image URL: \`${options.imageURL}\``); return null;
         }
 
-        // Send the embed and neccesary components
-        if (this.options.followUp)
-            this.fetchedReply = await this.interaction.followUp(replyOptions);
-        else
-            try {
-                this.fetchedReply = await this.interaction.reply(replyOptions);
-            } catch {
-                // If you edit a reply you can't change the message to ephemeral
-                // unless you do a follow up message and then delete the original reply but that's pretty scuffed
-                this.fetchedReply = await this.interaction.editReply(replyOptions);
+        //* Embed Footer
+        if (options.footer.text) this.setFooter({ text: options.footer.text, iconURL: options.footer.iconURL });
+        if (options.footer.iconURL) this.setFooter({
+            text: this.data.footer.text, iconURL: options.footer.iconURL
+        });
+
+        //* Embed Color
+        if (options.color) this.setColor(options.color);
+
+        //* Embed Timestamp
+        if (options.showTimestamp) this.setTimestamp();
+    }
+
+    /** Send the embed using the given interaction.
+     * 
+     * @example
+     // Text formatting shorthand:
+     * "%AUTHOR_NAME" = "the author's display/user name"
+     * "%AUTHOR_MENTION" = "the author's mention"
+     * 
+     * @param {bE_sendOptions} options */
+    async send(options) {
+        options = { ...new bE_sendOptions(), ...options };
+
+        // Format message content
+        options.messageContent = options.messageContent
+            // Formatting shorthand
+            .replace("%AUTHOR_NAME", this.author.user?.displayName || this.author.user?.username)
+            .replace("%AUTHOR_MENTION", this.author.user?.toString());
+
+        // Change the embed's description if applicable
+        if (options.description) this.setDescription(options.description
+            // Formatting shorthand
+            .replace("%AUTHOR_NAME", this.author.user?.displayName || this.author.user?.username)
+            .replace("%AUTHOR_MENTION", this.author.user?.toString())
+        );
+
+        // Change the embed's image if applicable
+        if (options.imageURL) try {
+            this.setImage(options.imageURL);
+        } catch {
+            logger.error("Failed to send embed", `invalid image URL: \`${options.imageURL}\``); return null;
+        }
+
+        // Create an array if a single object was given
+        if (!Array.isArray(options.components)) options.components = [options.components];
+
+        // Send the embed
+        try {
+            switch (options.method) {
+                case "reply": try {
+                    return await this.interaction.reply({
+                        content: options.messageContent, components: options.components,
+                        embeds: [this], ephemeral: options.ephemeral
+                    });
+                } catch { // Fallback to "editReply"
+                    return await this.interaction.editReply({
+                        content: options.messageContent, components: options.components,
+                        embeds: [this]
+                    });
+                }
+
+                case "editReply": return await this.interaction.editReply({
+                    content: options.messageContent, components: options.components,
+                    embeds: [this]
+                });
+
+                case "followUp": return await this.interaction.followUp({
+                    content: options.messageContent, components: options.components,
+                    embeds: [this], ephemeral: options.ephemeral
+                });
+
+                case "send": return await this.interaction.channel.send({
+                    content: options.messageContent, components: options.components,
+                    embeds: [this]
+                });
+
+                default: logger.error("Failed to send embed", `invalid send method: \"${options.method}\"`); return null;
             }
+        } catch (err) {
+            logger.error("Failed to send embed", "message_embed.send", err); return null;
+        }
+    }
+}
+
+/** @type {"short" | "shortJump" | "long" | "longJump" | false} */
+const nav_paginationType = null;
+
+/** @type {BetterEmbed | EmbedBuilder | Array<BetterEmbed | EmbedBuilder> | Array<Array<BetterEmbed | EmbedBuilder>>} */
+const nav_embedsType = null;
+
+/** @type {BetterEmbed | EmbedBuilder} */
+const nav_embedsType2 = null;
+
+class nav_constructorOptions {
+    constructor() {
+        /** @type {CommandInteraction | null} */
+        this.interaction = null;
+
+        /** @type {nav_embedsType} */
+        this.embeds = null;
+
+        /** @type {nav_paginationType} */
+        this.paginationType = false;
+        this.dynamicPagination = true;
+        this.useReactionsForPagination = false;
+        this.selectMenu = false;
+
+        this.timeout = dateTools.parseStr(timeouts.pagination);
+    }
+}
+
+class nav_selectMenuOptionData {
+    constructor(idx = 0) {
+        this.emoji = "";
+        this.label = `page ${idx + 1}`;
+        this.description = "";
+        this.value = `ssm_o_${idx + 1}`;
+        this.isDefault = idx === 0 ? true : false;
+    }
+}
+
+class nav_sendOptions {
+    constructor() {
+        /** The method to send the embed.
+         * 
+         * If "reply" isn't possible, it will fallback to "editReply".
+         * 
+         * @type {"reply" | "editReply" | "followUp" | "send"} */
+        this.method = "reply";
+
+        /** Send the message as ephemeral. */
+        this.ephemeral = false;
+    }
+}
+
+/** Add a navigation system to embeds. */
+class EmbedNavigator {
+    #createButton(emoji, label, customID) {
+        return new ButtonBuilder({
+            emoji, label, style: ButtonStyle.Secondary, custom_id: customID
+        });
+    }
+
+    /** @param {nav_constructorOptions} options */
+    constructor(options) {
+        options = { ...new nav_constructorOptions(), ...options };
+        if (!options.interaction) return logger.error("Failed to navigationate", "interaction not given");
+
+        // Variables
+        this.data = {
+            interaction: options.interaction,
+            /** @type {Message} */
+            message: null,
+
+            embeds: options.embeds,
+
+            timeout: options.timeout,
+
+            /** @type {nav_embedsType2} */
+            page_current: null,
+            page_nestedLength: 0,
+            page_idx: { current: 0, nested: 0 },
+
+            selectMenuEnabled: options.selectMenu,
+            selectMenuValues: [],
+
+            paginationType: options.paginationType,
+            dynamicPagination: options.dynamicPagination,
+            /** @type {Array<{name: string, emoji: string}>} */
+            paginationReactions: [], useReactionsForPagination: options.useReactionsForPagination,
+            requiresPagination: false, requiresLongPagination: false, canJumpToPage: false,
+
+            messageComponents: [],
+
+            collectors: {
+                interaction: null,
+                reaction: null
+            },
+
+            actionRows: {
+                selectMenu: new ActionRowBuilder(),
+                pagination: new ActionRowBuilder()
+            },
+
+            components: {
+                selectMenu: new StringSelectMenuBuilder().setCustomId("ssm_pageSelect").setPlaceholder("choose a page to view..."),
+
+                pagination: {
+                    toFirst: this.#createButton(null, nav_emojis.toFirst.emoji, "btn_toFirst"),
+                    back: this.#createButton(null, nav_emojis.back.emoji, "btn_back"),
+                    jump: this.#createButton(nav_emojis.jump.emoji, null, "btn_jump"),
+                    next: this.#createButton(null, nav_emojis.next.emoji, "btn_next"),
+                    toLast: this.#createButton(null, nav_emojis.toLast.emoji, "btn_toLast")
+                }
+            }
+        }
+
+        // Configure
+        if (!Array.isArray(this.data.embeds)) this.data.embeds = [this.data.embeds];
+
+        this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
+    }
+
+    /** Toggle the select menu on/off. */
+    async toggleSelectMenu() {
+        this.data.selectMenuEnabled = !this.data.selectMenuEnabled;
+
+        return await this.refresh();
+    }
+
+    /** Add an option to the select menu.
+     * @param {nav_selectMenuOptionData} data */
+    addToSelectMenu(data) {
+        data = { ...new nav_selectMenuOptionData(this.data.selectMenuValues.length), ...data };
+
+        // Append a new value to reference this select menu option
+        this.data.selectMenuValues.push(data.value);
+
+        // Create the select menu option
+        let option = new StringSelectMenuOptionBuilder()
+            .setLabel(data.label)
+            .setValue(data.value)
+            .setDefault(data.isDefault);
+
+        // Add a description if applicable
+        if (data.description) option.setDescription(data.description);
+
+        // Add an emoji if applicable
+        if (data.emoji) option.setEmoji(data.emoji);
+
+        // Add the newly created option to the select menu
+        this.data.components.selectMenu.addOptions(option);
+    }
+
+    /** Remove an option from the select menu using its index.
+     * @param {number} idx */
+    removeFromSelectMenu(idx) {
+        this.data.components.selectMenu.spliceOptions(idx, 1);
+    }
+
+    /** Set pagination type. Set to false to disable.
+     * @param {nav_paginationType} type */
+    async setPaginationType(type) {
+        this.data.paginationType = type;
+
+        await this.refresh();
+    }
+
+    #updatePagination() {
+        this.#updateCurrentPage(); this.data.paginationReactions = [];
+        let _paginationButtons = [];
+
+        if (this.data.requiresPagination) switch (this.data.paginationType) {
+            case "short": _paginationButtons = ["back", "next"]; break;
+
+            case "shortJump":
+                _paginationButtons = this.data.dynamicPagination
+                    ? this.data.canJumpToPage
+                        ? ["back", "jump", "next"]
+                        : ["back", "next"]
+                    : ["back", "jump", "next"]
+                break;
+
+            case "long":
+                _paginationButtons = this.data.dynamicPagination
+                    ? this.data.requiresLongPagination
+                        ? ["toFirst", "back", "next", "toLast"]
+                        : ["back", "next"]
+                    : ["toFirst", "back", "next", "toLast"]
+                break;
+
+            case "longJump":
+                // requiresLongPagination and canJumpToPage both activate on the same page length
+                // so we can skip a 2nd canJumpToPage check
+                _paginationButtons = this.data.dynamicPagination
+                    ? this.data.requiresLongPagination
+                        ? this.data.canJumpToPage
+                            ? ["toFirst", "back", "jump", "next", "toLast"]
+                            : ["toFirst", "back", "next", "toLast"]
+                        : ["back", "next"]
+                    : ["toFirst", "back", "jump", "next", "toLast"]
+                break;
+        }
+
+        // Parse the button string array into button/emoji data
+        if (this.data.useReactionsForPagination)
+            this.data.paginationReactions = _paginationButtons.map(btnType => nav_emojis[btnType]);
+        else this.data.actionRows.pagination.setComponents(
+            ..._paginationButtons.map(btnType => this.data.components.pagination[btnType])
+        );
+    }
+
+    #updateCurrentPage() {
+        let page = this.data.embeds[this.data.page_idx.current];
+
+        if (page?.length)
+            this.data.page_current = page[this.data.page_idx.nested];
+        else
+            this.data.page_current = page;
+
+        // Keep track of how many nested pages are on this page
+        this.data.page_nestedLength = page?.length || 0;
+
+        // Determine whether or not pagination is required
+        this.data.requiresPagination = page?.length >= 2;
+
+        // Check whether or not it would be necessary to use long pagination
+        this.data.requiresLongPagination = page?.length >= 4;
+
+        // Check whether or not there's enough pages to enable page jumping
+        this.data.canJumpToPage = page?.length >= 4;
+    }
+
+    #clampPageIndex() {
+        /// Current
+        if (this.data.page_idx.current < 0) this.data.page_idx.current = 0;
+
+        if (this.data.page_idx.current > (this.data.embeds.length - 1))
+            this.data.page_idx.current = (this.data.embeds.length - 1);
+
+        /// Nested
+        if (this.data.page_idx.nested < 0)
+            this.data.page_idx.nested = (this.data.page_nestedLength - 1);
+
+        if (this.data.page_idx.nested > (this.data.page_nestedLength - 1))
+            this.data.page_idx.nested = 0;
+    }
+
+    async #addPaginationReactions() {
+        try {
+            for (let reaction of this.data.paginationReactions)
+                await this.data.message.react(reaction.emoji);
+        } catch { }
+    }
+
+    async #removeReactions() {
+        try { await this.data.message.reactions.removeAll(); } catch { }
+    }
+
+    async #refreshPaginationReactions() {
+        await this.#removeReactions();
+        await this.#addPaginationReactions();
+    }
+
+    async #removeComponents() {
+        try { await this.data.message.edit({ components: [] }) } catch { }
+    }
+
+    async #awaitChoosePageNumber() {
+        // Tell the user to choose a page number
+        let msg = await this.data.message.reply({
+            content: `${this.data.interaction.user.toString()} what page do you want to jump to?`
+        });
+
+        // Create a message collector to await the user's next message
+        let filter = m => m.author.id === this.data.interaction.user.id;
+        await msg.channel.awaitMessages({ filter, time: dateTools.parseStr(timeouts.confirmation), max: 1 })
+            .then(async collected => {
+                // Delete the user's message along with the confirmation message
+                await Promise.all([collected.first().delete(), msg.delete()]);
+
+                // Parse the user's message into a number
+                let _content = collected.first().content;
+                let _number = +_content;
+
+                // Check whether it's a valid number
+                if (isNaN(_number) || (_number > this.data.page_nestedLength && _number < 0))
+                    // Send a self destructing error message
+                    await message_deleteAfter(await this.data.interaction.followUp({
+                        content: `${this.data.interaction.user.toString()} \`${_content}\` is an invalid page number`
+                    }), dateTools.parseStr(timeouts.errorMessage));
+
+                // Set the nested page index
+                this.data.page_idx.nested = _number - 1;
+            })
+            .catch(async () => {
+                try { await msg.delete() } catch { };
+            });
+    }
+
+    /** Send the embed with navigation.
+     * @param {nav_sendOptions} options */
+    async send(options) {
+        options = { ...new nav_sendOptions(), ...options };
+        this.#updateCurrentPage(); this.#updatePagination();
+
+        // Add the select menu if enabled
+        if (this.data.selectMenuEnabled)
+            this.data.messageComponents.push(this.data.actionRows.selectMenu);
+
+        // Add pagination if enabled (buttons)
+        if (this.data.requiresPagination && !this.data.useReactionsForPagination)
+            this.data.messageComponents.push(this.data.actionRows.pagination);
+
+        // Send the message
+        try {
+            switch (options.method) {
+                case "reply": try {
+                    this.data.message = await this.data.interaction.reply({
+                        embeds: [this.data.page_current], ephemeral: options.ephemeral,
+                        components: this.data.messageComponents
+                    }); break;
+                } catch { // Fallback to "editReply"
+                    this.data.message = await this.data.interaction.editReply({
+                        embeds: [this.data.page_current], components: this.data.messageComponents
+                    }); break;
+                }
+
+                case "editReply": this.data.message = await this.data.interaction.editReply({
+                    embeds: [this.data.page_current], components: this.data.messageComponents
+                }); break;
+
+                case "followUp": this.data.message = await this.data.interaction.followUp({
+                    embeds: [this.data.page_current], ephemeral: options.ephemeral,
+                    components: this.data.messageComponents
+                }); break;
+
+                case "send": this.data.message = await this.data.interaction.channel.send({
+                    embeds: [this.data.page_current], components: this.data.messageComponents
+                }); break;
+
+                default: logger.error("Failed to send embed", `invalid send method: \"${options.method}\"`); return null;
+            }
+        } catch (err) {
+            logger.error("Failed to send embed", "message_embed.send", err); return null;
+        }
+
+        // Add pagination if enabled (reactions)
+        if (this.data.requiresPagination && this.data.useReactionsForPagination) this.#addPaginationReactions();
 
         // Collect message component interactions
-        this.collectInteractions(); return this.fetchedReply;
+        if (this.data.messageComponents.length) this.#collectInteractions();
+
+        // Collect message reactions
+        if (this.data.paginationReactions.length) this.#collectReactions();
+
+        // Return the message object
+        return this.data.message;
     }
 
-    async update(resetNestedIndex = false) {
-        if (resetNestedIndex) this.nestedPageIndex = 0;
-
-        let view = this.views[this.viewIndex];
-        if (Array.isArray(view)) view = view[this.nestedPageIndex];
-
-        let replyOptions = {
-            embeds: [view],
-            components: [],
-            ephemeral: this.options.ephemeral
-        };
-
-        // If enabled, add in the select menu action row
-        if (this.selectMenu_enabled) replyOptions.components.push(this.actionRow.selectMenu);
-
-        // If enabled, add in the pagination action row
-        if (this.views[this.viewIndex]?.length > 1 && this.pagination_enabled) {
-            this.determinePageinationStyle();
-            replyOptions.components.push(this.actionRow.pagination);
+    /** Refresh the message with the current page and components. */
+    async refresh() {
+        // Check if the message is editable
+        if (!this.data.message?.editable) {
+            logger.error("(Navigationator) Failed to edit message", "message not sent/editable");
+            return null;
         }
 
-        // Set the option the user picked as default so the select menu shows the relevant option selected
-        if (this.selectMenu_enabled) {
-            this.components.stringSelectMenu.options.forEach(option => option.setDefault(false));
-            this.components.stringSelectMenu.options[this.viewIndex].setDefault(true);
-        }
+        this.#updateCurrentPage(); this.#updatePagination();
 
-        await this.fetchedReply.edit(replyOptions);
+        // Reset message components
+        this.data.messageComponents = [];
+
+        // Add the select menu if enabled
+        if (this.data.selectMenuEnabled)
+            this.data.messageComponents.push(this.data.actionRows.selectMenu);
+
+        // Add pagination if enabled (buttons)
+        if (this.data.requiresPagination && !this.data.useReactionsForPagination)
+            this.data.messageComponents.push(this.data.actionRows.pagination);
+
+        // Add/remove pagination if enabled (reactions)
+        if (this.data.useReactionsForPagination) if (this.data.requiresPagination) {
+            let _emojis_nav_names = [...Object.values(nav_emojis)].map(emoji => emoji.name);
+
+            // Check if the current pagination reactions are updated
+            let _currentPaginationReactions = this.data.message.reactions.cache.filter(reaction =>
+                _emojis_nav_names.includes(reaction.emoji.name)
+            );
+
+            // Update pagination reactions
+            if (_currentPaginationReactions.size !== this.data.paginationReactions.length)
+                this.#refreshPaginationReactions();
+        } else this.#removeReactions();
+
+        // Collect message component interactions
+        if (this.data.messageComponents.length && !this.data.collectors.interaction) this.#collectInteractions();
+        if (this.data.collectors.interaction) this.data.collectors.interaction.resetTimer();
+
+        // Collect message reactions
+        if (this.data.paginationReactions.length && !this.data.collectors.reaction) this.#collectReactions();
+        if (this.data.collectors.reaction) this.data.collectors.reaction.resetTimer();
+
+        // Edit & return the message
+        this.data.message = await this.data.message.edit({
+            embeds: [this.data.page_current], components: this.data.messageComponents
+        }); return this.data.message;
     }
 
-    async collectInteractions() {
-        // Collect button interactions
-        let filter = i => i.user.id === this.interaction.user.id;
-        let collector = this.fetchedReply.createMessageComponentCollector({ filter, time: this.options.timeout });
+    async #collectInteractions() {
+        // Create an interaction collector
+        let filter = i => i.user.id === this.data.interaction.user.id;
+        let collector = this.data.message.createMessageComponentCollector({ filter, time: this.data.timeout });
+        this.data.collectors.interaction = collector;
 
         collector.on("collect", async i => {
             // Defer the interaction and reset the collector's timer
             await i.deferUpdate(); collector.resetTimer();
 
-            // Ignore interactions that aren't dealing with the select menu or pagination buttons
+            // Ignore non-button/select menu interactions
             if (![ComponentType.Button, ComponentType.StringSelect].includes(i.componentType)) return;
 
             switch (i.customId) {
-                case "menu_view":
-                    let changeView = this.selectMenu_values.findIndex(v => v === i.values[0]);
-                    if (changeView >= 0) {
-                        this.viewIndex = changeView;
-                        return await this.update(true);
-                    }
+                case "ssm_pageSelect":
+                    this.data.page_idx.current = this.data.selectMenuValues.findIndex(val => val === i.values[0]);
+                    this.data.page_idx.nested = 0;
 
-                case "btn_skipFirst": this.nestedPageIndex = 0; break;
+                    // Change the default select menu option
+                    this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
+                    this.data.components.selectMenu.options[this.data.page_idx.current].setDefault(true);
+
+                    await this.refresh(); return;
+
+                case "btn_toFirst":
+                    this.data.page_idx.nested = 0;
+                    await this.refresh(); return;
 
                 case "btn_back":
-                    this.nestedPageIndex--;
-                    if (this.nestedPageIndex < 0) this.nestedPageIndex = this.views[this.viewIndex].length - 1;
-
-                    break;
+                    this.data.page_idx.nested--; this.#clampPageIndex();
+                    await this.refresh(); return;
 
                 case "btn_jump":
-                    // Let the user know what action they should take
-                    let _msg = await this.interaction.followUp({
-                        content: `${this.interaction.user} say the page number you want to jump to`
-                    });
-
-                    // Create a new message collector and await the user's next message
-                    let filter_temp = m => m.author.id === this.interaction.user.id;
-                    await this.interaction.channel.awaitMessages({ filter: filter_temp, time: 10000, max: 1 })
-                        .then(async collected => {
-                            // Delete the user's number message along with our previous message telling the user what to do
-                            collected.first().delete(); _msg.delete();
-
-                            // Convert the collected message to a number
-                            let pageNum = Number(collected.first().content);
-
-                            // Check if the collected page number is actually a number, and that embed page is available
-                            if (isNaN(pageNum) || pageNum > this.views[this.viewIndex]?.length || pageNum < 0)
-                                // Send a self destructing message to the user stating that the given page number is invalid
-                                return await message_deleteAfter(await this.interaction.followUp({
-                                    content: `${this.interaction.user} that's an invalid page number`
-                                }), 5000);
-
-                            // Update the current page index
-                            this.nestedPageIndex = pageNum - 1;
-                        });
-
-                    break;
+                    await this.#awaitChoosePageNumber();
+                    await this.refresh(); return;
 
                 case "btn_next":
-                    this.nestedPageIndex++;
-                    if (this.nestedPageIndex > this.views[this.viewIndex].length - 1) this.nestedPageIndex = 0;
+                    this.data.page_idx.nested++; this.#clampPageIndex();
+                    await this.refresh(); return;
 
-                    break;
-
-                case "btn_skipLast": this.nestedPageIndex = (this.views[this.viewIndex].length - 1); break;
+                case "btn_toLast":
+                    this.data.page_idx.nested = (this.data.page_nestedLength - 1);
+                    await this.refresh(); return;
 
                 default: return;
             }
-
-            // Update the message
-            return await this.update();
         });
 
-        // When the collector times out remove the message's components
+        // Remove message components on timeout
         collector.on("end", async () => {
-            let msg = null;
+            this.data.collectors.reaction = null;
+            await this.#removeComponents();
+        });
+    }
 
-            try { msg = await this.interaction.channel.messages.fetch(this.fetchedReply.id) } catch { };
+    async #collectReactions() {
+        // Create the reaction collector        
+        let filter = (reaction, user) => {
+            if (user.id !== this.data.interaction.guild.members.me.id) reaction.users.remove(user.id);
 
-            if (msg) await this.fetchedReply.edit({ components: [] });
+            let _paginationEmojis = this.data.paginationReactions.map(emoji => emoji.name);
+
+            return _paginationEmojis.includes(reaction.emoji.name)
+                && user.id === this.data.interaction.user.id;
+        };
+
+        let collector = this.data.message.createReactionCollector({
+            filter: filter, dispose: true,
+            time: this.data.timeout
+        }); this.data.collectors.reaction = collector;
+
+        // Collect reactions
+        collector.on("collect", async reaction => {
+            switch (reaction.emoji.name) {
+                case nav_emojis.toFirst.name:
+                    this.data.page_idx.nested = 0;
+                    await this.refresh(); return;
+
+                case nav_emojis.back.name:
+                    this.data.page_idx.nested--; this.#clampPageIndex();
+                    await this.refresh(); return;
+
+                case nav_emojis.jump.name:
+                    await this.#awaitChoosePageNumber();
+                    await this.refresh(); return;
+
+                case nav_emojis.next.name:
+                    this.data.page_idx.nested++; this.#clampPageIndex();
+                    await this.refresh(); return;
+
+                case nav_emojis.toLast.name:
+                    this.data.page_idx.nested = (this.data.page_nestedLength - 1);
+                    await this.refresh(); return;
+
+                default: return;
+            }
+        });
+
+        // Remove all reactions when the reaction collector times out or ends
+        collector.on("end", async () => {
+            this.data.collectors.reaction = null;
+            await this.#removeReactions();
         });
     }
 }
 
-async function message_awaitConfirmation(interaction, options = { title: "", description: "", footer: "", showAuthor: true, deleteAfter: true, timeout: 0 }) {
-    options = {
-        title: "Please confirm this action", description: null, showAuthor: true, footer: "",
-        deleteAfter: true,
-        timeout: dateTools.parseStr(botSettings.timeout.confirmation),
-        ...options
-    };
-
-    let confirmed = false;
-
-    // Format a dynamic title
-    options.title = options.title
-        .replace("%USER", options.author?.username || interaction.user.username);
-
-    // Create the embed
-    let embed = new EmbedBuilder()
-        .setAuthor({ name: options.title })
-        .setColor(botSettings.embed.color || null);
-
-    // Set the author of the embed if applicable
-    if (options.showAuthor) embed.setAuthor({
-        name: embed.data.author.name,
-        iconURL: interaction.user.avatarURL({ dynamic: true })
-    });
-
-    // Set the embed description
-    if (options.description) embed.setDescription(options.description);
-
-    // Set the embed footer
-    if (options.footer) embed.setFooter({ text: options.footer });
-
-    // Create the confirm/cancel buttons
-    let btn_confirm = new ButtonBuilder({ label: "Confirm", style: ButtonStyle.Success, custom_id: "btn_confirm" });
-    let btn_cancel = new ButtonBuilder({ label: "Cancel", style: ButtonStyle.Danger, custom_id: "btn_cancel" });
-
-    // Create the action row
-    let actionRow = new ActionRowBuilder()
-        .addComponents(btn_confirm, btn_cancel);
-
-    // Send the confirmation message embed
-    let message = await interaction.followUp({ embeds: [embed], components: [actionRow] });
-
-    // Create a promise to await the user's decision
-    return new Promise(resolve => {
-        // Collect button interactions
-        let filter = i => (i.componentType === ComponentType.Button) && (i.user.id === interaction.user.id);
-        message.awaitMessageComponent({ filter, time: options.timeout }).then(async i => {
-            // Will return true since the user clicked the comfirm button
-            if (i.customId === "btn_confirm") confirmed = true;
-
-            // Delete the confirmation message
-            if (options.deleteAfter) message.delete();
-            else await message.edit({ components: [] });
-
-            // Resolve the promise with the confirmation
-            return resolve(confirmed);
-        }).catch(async () => {
-            // Delete the confirmation message if it still exists
-            try { await message.delete() } catch { };
-
-            // Return false since the user didn't click anything
-            return resolve(confirmed);
-        });
-    });
-}
-
-async function message_deleteAfter(message, time) {
-    setTimeout(async () => { try { await message.delete() } catch { } }, time); return null;
-}
-
-//! Markdown
-function bold(space = true, ...str) {
-    if (!Array.isArray(str)) str = [str];
-
-    return space ? (`**${str.join(" ")}**`) : (`**${str.join("")}**`);
-}
-
-function italic(space = true, ...str) {
-    if (!Array.isArray(str)) str = [str];
-
-    return space ? (`*${str.join(" ")}*`) : (`*${str.join("")}*`);
-}
-
-function inline(space = true, ...str) {
-    if (!Array.isArray(str)) str = [str];
-
-    return space ? (`\`${str.join(" ")}\``) : (`\`${str.join("")}\``);
-}
-
-function quote(space = true, ...str) {
-    if (!Array.isArray(str)) str = [str];
-
-    return space ? (`> ${str.join(" ")}`) : (`> ${str.join("")}`);
-}
-
-function link(label, url, tooltip = "") {
-    return `[${label}](${url}${tooltip ? ` "${tooltip}"` : ""})`;
-}
-
-/** @param {"left" | "right" | "both"} side */
-function space(side = "both", ...str) {
-    if (!Array.isArray(str)) str = [str];
-
-    switch (side) {
-        case "left": return space ? (" " + str.join(" ")) : (" " + str.join(""));
-        case "right": return space ? (str.join(" ") + " ") : (str.join("") + " ");
-        case "both": return space ? (" " + str.join(" ") + " ") : (" " + str.join("") + " ");
-    }
-}
-
-module.exports = {
-    messageTools: {
-        Embedinator: message_Embedinator,
-        Navigationify: message_Navigationify,
-
-        awaitConfirmation: message_awaitConfirmation,
-        deleteAfter: message_deleteAfter
-    },
-
-    markdown: { bold, italic, inline, quote, link, space }
-};
+module.exports = { BetterEmbed, EmbedNavigator };
