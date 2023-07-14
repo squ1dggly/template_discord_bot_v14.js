@@ -15,20 +15,12 @@ function array_chunk(arr, size) {
     return arr_new;
 }
 
-/** Return an array with only unique items based on the given filter.
- * @param {Array} arr The array to filter.
- * @param {(itemCurrent, itemToCompare) => void} filter The method to filter.
+/** Return an array with only unique items based on the given filter
+ * @param {Array} arr array to filter
+ * @param {string} prop [optional] an object property within the array to filter by
  */
-function array_unique(arr, filter) {
-    let arr_new = [];
-
-    arr.forEach(itemCurrent => {
-        // let existsInArray = arr_new.findIndex(e => filter(e, )) >= 0;
-        let existsInArray = arr_new.findIndex(itemToCompare => filter(itemCurrent, itemToCompare)) >= 0;
-        if (!existsInArray) arr_new.push(itemCurrent);
-    });
-
-    return arr_new;
+function array_unique(arr, prop = "") {
+    return [...new Map(arr.map(item => [(prop ? item[prop] : item), item])).values()];
 }
 
 // ! String
@@ -90,6 +82,15 @@ function string_formatNumberToPlace(num) {
 }
 
 // ! Number
+/** Get the sum of a given array
+ * @param {Array} arr the array to sum
+ * @param {str} prop name of property to sum inside of array */
+function number_sum(arr, prop = "") {
+    return prop
+        ? arr.reduce((a, b) => a + b[prop], 0)
+        : arr.reduce((a, b) => a + b, 0);
+}
+
 /** Convert the given milliseconds into seconds by dividing the number by 1,000 .
  * @param {number} num A value of milliseconds.
  */
@@ -126,6 +127,13 @@ function number_percentage(num, percent, round) {
  */
 function number_clamp(num, min, max) {
     return num < min ? min : num > max ? max : num;
+}
+
+/** Returns 0 if the number is negative
+ * @param {number} num The number to clamp */
+function number_clampPositive(num) {
+    if (isNaN(num)) return 0;
+    return num < 0 ? 0 : num;
 }
 
 // ! Date
@@ -236,10 +244,11 @@ function random_chance(percentage = 50) {
 
 /** Pick a random item from the given array.
  * @param {array} arr The array.
- * @returns {item} The chosen item from the array.
+ * @param {boolean} clone Deep clone the item.
  */
-function random_choice(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function random_choice(arr, clone = false) {
+    let item = arr[Math.floor(Math.random() * arr.length)];
+    return clone ? structuredClone(item) : item;
 }
 
 /** Pick a random item index from the given array.
@@ -253,10 +262,10 @@ function random_choiceIdx(arr) {
 /** Choose a random item from the given array based on the item's rarity.
  * 
  * Each item in the array must have a "rarity" property for it to be chosen.
- * @param {[{rarity: 50}]} arr The array of items.
- * @returns {item} The chosen item from the array.
+ * @param {Array<>} arr The array of items.
+ * @param {boolean} clone Deep clone the item
  */
-function random_weightedChoice(arr) {
+function random_weightedChoice(arr, clone = false) {
     // Creates an array with only the rarity property which are then summed together with the previous entry
     /* example:
         arr = [{ item: "yes", rarity: 4 }, { item: "no", rarity: 20 }]
@@ -271,7 +280,8 @@ function random_weightedChoice(arr) {
 
     // Returns the first item in the original array that has a rarity higher than or equal to (decider)
     // how this picks a random item from that rarity I still have no idea but at least it's less work for me, lol
-    return arr[weights.findIndex(w => w >= decider)];
+    let item = arr[weights.findIndex(w => w >= decider)];
+    return clone ? structuredClone(item) : item;
 }
 
 /** Return a random number.
@@ -373,10 +383,12 @@ module.exports = {
 
     /** Functions useful for dealing with numbers. */
     numberTools: {
+        sum: number_sum,
         milliToSeconds: number_milliToSeconds,
         secondsToMilli: number_secondsToMilli,
         percentage: number_percentage,
-        clamp: number_clamp
+        clamp: number_clamp,
+        clampPositive: number_clampPositive
     },
 
     /** Functions useful for dealing with dates. */
