@@ -6,7 +6,3 @@ function toTitleCase(str) {
 		txt => txt.charAt(0).toUpperCase() + txt.substring(1).toLowerCase()
 	);
 }
-
-function formatNumber(num, options) {}
-
-function appendNumberPlace(num) {}
