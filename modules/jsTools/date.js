@@ -7,12 +7,13 @@ const _nT = require("./number");
 // prettier-ignore
 /** Parse a string into either milliseconds or seconds
  * @param {string} str string to parse
- * @param {"ms"|"s"} type return "s" (seconds) or "ms" (milliseconds)
- * @param {"ms"|"s"} fromNow return "s" (seconds) or "ms" (milliseconds)
+ * @param {options_parse} options return "s" (seconds) or "ms" (milliseconds)
  *
- * @example parse("1m", "s") --> 60 */
-
-function parse(str, type = "ms", fromNow = false) {
+ * @example
+ * parse("1m", "s") --> 60
+ * parse("-1m", "s") --> -60 */
+function parse(str, options) {
+    options = { type: "ms", fromNow: false, ...options };
     if (typeof str !== "string") return new TypeError(`\'${str}\' must be a string`);
 
     let isNegative = str.at(0) === "-";
@@ -30,10 +31,14 @@ function parse(str, type = "ms", fromNow = false) {
         case "ms": parsed = (+time[0]); break;
     }
 
-    switch (type) {
-        case "s": return isNegative ? -_nT.msToSec(parsed) : _nT.msToSec(parsed);
-        case "ms": return isNegative ? -parsed : parsed;
-        default: return isNegative ? -parsed : parsed;
+    if (options.fromNow) parsed = isNegative
+        ? Date.now() - parsed
+        : Date.now() + parsed;
+
+    switch (options.type) {
+        case "s": return isNegative && !options.fromNow ? -_nT.msToSec(parsed) : _nT.msToSec(parsed);
+        case "ms": return isNegative && !options.fromNow ? -parsed : parsed;
+        default: return isNegative && !options.fromNow ? -parsed : parsed;
     }
 }
 
@@ -91,3 +96,5 @@ function eta(options) {
 	// Return the difference as a formatted string
 	return formatter.format(timeDifference.toFixed(), div.name);
 }
+
+module.exports = { parse, eta };
