@@ -1,4 +1,4 @@
-/** Converts the first letter of every alphanumeric word to uppercase
+/** Make the first letter of every alphanumeric word uppercase
  * @param {string} str string to convert */
 function toTitleCase(str) {
 	return str.replace(

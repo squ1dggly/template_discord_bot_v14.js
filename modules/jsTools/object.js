@@ -1,5 +1,5 @@
 /** Get a property value from an object using the provided path
- * @param {{}} obj object
+ * @param {object} obj object
  * @param {string} path path to the nested property
  *
  * @example // returns 5
