@@ -29,4 +29,47 @@ function unique(arr, prop = "", copy = false) {
 	return copy ? structuredClone(arr_new) : arr_new;
 }
 
-module.exports = { chunk, unique };
+/** @typedef bM_callback_params
+ * @property {number} idx index of the element being processed
+ * @property {Array} arrayOriginal original array being processed
+ * @property {Array} arrayNew new array being constructed
+ * @property {never} lastElement the last element in the new array */
+
+/** Called once for every element in the array
+ * @callback bM_callback
+ * @param {never} value element being processed
+ * @param {bM_callback_params} params callback parameters */
+
+/** Return an array that contains the results of the given callback function
+ *
+ * - Gives callback access to the new array being constructed
+ * @param {bM_callback} callback */
+function betterMap(arr, callback) {
+	let arr_new = [];
+
+	for (let idx = 0; idx < arr.length; idx++) {
+		let cb = callback(arr[idx], {
+			idx,
+			arrayOriginal: arr,
+			arrayNew: arr_new,
+			lastElement: arr_new[idx - 1] || undefined
+		});
+
+		if (cb) arr_new.push(cb);
+	}
+
+	return arr_new;
+}
+
+betterMap([1, 2, 3, 4, 5], (num, { idx, arrayOriginal, arrayNew, lastElement }) => {
+	console.log(
+		"num: " + num,
+		"idx: " + idx,
+		"arrayOriginal: " + arrayOriginal,
+		"arrayNew: " + arrayNew,
+		"lastElement: " + lastElement
+	);
+	return num;
+});
+
+module.exports = { chunk, unique, betterMap };
