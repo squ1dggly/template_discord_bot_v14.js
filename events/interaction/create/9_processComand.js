@@ -2,7 +2,7 @@
 
 const { Client, BaseInteraction, PermissionsBitField } = require('discord.js');
 
-const { ownerID, adminIDs } = require('../../../configs/clientSettings.json');
+const { ownerID, adminIDs } = require('../../../configs/config_client');
 const logger = require('../../../modules/logger');
 
 module.exports = {

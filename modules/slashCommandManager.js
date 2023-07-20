@@ -3,7 +3,7 @@
 const { Client, REST, Routes } = require('discord.js');
 const logger = require('./logger');
 
-const TOKEN = process.env.TOKEN || require('../configs/clientSettings.json').TOKEN;
+const TOKEN = process.env.TOKEN || require('../configs/config_client').TOKEN;
 
 // Create an instance of the REST api
 const rest = new REST().setToken(TOKEN);

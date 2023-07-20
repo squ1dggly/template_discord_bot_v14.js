@@ -1,9 +1,9 @@
 const { Schema, model } = require("mongoose");
 
-const schema_user = Schema(
+const schema_user = new Schema(
 	{
 		_id: { type: String, require: true },
-		timestamp_started: { type: Number, require: true }
+		timestamp_started: { type: Number, default: Date.now() }
 	},
 	{ collection: "users" }
 );

@@ -1,7 +1,7 @@
 // Runs as soon as the bot's connected to discord.
 
 const { Client, ActivityType } = require('discord.js');
-const { DEVMODE, clientPresence } = require('../../configs/clientSettings.json');
+const { DEVMODE, clientPresence } = require('../../configs/config_client');
 
 module.exports = {
     name: "SET_PRESENCE",

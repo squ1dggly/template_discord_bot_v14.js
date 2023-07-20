@@ -8,7 +8,7 @@ const slashCommandManager = require("./modules/slashCommandManager");
 const logger = require("./modules/logger");
 const mongo = require("./modules/mongo");
 
-const TOKEN = process.env.TOKEN || require("./configs/clientSettings.json").TOKEN;
+const TOKEN = process.env.TOKEN || require("./configs/config_client").TOKEN;
 
 logger.log("initializing...");
 
