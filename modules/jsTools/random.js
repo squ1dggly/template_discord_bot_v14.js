@@ -1,17 +1,58 @@
 const _aT = require("./array");
 
 // prettier-ignore
+const alphabet = [
+    "a", "b", "c", "d",
+    "e", "f", "g", "h",
+    "i", "j", "k", "l",
+    "m", "n", "o", "p",
+    "q", "r", "s", "t",
+    "u", "v", "w", "x",
+    "y", "z"
+];
+
+// prettier-ignore
 /** Choose a psuedo-random number within a min-max range
  * @param {number|string} min minimum value
  * @param {number|string} max maximum value
  * @param {boolean} round round up the sum */
-function number(min, max, round = true) {
+function randomNumber(min, max, round = true) {
     min = +min; if (isNaN(min)) throw new TypeError(`\`${min}\` must be a valid number`);
     max = +max; if (isNaN(max)) throw new TypeError(`\`${max}\` must be a valid number`);
 
     return round
         ? Math.floor(Math.random() * (max - min))
         : Math.random() * (max - min);
+}
+
+/** Create a psuedo-random string of numbers (0-9)
+ * @param {number} len length of the string */
+function numericString(len) {
+	let str = "";
+	for (let i = 0; i < len; i++) str += number(0, 9);
+	return str;
+}
+
+/** Create a psuedo-random string of letters (a-z)
+ * @param {number} len length of the string
+ * @param {boolean} includeCaps include uppercase letters */
+function alphaString(len, includeCaps = false) {
+	let str = "";
+	for (let i = 0; i < len; i++)
+		str += includeCaps && chance() ? choice(alphabet).toUpperCase() : choice(alphabet);
+	return str;
+}
+
+/** Create a psuedo-random string of letters and numbers (a-z|0-9)
+ * @param {number} len length of the string
+ * @param {boolean} includeCaps include uppercase letters */
+function alphaNumericString(len, includeCaps = false) {
+	let str = "";
+	for (let i = 0; i < len; i++) {
+		let char = String(chance() ? choice(alphabet) : number(0, 9));
+		str += includeCaps && chance() ? char.toUpperCase() : char;
+	}
+	return str;
 }
 
 // prettier-ignore
@@ -61,18 +102,7 @@ function choiceWeighted(arr, clone = false) {
 		if (isNaN(obj.rarity)) throw new TypeError(`Rarity at index ${idx} is not a valid number`);
 	});
 
-	/// Determine the element to return
-	/* let weights = [];
-	for (let i = 0; i < arr.length; i++)
-		weights.push((arr[i]?.rarity || arr[i]?.Rarity) + (weights[weights.length - 1] || 0)); */
-
-    /* let weights = arr.map((obj, idx, arr) => {
-        obj.rarity + arr[i-1]
-    }); */
-    /* let weights = [];
-    for (let i = 0; i < arr.length; i++)
-        weights.push(arr[i].rarity + (weights[weights.length - 1] || 0)); */
-    
+	/// Determine the element to return    
     let weights = _aT.betterMap(arr, (obj, idx, last) => {
         return obj.rarity + (last || 0)
     });
@@ -85,3 +115,14 @@ function choiceWeighted(arr, clone = false) {
 	let item = arr[weights.findIndex(w => w >= decider)];
 	return clone ? structuredClone(item) : item;
 }
+
+module.exports = {
+	randomNumber,
+	numericString,
+	alphaString,
+	alphaNumericString,
+	chance,
+	choice,
+	choiceIndex,
+	choiceWeighted
+};

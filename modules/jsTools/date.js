@@ -7,7 +7,7 @@ const _nT = require("./number");
 // prettier-ignore
 /** Parse a string into either milliseconds or seconds
  * @param {string} str string to parse
- * @param {options_parse} options return "s" (seconds) or "ms" (milliseconds)
+ * @param {options_parse} options parsing options
  *
  * @example
  * parse("1m", "s") --> 60
@@ -49,7 +49,7 @@ function parse(str, options) {
  */
 
 /** Get the time between then and now and parse it into a human-readable string
- * @param {options_eta} options
+ * @param {options_eta} options parsing options
  *
  * @example
  * eta({ then: "1h" }) // returns "in 1 hour"
