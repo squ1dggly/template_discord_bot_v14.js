@@ -17,14 +17,16 @@ function chunk(arr, size, copy = false) {
 		chunk = arr.slice(i, i + size);
 	}
 
-	return deepCopy ? structuredClone(chunk) : chunk;
+	return copy ? structuredClone(chunk) : chunk;
 }
 
 /** Filter out non-unique items from an array
  * @param {Array} arr array to filter
- * @param {string} prop a nested property within each item to filter by */
-function unique(arr, prop = "") {
-	return [...new Map(arr.map(item => [_o.getProp(item, prop)], item)).values()];
+ * @param {string} prop a nested property within each item to filter by
+ * @param {boolean} copy return a deep copy of the array using structuredClone() */
+function unique(arr, prop = "", copy = false) {
+	let arr_new = [...new Map(arr.map(item => [_o.getProp(item, prop)], item)).values()];
+	return copy ? structuredClone(arr_new) : arr_new;
 }
 
 module.exports = { chunk, unique };
