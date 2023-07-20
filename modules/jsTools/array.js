@@ -37,15 +37,18 @@ function unique(arr, prop = "", copy = false) {
  * @param {Array} arrayNew new array being constructed
  * @param {Array} arrayOriginal original array being processed */
 
-/** Return an array that contains the results of the given callback function
+/** Create an array that contains the results of the given callback function
  *
  * - Gives callback access to the new array being constructed
  * @param {bM_callback} callback */
 function betterMap(arr, callback) {
+	let arr_original = arr;
 	let arr_new = [];
 
-	for (let idx = 0; idx < arr.length; idx++)
-		arr_new.push(callback(arr[idx], idx, arr_new[idx - 1] || undefined, arr_new, arr));
+	for (let idx = 0; idx < arr_original.length; idx++) {
+		let _lastElement = arr_new[idx - 1] || undefined;
+		arr_new.push(callback(arr_original[idx], idx, _lastElement, arr_new, arr_original));
+	}
 
 	return arr_new;
 }

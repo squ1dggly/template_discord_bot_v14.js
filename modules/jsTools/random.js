@@ -51,8 +51,8 @@ function choiceWeighted(arr, clone = false) {
 
 	// Check if the object array has a "rarity" property
 	arr.forEach((obj, idx) => {
-		if (obj?.rarity === (null || undefined) || obj?.Rarity === (null || undefined))
-			throw new Error(`An element at index ${idx} does not have a "rarity" property`);
+		if ((obj?.rarity || obj?.Rarity) === (null || undefined))
+			throw new Error(`An element at index ${idx} does not have a \"rarity\" property`);
 
 		// Convert "rarity" into a valid number
 		let rarity = +arr[idx].rarity || +arr[idx].Rarity;
@@ -73,14 +73,14 @@ function choiceWeighted(arr, clone = false) {
     for (let i = 0; i < arr.length; i++)
         weights.push(arr[i].rarity + (weights[weights.length - 1] || 0)); */
     
-    let weights = _aT.betterMap(arr, (obj, idx, a) => {
-        return obj.rarity + (a[a.length - 1])
+    let weights = _aT.betterMap(arr, (obj, idx, last) => {
+        return obj.rarity + (last || 0)
     });
 
-	// Generates a random float and multiplies it by the largest sum in the array of (weights)
+	// Generates a random float and multiplies it by the largest sum in the array of weights
 	let decider = Math.random() * weights[weights.length - 1];
 
-	// Returns the first item in the original array that has a rarity higher than or equal to (decider)
+	// Returns the first item in the original array that has a rarity higher than or equal to decider
 	// how this picks a random item from that rarity I still have no idea but at least it's less work for me, lol
 	let item = arr[weights.findIndex(w => w >= decider)];
 	return clone ? structuredClone(item) : item;
