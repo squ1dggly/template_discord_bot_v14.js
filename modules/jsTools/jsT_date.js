@@ -1,4 +1,4 @@
-const _nT = require("./number");
+const _nT = require("./jsT_number");
 
 /** @typedef options_parse
  * @property {"ms"|"s"} type return "s" (seconds) or "ms" (milliseconds)

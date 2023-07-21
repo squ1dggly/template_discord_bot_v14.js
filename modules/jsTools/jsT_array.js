@@ -1,4 +1,4 @@
-const _o = require("./object");
+const _o = require("./jsT_object");
 
 /** Split an array into smaller arrays that don't exceed a given size
  * @param {array} arr array to split
