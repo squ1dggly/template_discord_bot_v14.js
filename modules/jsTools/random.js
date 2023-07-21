@@ -29,7 +29,7 @@ function randomNumber(min, max, round = true) {
  * @param {number} len length of the string */
 function numericString(len) {
 	let str = "";
-	for (let i = 0; i < len; i++) str += number(0, 9);
+	for (let i = 0; i < len; i++) str += randomNumber(0, 9);
 	return str;
 }
 
@@ -49,7 +49,7 @@ function alphaString(len, includeCaps = false) {
 function alphaNumericString(len, includeCaps = false) {
 	let str = "";
 	for (let i = 0; i < len; i++) {
-		let char = String(chance() ? choice(alphabet) : number(0, 9));
+		let char = String(chance() ? choice(alphabet) : randomNumber(0, 9));
 		str += includeCaps && chance() ? char.toUpperCase() : char;
 	}
 	return str;
@@ -63,7 +63,7 @@ function alphaNumericString(len, includeCaps = false) {
 function chance(percent = 50) {
     percent = +percent; if (isNaN(percent)) throw new TypeError(`\`${percent}\` must be a number `);
     if (percent < 1 || percent > 100) throw new Error(`\`${percent}\` must be within a range of 1 and 100`);
-    return number(0, 100) < percent;
+    return randomNumber(0, 100) < percent;
 }
 
 /** Choose a psuedo-random item from an array
@@ -71,7 +71,7 @@ function chance(percent = 50) {
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
 function choice(arr, copy = false) {
 	if (!Array.isArray(arr)) throw new TypeError(`You must provide a valid array`);
-	let item = arr[number(0, arr.length - 1)];
+	let item = arr[randomNumber(0, arr.length - 1)];
 	return copy ? structuredClone(item) : item;
 }
 
@@ -79,7 +79,7 @@ function choice(arr, copy = false) {
  * @param {array} arr array of items to choose from */
 function choiceIndex(arr) {
 	if (!Array.isArray(arr)) throw new TypeError(`You must provide a valid array`);
-	return number(0, arr.length - 1);
+	return randomNumber(0, arr.length - 1);
 }
 
 // prettier-ignore

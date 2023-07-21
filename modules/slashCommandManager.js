@@ -1,152 +1,133 @@
-// Push, remove, or refresh all slash commands in a Guild.
+/** Push, remove, or refresh slash commands to/from/in a guild. */
 
-const { Client, REST, Routes } = require('discord.js');
-const logger = require('./logger');
+/** @typedef push_options
+ * @property {SlashCommandBuilder|SlashCommandBuilder[]} slashCommands specific slash commands to push
+ * @property {string|string[]} ids id of every guild you want to edit
+ * @property {boolean} global if the commands are global, otherwise locally per guild */
 
-const TOKEN = process.env.TOKEN || require('../configs/config_client').TOKEN;
+/** @typedef remove_options
+ * @property {string|string[]} ids id of every guild you want to edit
+ * @property {boolean} global if the commands are global, otherwise locally per guild */
+
+/** @typedef refresh_options
+ * @property {SlashCommandBuilder|SlashCommandBuilder[]} slashCommands specific slash commands to push
+ * @property {string|string[]} ids id of every guild you want to edit
+ * @property {boolean} global if the commands are global, otherwise locally per guild */
+
+const { Client, SlashCommandBuilder, REST, Routes } = require("discord.js");
+const logger = require("./logger");
+
+const TOKEN = process.env.TOKEN || require("../configs/config_client").TOKEN;
 
 // Create an instance of the REST api
 const rest = new REST().setToken(TOKEN);
 
 module.exports = {
-    /** Push slash commands to one or more guilds.
-     * @param {Client} client The client.
-     * @param {Array<string> | string} guildIDs The IDs of the Guilds you wish to push to.
-     * @param {boolean} global Whether to push the slash commands globally. False is locally per server.
-     */
-    push: async (client, guildIDs, global = false) => {
-        let slash_commands = [...client.slashCommands.values()].map(slsh => slsh.builder);
+	/** Push slash commands to one or more guilds
+	 * @param {Client} client client
+	 * @param {push_options} options push options */
+	push: async (client, options = {}) => {
+		options = { slashCommands: [], ids: [], global: false, ...options };
 
-        // Push slash commands globally
-        if (global) try {
-            // Log what's currently happening
-            logger.log(`pushing slash commands for (${guildIDs.length}) ${guildIDs.length > 1 ? "guilds" : "guild"}`);
+		// Get the slash commands from the client
+		options.slashCommands ||= [...client.slashCommands.values()].map(slsh => slsh.builder);
+		// prettier-ignore
+		if (!options.slashCommands.length) return logger.error(
+			"Failed to register slash commands",
+			`type: ${options.global ? "global" : "local"}`,
+			"No slash commands found"
+		);
 
-            await rest.put(Routes.applicationCommands(client.user.id), { body: slash_commands });
+		// Register slash commands (globally)
+		if (options.global) {
+			// prettier-ignore
+			logger.log(`registering slash commands globally...`);
 
-            // Log success
-            return logger.success("slash commands pushed successfully (global)");
-        } catch (err) {
-            return logger.error("Failed to push slash commands", "global", err);
-        }
+			return await rest
+				.put(Routes.applicationCommands(client.user.id), { body: options.slashCommands })
+				.then(() => logger.success("slash commands registered (global)"))
+				.catch(err => logger.error("Failed to register slash commands", "type: global", err));
+		}
 
-        // If a single string was given for the guildIDs parameter, convert it into an array
-        if (!Array.isArray(guildIDs)) guildIDs = [guildIDs];
+		/// Register slash commands (locally)
+		// If a single string was given for IDs, convert it into an array
+		if (!Array.isArray(options.ids)) options.ids = [options.ids];
 
-        // Push slash commands locally (per server)
-        try {
-            let promiseArray = [];
+		options.ids ||= (await client.guilds.fetch()).map(({ id }) => id);
+		// prettier-ignore
+		if (!options.ids.length) return logger.error(
+			"Failed to register slash commands",
+			"type: local",
+			"You must provide at least 1 guild ID"
+        );
 
-            //* Iterate through each guildID and push the slash commands
-            if (guildIDs.length > 0) {
-                // Log what's currently happening
-                logger.log(`pushing slash commands for (${guildIDs.length}) ${guildIDs.length > 1 ? "guilds" : "guild"}`);
+		// prettier-ignore
+		logger.log(`registering slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guilds" : "guild"}...`);
 
-                // Iterate through each guildID
-                guildIDs.forEach(guildID => {
-                    let res = rest.put(Routes.applicationGuildCommands(client.user.id, guildID), { body: slash_commands });
-                    promiseArray.push(res);
-                });
+		// prettier-ignore
+		// Iterate through each guild ID and register slash commands
+		return await Promise.all(options.ids.map(id => rest
+            .put(Routes.applicationGuildCommands(client.user.id, id), { body: options.slashCommands })
+            .catch(err => logger.error(`Failed to register slash commands", "type: local | guildID: ${id}`, err)
+        )))
+            .then(sucessful => {
+                // Get the number of guilds that were successfully registered
+                let sucessful_count = sucessful.filter(s => s).length;
+                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guilds" : "guild"} (local)`)
+            }).catch(err => logger.error("Failed to register slash commands", "type: local", err));
+	},
 
-                // Wait for REST to finish each request
-                await Promise.all(promiseArray);
+	/** Remove slash commands from one or more guilds
+	 * @param {Client} client client
+	 * @param {remove_options} options remove options */
+	remove: async (client, options = {}) => {
+		options = { ids: [], global: false, ...options };
 
-                // Log success
-                return logger.success("slash commands registered successfully");
-            } else { //* Iterate through every guild the bot is currently in and push the slash commands
-                // Fetch each guild the bot's currently in
-                let guilds = await client.guilds.fetch();
+		// Remove slash commands (globally)
+		if (options.global) {
+			// prettier-ignore
+			logger.log(`removing slash commands globally...`);
 
-                // Log what's currently happening
-                logger.log(`pushing slash commands for (${guilds.length}) ${guilds.length > 1 ? "guilds" : "guild"}`);
+			return await rest
+				.put(Routes.applicationCommands(client.user.id), { body: [] })
+				.then(() => logger.success("slash commands removed (global)"))
+				.catch(err => logger.error("Failed to remove slash commands", "type: global", err));
+		}
 
-                // Iterate through each guild
-                guilds.forEach(guild => {
-                    let res = rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), { body: slash_commands });
-                    promiseArray.push(res);
-                });
+		/// Remove slash commands (locally)
+		// If a single string was given for IDs, convert it into an array
+		if (!Array.isArray(options.ids)) options.ids = [options.ids];
 
-                // Wait for REST to finish each request
-                await Promise.all(promiseArray);
+		options.ids ||= (await client.guilds.fetch()).map(({ id }) => id);
+		// prettier-ignore
+		if (!options.ids.length) return logger.error(
+			"Failed to remove slash commands",
+			"type: local",
+			"You must provide at least 1 guild ID"
+        );
 
-                // Log success
-                return logger.success("slash commands pushed successfully");
-            }
-        } catch (err) {
-            return logger.error("Failed to push slash commands", "local (per server)", err);
-        }
-    },
+		// prettier-ignore
+		logger.log(`removing slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guilds" : "guild"}...`);
 
-    /** Remove slash commands from one or more guilds.
-     * @param {Client} client The client.
-     * @param {Array<string> | string} guildIDs The IDs of the Guilds you wish to delete from.
-     * @param {boolean} global Whether to remove the slash commands globally. False is locally per server.
-     */
-    remove: async (client, guildIDs, global = false) => {
-        // Remove slash commands globally
-        if (global) try {
-            // Log what's currently happening
-            logger.log(`removing slash commands from (${guildIDs.length}) ${guildIDs.length > 1 ? "guilds" : "guild"}`);
+		// prettier-ignore
+		// Iterate through each guild ID and remove slash commands
+		return await Promise.all(options.ids.map(id => rest
+            .put(Routes.applicationGuildCommands(client.user.id, id), { body: [] })
+            .catch(err => logger.error(`Failed to remove slash commands", "type: local | guildID: ${id}`, err)
+        )))
+            .then(sucessful => {
+                // Get the number of guilds that were successfully registered
+                let sucessful_count = sucessful.filter(s => s).length;
+                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guilds" : "guild"} (local)`)
+            }).catch(err => logger.error("Failed to remove slash commands", "type: local", err));
+	},
 
-            await rest.put(Routes.applicationCommands(client.user.id), { body: [] });
-
-            // Log success
-            return logger.success("slash commands removed successfully (global)");
-        } catch (err) {
-            return logger.error("Failed to remove slash commands", "global", err);
-        }
-
-        // Push slash commands locally (per server)
-        try {
-            let promiseArray = [];
-
-            //* Iterate through each guildID and push the slash commands
-            if (guildIDs.length > 0) {
-                // Log what's currently happening
-                logger.log(`removing slash commands from (${guildIDs.length}) ${guildIDs.length > 1 ? "guilds" : "guild"}`);
-
-                // Iterate through each guildID
-                guildIDs.forEach(guildID => {
-                    let res = rest.put(Routes.applicationGuildCommands(client.user.id, guildID), { body: [] });
-                    promiseArray.push(res);
-                });
-
-                // Wait for REST to finish each request
-                await Promise.all(promiseArray);
-
-                // Log success
-                return logger.success("slash commands removed successfully");
-            } else { //* Iterate through every guild the bot is currently in and push the slash commands
-                // Fetch each guild the bot's currently in
-                let guilds = await client.guilds.fetch();
-
-                // Log what's currently happening
-                logger.log(`removing slash commands for (${guilds.length}) ${guilds.length > 1 ? "guilds" : "guild"}`);
-
-                // Iterate through each guild
-                guilds.forEach(guild => {
-                    let res = rest.put(Routes.applicationGuildCommands(client.user.id, guild.id), { body: [] });
-                    promiseArray.push(res);
-                });
-
-                // Wait for REST to finish each request
-                await Promise.all(promiseArray);
-
-                // Log success
-                return logger.success("slash commands removed successfully");
-            }
-        } catch (err) {
-            return logger.error("Failed to remove slash commands", "local (per server)", err);
-        }
-    },
-
-    /** Refresh slash commands for one or more guilds.
-     * @param {Client} client The client.
-     * @param {Array<string> | string} guildIDs The IDs of the Guilds you wish to refresh.
-     * @param {boolean} global Whether to refresh the slash commands globally. False is locally per server.
-     */
-    refresh: async (client, guildIDs, global = false) => {
-        await this.remove(client, guildIDs, global);
-        await this.push(client, guildIDs, global);
-    }
+	/** Refresh slash commands in one or more guilds
+	 * @param {Client} client client
+	 * @param {refresh_options} options refresh options */
+	refresh: async (client, options = {}) => {
+		options = { ids: [], global: false, ...options };
+		await this.remove(client, options);
+		await this.push(client, options);
+	}
 };
