@@ -1,0 +1,10 @@
+{
+	"EMBED_COLOR": "#2B2D31",
+	"CONFIRMATION_TITLE": { "text": "Please confirm this action", "useAuthor": true },
+
+	"timeouts": {
+		"PAGINATION": "30s",
+		"CONFIRMATION": "15s",
+		"ERROR_MESSAGE": "5s"
+	}
+}
