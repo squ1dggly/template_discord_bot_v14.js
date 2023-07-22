@@ -1,18 +1,18 @@
 const _nT = require("./jsT_number");
 
-/** @typedef options_parse
+/** @typedef parse_options
  * @property {"ms"|"s"} type return "s" (seconds) or "ms" (milliseconds)
  * @property {boolean} fromNow add Date.now() to the result */
 
 // prettier-ignore
 /** Parse a string into either milliseconds or seconds
  * @param {string} str string to parse
- * @param {options_parse} options parsing options
+ * @param {parse_options} options
  *
  * @example
  * parse("1m", "s") --> 60
  * parse("-1m", "s") --> -60 */
-function parse(str, options) {
+function parseTime(str, options) {
     options = { type: "ms", fromNow: false, ...options };
     if (typeof str !== "string") return new TypeError(`\'${str}\' must be a string`);
 
@@ -42,14 +42,14 @@ function parse(str, options) {
     }
 }
 
-/** @typedef options_eta
+/** @typedef eta_options
  * @property {number|string} now unix time in milliseconds, defaults to Date.now()
  * @property {number|string} then unix time in milliseconds or parsable string
  * @property {boolean} ignorePast return null if "then" is in the past
  */
 
 /** Get the time between then and now and parse it into a human-readable string
- * @param {options_eta} options parsing options
+ * @param {eta_options} options
  *
  * @example
  * eta({ then: "1h" }) // returns "in 1 hour"
@@ -62,7 +62,7 @@ function eta(options) {
 	options.now = +options.now;
 	if (isNaN(options.now)) throw new Error(`\'${options.now}\' is not a valid unix time`);
 
-	if (isNaN(options.then)) options.then = Date.now() + parse(options.then.trim(), "ms");
+	if (isNaN(options.then)) options.then = Date.now() + parseTime(options.then.trim(), "ms");
 	else options.then = +options.then;
 
 	if (!options.then) throw new Error(`\'${options.then}\' is not a valid time/number`);
@@ -97,4 +97,4 @@ function eta(options) {
 	return formatter.format(timeDifference.toFixed(), div.name);
 }
 
-module.exports = { parse, eta };
+module.exports = { parseTime, eta };
