@@ -42,14 +42,20 @@ const _jsT = require("../jsTools/_jsT");
 
 /** A better version of the classic EmbedBuilder */
 class BetterEmbed extends EmbedBuilder {
-	#_configure() {
-		let _options = this.options;
+	#_configure(options = {}) {
+		let _options = { ...this.options, ...options };
 
 		/// Apply shorthand formatting
 		_options.description = this.#_format(_options.description);
 		_options.author.name = this.#_format(_options.author.text);
 		_options.title = this.#_format(_options.title.text);
 		_options.footer.text = this.#_format(_options.footer.text);
+
+		// Error preventing
+		if (!_options.description) _options.description = " ";
+		if (!_options.author.text) _options.author.text = " ";
+		if (!_options.footer.text) _options.footer.text = " ";
+		if (!_options.color) _options.color = "Random";
 
 		/// Author
 		// if (this.data.author.text) this.data.author.name = _options.author.text;
@@ -167,6 +173,8 @@ class BetterEmbed extends EmbedBuilder {
 			...this.options, ...options
 		};
 
+		this.#_configure(options);
+		options.messageContent = this.#_format(options.messageContent);
 		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
 	}
 }
