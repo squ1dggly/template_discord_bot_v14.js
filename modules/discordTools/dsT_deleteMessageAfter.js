@@ -5,15 +5,11 @@ const _jsT = require("../jsTools/_jsT");
  * @param {Message} message message object that was sent
  * @param {number|string} time amount of time to wait in milliseconds */
 async function deleteMesssageAfter(message, time) {
-	if (typeof time === "string") time = _jsT.parseTime(time);
-	if (isNaN(time)) throw new TypeError(`${time} is not a valid number`);
+	// Wait until the given time has passed
+	await _jsT.wait(time);
 
-	return new Promise(resolve =>
-		setTimeout(async () => {
-			// prettier-ignore
-			try { resolve(await message.delete()); } catch { }
-		}, time)
-	);
+	// prettier-ignore
+	try { return await message.delete(); } catch { return null; }
 }
 
 module.exports = deleteMesssageAfter;

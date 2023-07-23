@@ -13,7 +13,8 @@ const _nT = require("./jsT_number");
  * parse("1m", "s") --> 60
  * parse("-1m", "s") --> -60 */
 function parseTime(str, options) {
-	options = { type: "ms", fromNow: false, ...options }; str = `${str}`;
+	options = { type: "ms", fromNow: false, ...options };
+	if (!isNaN(+str)) return +str; else str = `${str}`;
 	
     let isNegative = str.at(0) === "-";
     let time = str.match(/[a-zA-Z]+|[0-9]+/g); if (isNaN(+time[0]))
