@@ -3,7 +3,7 @@
 require("dotenv").config();
 const fs = require("fs");
 
-const { Client, GatewayIntentBits, Collection, Partials } = require("discord.js");
+const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
 const slashCommandManager = require("./modules/slashCommandManager");
 const logger = require("./modules/logger");
 const mongo = require("./modules/mongo");
@@ -36,11 +36,12 @@ let importers_dir = fs.readdirSync("./modules/importers").filter(fn => fn.starts
 // prettier-ignore
 importers_dir.forEach(fn => {
 	try { require(`./modules/importers/${fn}`).init(client); }
-	catch (err) { logger.error("Importer failed to load", `\"${fn}\" is not a valid importer`, err); }
+	catch (err) { logger.error("Importer failed to load", `\"${fn}\" could not initialize`, err); }
 });
 
 // Connect the client to discord
 logger.log("connecting to Discord...");
+// prettier-ignore
 client.login(TOKEN).then(async () => {
 	// await mongo.connect();
 
