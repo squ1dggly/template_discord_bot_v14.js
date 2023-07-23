@@ -3,7 +3,7 @@
 require("dotenv").config();
 const fs = require("fs");
 
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const { Client, GatewayIntentBits, Collection, Partials } = require("discord.js");
 const slashCommandManager = require("./modules/slashCommandManager");
 const logger = require("./modules/logger");
 const mongo = require("./modules/mongo");
@@ -17,27 +17,26 @@ const client = new Client({
 		GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildPresences,
 		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.MessageContent
-	],
+		// GatewayIntentBits.DirectMessageReactions // Allows bot to see reactions in DMs
+		// GatewayIntentBits.DirectMessages // Allows bot to read DMs
+	]
 
-	partials: [Partials.Channel] // Allows the bot to read its own DMs
+	// partials: [Partials.Channel] // Allows bot to use non-guild channels
 });
 
 // Collections that hold valuable information for the client
 client.slashCommands = new Collection();
 
 // Run importers
-let importers_dir = fs
-	.readdirSync("./modules/importers")
-	.filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
+let importers_dir = fs.readdirSync("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
 
+// prettier-ignore
 importers_dir.forEach(fn => {
-	try {
-		require(`./modules/importers/${fn}`).init(client);
-	} catch (err) {
-		logger.error("Importer failed to load", `\"${fn}\" is not a valid importer`, err);
-	}
+	try { require(`./modules/importers/${fn}`).init(client); }
+	catch (err) { logger.error("Importer failed to load", `\"${fn}\" is not a valid importer`, err); }
 });
 
 // Connect the client to discord
@@ -45,15 +44,15 @@ logger.log("connecting to Discord...");
 client.login(TOKEN).then(async () => {
 	// await mongo.connect();
 
-	// Push all commands to a specific server (this is local) - use this to refresh local commands
-	await slashCommandManager.push(client, "your_server_id");
+	// Register slash commands to a specific server :: { local }
+	// await slashCommandManager.push(client, { ids: "your_server_id" });
 
-	// Push all commands excluding admin (this is global) - use this to refresh global commands
-	// await slashCommandManager.push(client, null, true);
+	// Register slash commands :: { global }
+	// await slashCommandManager.push(client, { global: true });
 
-	// Remove all commands (this is local | does not work if using global commands) (this is local)
-	// await slashCommandManager.remove(client, "your_server_id");
+	// Remove commands (does nothing if commands were registered globally) :: { local }
+	// await slashCommandManager.remove(client, { ids: "your_server_id" });
 
-	// Remove all commands (this is global | does not work if using local commands) (this is global)
-	// await slashCommandManager.remove(client, null, true);
+	// Remove commands (does nothing if commands were registered locally) :: { global }
+	// await slashCommandManager.remove(client, { global: true });
 });
