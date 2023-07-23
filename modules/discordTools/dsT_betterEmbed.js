@@ -46,15 +46,15 @@ class BetterEmbed extends EmbedBuilder {
 		let _options = this.options;
 
 		/// Apply shorthand formatting
-		this.data.description = this.#_format(_options.description);
-		this.data.author.name = this.#_format(_options.author.text);
-		this.data.title = this.#_format(_options.title.text);
-		this.data.footer.text = this.#_format(_options.footer.text);
+		_options.description = this.#_format(_options.description);
+		_options.author.name = this.#_format(_options.author.text);
+		_options.title = this.#_format(_options.title.text);
+		_options.footer.text = this.#_format(_options.footer.text);
 
 		/// Author
 		// if (this.data.author.text) this.data.author.name = _options.author.text;
-		if (this.data.author.text) this.#_setAuthor(_options.author.text, "name");
-		if (this.data.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
+		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
+		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
 		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
 			// Get the authorURL() method from within the GuildMember or from the user itself
 			let _foo_avatarURL = _options.author?.user?.user?.avatarURL || _options.author?.user?.avatarURL;
@@ -104,8 +104,8 @@ class BetterEmbed extends EmbedBuilder {
 
 	#_format(str) {
 		return str
-			.replace(/\$USER/g, this.data.author.user)
-			.replace(/\$USERNAME/g, this.data.author.user?.displayName || this.data.author.user?.username);
+			.replace(/\$USER/g, this.data.author?.user)
+			.replace(/\$USERNAME/g, this.data.author?.user?.displayName || this.data.author?.user?.username);
 	}
 
 	/** @param {string} update @param {"name"|"linkURL"|"iconURL"} type */
@@ -171,6 +171,6 @@ class BetterEmbed extends EmbedBuilder {
 	}
 }
 
-new BetterEmbed();
+console.log(new BetterEmbed());
 
 module.exports = BetterEmbed;

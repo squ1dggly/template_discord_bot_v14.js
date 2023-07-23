@@ -13,13 +13,13 @@ const _nT = require("./jsT_number");
  * parse("1m", "s") --> 60
  * parse("-1m", "s") --> -60 */
 function parseTime(str, options) {
-	options = { type: "ms", fromNow: false, ...options };
-	if (typeof str === "number") return str;
-    if (typeof str !== "string") return new TypeError(`\'${str}\' must be a string`);
-
+	options = { type: "ms", fromNow: false, ...options }; str = `${str}`;
+	
     let isNegative = str.at(0) === "-";
-    let time = str.match(/[a-zA-Z]+|[0-9]+/g);
-    let parsed = 0;
+    let time = str.match(/[a-zA-Z]+|[0-9]+/g); if (isNaN(+time[0]))
+		return new TypeError(`\'${str}\' must be a valid time string`);
+    
+	let parsed = 0;
 
     switch (time[1]) {
         case "y": parsed = (+time[0] * 12 * 4 * 7 * 24 * 60 * 60 * 1000); break;
