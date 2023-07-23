@@ -52,7 +52,8 @@ class BetterEmbed extends EmbedBuilder {
 		if (!_options.description) _options.description = " ";
 		if (!_options.author.text) _options.author.text = " ";
 		if (!_options.footer.text) _options.footer.text = " ";
-		if (!_options.color) _options.color = "Random";
+		if (!_options.color) _options.color = config.EMBED_COLOR || "Random";
+		if (!Array.isArray(_options.color)) _options.color = [_options.color];
 
 		/// Author
 		// if (this.data.author.text) this.data.author.name = _options.author.text;
@@ -97,8 +98,8 @@ class BetterEmbed extends EmbedBuilder {
 
 		// Color
 		// prettier-ignore
-		if (_options.color)
-			try { this.setColor(_options.color); }
+		if (_options.color.length)
+			try { this.setColor(_options.color.length > 1 ? _jsT.choice(_options.color) : _options.color[0]); }
 			catch { logger.error("Could not configure embed", "invalid_color", `\`${_options.color}\``); }
 
 		// Timestamp

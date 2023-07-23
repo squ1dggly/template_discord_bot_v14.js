@@ -1,5 +1,5 @@
 {
-	"EMBED_COLOR": "#2B2D31",
+	"EMBED_COLOR": ["#2B2D31"],
 	"CONFIRMATION_TITLE": { "text": "Please confirm this action", "useAuthor": true },
 
 	"timeouts": {
