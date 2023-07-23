@@ -1,5 +1,5 @@
 /** @typedef bE_options
- * Title/description formatting shorthand:
+ * Author/Title/Description format shorthand:
  *
  * • $USER :: author's mention
  *
@@ -15,11 +15,13 @@
  * @property {boolean} showTimestamp */
 
 /** @typedef bE_sendOptions
- * Title/description formatting shorthand:
+ * Message Content/Author/Title/Description format shorthand:
  *
  * • $USER :: author's mention
  *
  * • $USERNAME :: author's display/user name
+ * @property {CommandInteraction} interaction
+ * @property {TextChannel} channel
  * @property {string} messageContent
  * @property {{user:GuildMember|User, text:string, iconURL:string, linkURL: string}} author
  * @property {{text:string, linkURL:string}} title
@@ -30,46 +32,32 @@
  * @property {string} color
  * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if "reply" fails it will use "editReply" | "reply" is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
- * @property {boolean} ephemeral */
+ * @property {boolean} ephemeral
+ * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
 const config = require("./_dsT_config.json");
 
-const { Message, CommandInteraction, User, GuildMember, ActionRowBuilder, EmbedBuilder } = require("discord.js");
+const { CommandInteraction, User, GuildMember, TextChannel, ActionRowBuilder, EmbedBuilder } = require("discord.js");
 const _jsT = require("../jsTools/_jsT");
 
+/** A better version of the classic EmbedBuilder */
 class BetterEmbed extends EmbedBuilder {
-	/** Send a confirmation message and await the user's response
-	 * @param {bE_options} options */
-	constructor(options) {
-		super();
-
-		// prettier-ignore
-		this.options = {
-			interaction: null,
-			author: { user: null, text: "", iconURL: "", linkURL: "" },
-            title: { text: "", linkURL: "" }, footer: { text: "", iconURL: "" },
-            description: "", imageURL: "", thumbnailURL: "",
-            color: config.EMBED_COLOR || null,
-            showTimestamp: false, ...options
-		};
-
-		this.#_configure();
-	}
-
 	#_configure() {
+		let _options = this.options;
+
 		/// Apply shorthand formatting
-		this.data.description = this.#_format(this.options.description);
-		this.data.author.name = this.#_format(this.options.author.text);
-		this.data.title = this.#_format(this.options.title.text);
-		this.data.footer.text = this.#_format(this.options.footer.text);
+		this.data.description = this.#_format(_options.description);
+		this.data.author.name = this.#_format(_options.author.text);
+		this.data.title = this.#_format(_options.title.text);
+		this.data.footer.text = this.#_format(_options.footer.text);
 
 		/// Author
-		// if (this.data.author.text) this.data.author.name = this.options.author.text;
-		if (this.data.author.text) this.#_setAuthor(this.options.author.text, "name");
-		if (this.data.author.linkURL) this.#_setAuthor(this.options.author.linkURL, "linkURL");
-		if ((this.options.author.user || this.options.author.iconURL) && this.options.author.iconURL !== (false || null)) {
+		// if (this.data.author.text) this.data.author.name = _options.author.text;
+		if (this.data.author.text) this.#_setAuthor(_options.author.text, "name");
+		if (this.data.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
+		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
 			// Get the authorURL() method from within the GuildMember or from the user itself
-			let _foo_avatarURL = this.options.author?.user?.user?.avatarURL || this.options.author?.user?.avatarURL;
+			let _foo_avatarURL = _options.author?.user?.user?.avatarURL || _options.author?.user?.avatarURL;
 			let _avatarURL = _foo_avatarURL({ dynamic: true });
 
 			// prettier-ignore
@@ -78,31 +66,40 @@ class BetterEmbed extends EmbedBuilder {
 		}
 
 		// Title
-		if (this.options.title.text) this.setTitle(this.options.title.text);
+		if (_options.title.text) this.setTitle(_options.title.text);
 		// Title URL
 		// prettier-ignore
-		if (this.options.title.linkURL)
-			try { this.setURL(this.options.title.linkURL); }
-			catch { logger.error("Could not configure embed", "invalid_linkURL", `\`${this.options.title.linkURL}\``); }
+		if (_options.title.linkURL)
+			try { this.setURL(_options.title.linkURL); }
+			catch { logger.error("Could not configure embed", "invalid_linkURL", `\`${_options.title.linkURL}\``); }
 
 		// Image URL
 		// prettier-ignore
-		if (this.options.imageURL)
-			try { this.setImage(this.options.imageURL); }
-			catch { logger.error("Could not configure embed", "invalid_imageURL", `\`${this.options.imageURL}\``); }
+		if (_options.imageURL)
+			try { this.setImage(_options.imageURL); }
+			catch { logger.error("Could not configure embed", "invalid_imageURL", `\`${_options.imageURL}\``); }
 
 		// Image thumbnail URL
 		// prettier-ignore
-		if (this.options.thumbnailURL)
-			try { this.setThumbnail(this.options.thumbnailURL); }
-			catch { logger.error("Could not configure embed", "invalid_thumbnailURL", `\`${this.options.thumbnailURL}\``); }
+		if (_options.thumbnailURL)
+			try { this.setThumbnail(_options.thumbnailURL); }
+			catch { logger.error("Could not configure embed", "invalid_thumbnailURL", `\`${_options.thumbnailURL}\``); }
 
 		// Description
-		if (this.options.description) this.setDescription(this.options.description);
+		if (_options.description) this.setDescription(_options.description);
 
 		/// Footer
-		if (this.options.footer.text) this.#_setFooter(this.options.footer.text, "text");
-		if (this.options.footer.iconURL) this.#_setFooter(this.options.footer.iconURL, "iconURL");
+		if (_options.footer.text) this.#_setFooter(_options.footer.text, "text");
+		if (_options.footer.iconURL) this.#_setFooter(_options.footer.iconURL, "iconURL");
+
+		// Color
+		// prettier-ignore
+		if (_options.color)
+			try { this.setColor(_options.color); }
+			catch { logger.error("Could not configure embed", "invalid_color", `\`${_options.color}\``); }
+
+		// Timestamp
+		if (_options.showTimestamp) this.setTimestamp();
 	}
 
 	#_format(str) {
@@ -139,6 +136,38 @@ class BetterEmbed extends EmbedBuilder {
 				try { return this.setFooter({ text: update, iconURL: this.data.footer.icon_url }); }
 				catch { logger.error("Could not configure embed", "invalid: footer_iconURL", `\`${update}\``); }
 		}
+	}
+
+	/** Send a confirmation message and await the user's response
+	 * @param {bE_options} options */
+	constructor(options) {
+		super();
+
+		// prettier-ignore
+		this.options = {
+			interaction: null,
+			author: { user: null, text: "", iconURL: "", linkURL: "" },
+            title: { text: "", linkURL: "" }, footer: { text: "", iconURL: "" },
+            description: "", imageURL: "", thumbnailURL: "",
+            color: config.EMBED_COLOR || null,
+            showTimestamp: false, ...options
+		};
+
+		this.#_configure();
+	}
+
+	/** Send the embed using the interaction or channel
+	 * @param {bE_sendOptions} options */
+	async send(options) {
+		// prettier-ignore
+		options = {
+			channel: null,
+			messageContent: "", components: [],
+			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
+			...this.options, ...options
+		};
+
+		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
 	}
 }
 

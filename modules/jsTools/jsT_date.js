@@ -13,7 +13,8 @@ const _nT = require("./jsT_number");
  * parse("1m", "s") --> 60
  * parse("-1m", "s") --> -60 */
 function parseTime(str, options) {
-    options = { type: "ms", fromNow: false, ...options };
+	options = { type: "ms", fromNow: false, ...options };
+	if (typeof str === "number") return str;
     if (typeof str !== "string") return new TypeError(`\'${str}\' must be a string`);
 
     let isNegative = str.at(0) === "-";
