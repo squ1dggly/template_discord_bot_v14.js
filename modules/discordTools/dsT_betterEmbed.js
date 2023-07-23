@@ -1,10 +1,6 @@
 /** @typedef bE_options
- * Author/Title/Description format shorthand:
- *
- * • $USER :: author's mention
- *
- * • $USERNAME :: author's display/user name
  * @property {CommandInteraction} interaction
+ * @property {TextChannel} channel
  * @property {{user:GuildMember|User, text:string, iconURL:string, linkURL: string}} author
  * @property {{text:string, linkURL:string}} title
  * @property {{text:string, iconURL:string}} footer
@@ -15,11 +11,6 @@
  * @property {boolean} showTimestamp */
 
 /** @typedef bE_sendOptions
- * Message Content/Author/Title/Description format shorthand:
- *
- * • $USER :: author's mention
- *
- * • $USERNAME :: author's display/user name
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
  * @property {string} messageContent
@@ -33,6 +24,7 @@
  * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if "reply" fails it will use "editReply" | "reply" is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {boolean} ephemeral
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
 const config = require("./_dsT_config.json");
@@ -40,16 +32,21 @@ const config = require("./_dsT_config.json");
 const { CommandInteraction, User, GuildMember, TextChannel, ActionRowBuilder, EmbedBuilder } = require("discord.js");
 const _jsT = require("../jsTools/_jsT");
 
-/** A better version of the classic EmbedBuilder */
 class BetterEmbed extends EmbedBuilder {
+	#_formatMarkdown(str) {
+		return str
+			.replace(/\$USER/g, this.data.author?.user)
+			.replace(/\$USERNAME/g, this.data.author?.user?.displayName || this.data.author?.user?.username);
+	}
+
 	#_configure(options = {}) {
 		let _options = { ...this.options, ...options };
 
 		/// Apply shorthand formatting
-		_options.description = this.#_format(_options.description);
-		_options.author.name = this.#_format(_options.author.text);
-		_options.title = this.#_format(_options.title.text);
-		_options.footer.text = this.#_format(_options.footer.text);
+		_options.description = this.#_formatMarkdown(_options.description);
+		_options.author.name = this.#_formatMarkdown(_options.author.text);
+		_options.title = this.#_formatMarkdown(_options.title.text);
+		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
 
 		// Error preventing
 		if (!_options.description) _options.description = " ";
@@ -108,12 +105,6 @@ class BetterEmbed extends EmbedBuilder {
 		if (_options.showTimestamp) this.setTimestamp();
 	}
 
-	#_format(str) {
-		return str
-			.replace(/\$USER/g, this.data.author?.user)
-			.replace(/\$USERNAME/g, this.data.author?.user?.displayName || this.data.author?.user?.username);
-	}
-
 	/** @param {string} update @param {"name"|"linkURL"|"iconURL"} type */
 	#_setAuthor(update, type) {
 		// prettier-ignore
@@ -144,14 +135,17 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Send a confirmation message and await the user's response
+	/** A better version of the classic EmbedBuilder
+	 * - **`$USER`** :: *author's mention*
+	 *
+	 * - **`$USERNAME`** :: *author's display/user name*
 	 * @param {bE_options} options */
 	constructor(options) {
 		super();
 
 		// prettier-ignore
 		this.options = {
-			interaction: null,
+			interaction: null, channel: null,
 			author: { user: null, text: "", iconURL: "", linkURL: "" },
             title: { text: "", linkURL: "" }, footer: { text: "", iconURL: "" },
             description: "", imageURL: "", thumbnailURL: "",
@@ -163,22 +157,89 @@ class BetterEmbed extends EmbedBuilder {
 	}
 
 	/** Send the embed using the interaction or channel
+	 *
+	 * - **`$USER`** :: *author's mention*
+	 *
+	 * - **`$USERNAME`** :: *author's display/user name*
 	 * @param {bE_sendOptions} options */
 	async send(options) {
 		// prettier-ignore
 		options = {
 			channel: null,
-			messageContent: "", components: [],
+			messageContent: "", components: [], allowedMentions: {},
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
 			...this.options, ...options
 		};
 
 		this.#_configure(options);
-		options.messageContent = this.#_format(options.messageContent);
+		options.messageContent = this.#_formatMarkdown(options.messageContent);
 		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+
+		// If a single component was given, convert it into an array
+		if (!Array.isArray(options.components)) options.components = [options.components];
+
+		// Send the embed
+		try {
+			switch (options.sendMethod) {
+				// prettier-ignore
+				case "reply":
+					if (!options.interaction)
+						throw new Error("sendMethod \`reply\` not allowed; CommandInteraction not provided");
+
+					try {
+						return await this.options.interaction.reply({
+							content: options.messageContent, components: options.components,
+							embeds: [this], ephemeral: options.ephemeral, fetchReply: true,
+							allowedMentions: options.allowedMentions
+						});
+					} catch {
+						// Fallback to "editReply"
+						return await this.options.interaction.editReply({
+							content: options.messageContent, components: options.components,
+							embeds: [this], fetchReply: true, allowedMentions: options.allowedMentions
+						});
+					}
+
+				// prettier-ignore
+				case "editReply":
+					if (!options.interaction)
+						throw new Error("sendMethod \`editReply\` not allowed; CommandInteraction not provided");
+					
+					return await this.options.interaction.editReply({
+						content: options.messageContent, components: options.components,
+						embeds: [this], fetchReply: true, allowedMentions: options.allowedMentions
+					});
+
+				// prettier-ignore
+				case "followUp":
+					if (!options.interaction)
+						throw new Error("sendMethod \`followUp\` not allowed; CommandInteraction not provided");
+					
+						return await this.options.interaction.followUp({
+							content: options.messageContent, components: options.components,
+							embeds: [this], ephemeral: options.ephemeral, fetchReply: true,
+							allowedMentions: options.allowedMentions
+						});
+
+				// prettier-ignore
+				case "channel":
+					if (!options.channel)
+						throw new Error("sendMethod \`channel\` not allowed; TextChannel not provided");
+					
+					return await options.channel.send({
+						content: options.messageContent, components: options.components,
+						embeds: [this],fetchReply: true, allowedMentions: options.allowedMentions
+					});
+
+				default:
+					logger.error("Failed to send embed", "invalid_sendMethod", `\`${options.sendMethod}\``);
+					return null;
+			}
+		} catch (err) {
+			logger.error("Failed to send embed", "BetterEmbed.send()", err);
+			return null;
+		}
 	}
 }
-
-console.log(new BetterEmbed());
 
 module.exports = BetterEmbed;
