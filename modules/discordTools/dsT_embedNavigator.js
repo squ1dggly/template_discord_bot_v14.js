@@ -13,19 +13,19 @@
 const config = require("./_dsT_config.json");
 
 // prettier-ignore
-const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
 const _jsT = require("../jsTools/_jsT");
 
 class EmbedNavigator {
-	#_createButton(options) {
-		options = { emoji: "", label: "", style: ButtonStyle.Secondary, customID: "", ...options };
+	#_createButton(label, customID) {
+		let _button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: customID });
 
-		// prettier-ignore
-		return new ButtonBuilder({
-			emoji: options.emoji, label: options.label,
-			style: options.style, custom_id: options.customID
-		});
+		if (label.TEXT) _button.setLabel(label.TEXT);
+		else if (label.emoji.ID) _button.setEmoji(label.emoji.ID);
+		else throw new Error("You must provide text or an emoji ID for this navigator button in '_dsT_config.json'");
+
+		return _button;
 	}
 
 	/** @param {eN_options} options  */
@@ -47,9 +47,10 @@ class EmbedNavigator {
 			timeout: config.timeouts.PAGINATION, ...options
 		};
 
+		if (!Array.isArray(this.data.embeds)) this.options.embeds = [this.data.embeds];
 		options.timeout = _jsT.parseTime(options.timeout);
 
-		// Configure data & variables
+		/// Configure data & variables
 		// prettier-ignore
 		this.data = {
 			pages: {
@@ -58,12 +59,40 @@ class EmbedNavigator {
 				nested_length: 0, idx: { current: 0, nested: 0 }
 			},
 
-			selectMenu: {
-				optionValues: []
+			selectMenu: { optionValues: [] },
+
+			pagination: {
+				/** @type {{name:string, emoji:string}[]} */
+				reactions: [],
+				required: false, requiresLong: false, canJump: false 
+			},
+
+			collectors: { message: null, reaction: null },
+
+			actionRows: {
+				selectMenu: new ActionRowBuilder(),
+				pagination: new ActionRowBuilder()
+			},
+
+			components: {
+				selectMenu: new StringSelectMenuBuilder()
+					.setCustomId("ssm_pageSelect")
+					.setPlaceholder("choose a page to view..."),
+				
+				pagination: {
+					toFirst: this.#_createButton(config.navigator.buttons.to_first, "btn_toFirst"),
+					back: this.#_createButton(config.navigator.buttons.back, "btn_back"),
+					jump: this.#_createButton(config.navigator.buttons.jump, "btn_jump"),
+					next: this.#_createButton(config.navigator.buttons.next, "btn_next"),
+					toLast: this.#_createButton(config.navigator.buttons.to_last, "btn_toLast")
+				}
 			},
 
 			messageComponents: []
 		};
+
+		// Add the StringSelectMenuBuilder component to the select menu action row
+		this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
 	}
 }
 
