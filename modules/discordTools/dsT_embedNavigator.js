@@ -10,10 +10,23 @@
  * @property {boolean} dynamicPagination
  * @property {number|string} timeout */
 
+/** @typedef eN_selectMenuOptionData
+ * @property {string} emoji
+ * @property {string} label
+ * @property {string} description
+ * @property {string} value
+ * @property {string} isDefault */
+
+/** @typedef eN_sendOptions
+ * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if "reply" fails it will use "editReply" | "reply" is default
+ * @property {boolean} ephemeral
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions
+ * @property {boolean} deleteAfter */
+
 const config = require("./_dsT_config.json");
 
 // prettier-ignore
-const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } = require("discord.js");
+const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
 const _jsT = require("../jsTools/_jsT");
 
@@ -94,6 +107,52 @@ class EmbedNavigator {
 		// Add the StringSelectMenuBuilder component to the select menu action row
 		this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
 	}
+
+	/** @param {eN_selectMenuOptionData} data  */
+	addSelectMenuOption(data) {
+		// Error handling
+		if (!data.emoji && !data.label) throw new Error("You must provide either an emoji or label");
+
+		let idx_current = this.data.selectMenu.optionValues.length;
+		let idx_new = this.data.selectMenu.optionValues.length + 1;
+
+		// prettier-ignore
+		data = {
+			emoji: "", label: `page ${idx_new}`, description: "",
+			value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ...data
+		};
+
+		// Add the new option ID (value) to our selectMenuOptionValues array
+		this.data.selectMenu.optionValues.push(data.value);
+
+		// Create a new StringSelectMenuOption
+		let option = new StringSelectMenuOptionBuilder();
+
+		// Configure options
+		if (data.emoji) option.setEmoji(data.emoji);
+		if (data.label) option.setLabel(data.label);
+		if (data.description) option.setDescription(data.description);
+		if (data.value) option.setValue(data.value);
+		if (data.isDefault) option.setDefault(data.isDefault);
+	}
+
+	// prettier-ignore
+	async setSelectMenuEnabled(enabled) {
+		this.options.selectMenu = enabled;
+		await this.refresh(); return;
+	}
+
+	/** @param {eN_paginationType} type */
+	// prettier-ignore
+	async setPaginationType(type) {
+		this.options.paginationType = type;
+		await this.refresh(); return;
+	}
+
+	async refresh() {}
+
+	/** @param {eN_sendOptions} options  */
+	async send(options) {}
 }
 
 module.exports = EmbedNavigator;
