@@ -108,32 +108,42 @@ class EmbedNavigator {
 		this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
 	}
 
-	/** @param {eN_selectMenuOptionData} data  */
-	addSelectMenuOption(data) {
-		// Error handling
-		if (!data.emoji && !data.label) throw new Error("You must provide either an emoji or label");
+	/** @param {eN_selectMenuOptionData} options */
+	addSelectMenuOptions(...options) {
+		for (let _data of options) {
+			// Error handling
+			if (!data.emoji && !data.label) throw new Error("You must provide either an emoji or label");
 
-		let idx_current = this.data.selectMenu.optionValues.length;
-		let idx_new = this.data.selectMenu.optionValues.length + 1;
+			let idx_current = this.data.selectMenu.optionValues.length;
+			let idx_new = this.data.selectMenu.optionValues.length + 1;
 
-		// prettier-ignore
-		data = {
-			emoji: "", label: `page ${idx_new}`, description: "",
-			value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ...data
-		};
+			// prettier-ignore
+			data = {
+				emoji: "", label: `page ${idx_new}`, description: "",
+				value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ...data
+			};
 
-		// Add the new option ID (value) to our selectMenuOptionValues array
-		this.data.selectMenu.optionValues.push(data.value);
+			// Add the new option ID (value) to our selectMenuOptionValues array
+			this.data.selectMenu.optionValues.push(data.value);
 
-		// Create a new StringSelectMenuOption
-		let option = new StringSelectMenuOptionBuilder();
+			// Create a new StringSelectMenuOption
+			let option = new StringSelectMenuOptionBuilder();
 
-		// Configure options
-		if (data.emoji) option.setEmoji(data.emoji);
-		if (data.label) option.setLabel(data.label);
-		if (data.description) option.setDescription(data.description);
-		if (data.value) option.setValue(data.value);
-		if (data.isDefault) option.setDefault(data.isDefault);
+			// Configure options
+			if (data.emoji) option.setEmoji(data.emoji);
+			if (data.label) option.setLabel(data.label);
+			if (data.description) option.setDescription(data.description);
+			if (data.value) option.setValue(data.value);
+			if (data.isDefault) option.setDefault(data.isDefault);
+
+			// Add the new StringSelectMenuOption to the SelectMenu
+			this.data.components.selectMenu.addOptions(option);
+		}
+	}
+
+	/** @param {Number} idx */
+	removeSelectMenuOptions(...idx) {
+		for (let i of idx) this.data.components.selectMenu.spliceOptions(i, 1);
 	}
 
 	// prettier-ignore
@@ -149,10 +159,12 @@ class EmbedNavigator {
 		await this.refresh(); return;
 	}
 
-	async refresh() {}
-
 	/** @param {eN_sendOptions} options  */
-	async send(options) {}
+	async send(options) {
+		//
+	}
+
+	async refresh() {}
 }
 
 module.exports = EmbedNavigator;

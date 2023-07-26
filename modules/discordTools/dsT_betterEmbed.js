@@ -166,7 +166,7 @@ class BetterEmbed extends EmbedBuilder {
 	async send(options) {
 		// prettier-ignore
 		options = {
-			channel: null,
+			interaction: null, channel: null,
 			messageContent: "", components: [], allowedMentions: {},
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
 			...this.options, ...options
