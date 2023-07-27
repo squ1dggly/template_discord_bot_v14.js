@@ -167,8 +167,8 @@ class EmbedNavigator {
 	async send(options) {
 		/// Update the configuration
 		this.#_updatePage();
-		this.#_configurePagination();
 		this.#_updateMessageComponents();
+		this.#_configurePagination();
 
 		// Send the message
 		// prettier-ignore
@@ -183,6 +183,8 @@ class EmbedNavigator {
 		// Add reactions for pagination if enabled
 		// NOTE: this is not awaited since we want to be able to use the reactions while they're being added
 		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_addPaginationReactions();
+
+		/// Start collectors if needed
 		// Collect message reactions
 		if (this.data.pagination.reactions.length) this.#_collect_reactions();
 		// Collect message component interactions
@@ -207,13 +209,19 @@ class EmbedNavigator {
 
 		/// Update the configuration
 		this.#_updatePage();
-		this.#_configurePagination();
 		this.#_updateMessageComponents();
+		this.#_configurePagination();
 		this.#_refreshPagination();
 
 		/// Reset collection timers
 		if (this.data.collectors.message) this.data.collectors.message.resetTimer();
 		if (this.data.collectors.reaction) this.data.collectors.reaction.resetTimer();
+
+		/// Start collectors if needed
+		// Collect message reactions
+		if (this.data.pagination.reactions.length) this.#_collect_reactions();
+		// Collect message component interactions
+		if (this.data.messageComponents.length) this.#_collect_interactions();
 
 		// Edit & return the message
 		// prettier-ignore
