@@ -83,10 +83,10 @@ async function dynaSend(options) {
                 });
 
 			default:
-				logger.error("Failed to send", "invalid_sendMethod", `\`${options.sendMethod}\``);
+				logger.error("Failed to send message", "dynaSend.invalid_sendMethod", `method given: \`${options.sendMethod}\``);
 		}
 	} catch (err) {
-		logger.error("Failed to send embed", "BetterEmbed.send()", err);
+		logger.error("Failed to send message", "dynaSend()", err);
 		return null;
 	}
 

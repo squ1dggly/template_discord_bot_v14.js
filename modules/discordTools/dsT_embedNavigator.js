@@ -1,13 +1,16 @@
 /** @typedef {"short"|"shortJump"|"long"|"longJump"} eN_paginationType */
 
+/** @typedef eN_paginationOptions
+ * @property {eN_paginationType} type
+ * @property {boolean} useReactions
+ * @property {boolean} enableDynamic */
+
 /** @typedef eN_options
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
  * @property {EmbedBuilder|BetterEmbed} embeds can be an array/contain nested arrays
  * @property {boolean} selectMenu
- * @property {eN_paginationType} paginationType
- * @property {boolean} useReactionsForPagination
- * @property {boolean} dynamicPagination
+ * @property {eN_paginationOptions} pagination
  * @property {number|string} timeout */
 
 /** @typedef eN_selectMenuOptionData
@@ -28,6 +31,7 @@ const config = require("./_dsT_config.json");
 // prettier-ignore
 const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
+const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
 
 class EmbedNavigator {
@@ -55,8 +59,8 @@ class EmbedNavigator {
 		// prettier-ignore
 		this.options = {
 			interaction: null, channel: null, embeds: null,
-			selectMenu: false, paginationType: null,
-			useReactionsForPagination: false, dynamicPagination: false,
+			selectMenu: false,
+			pagination: { type: null, useReactions: false, enableDynamic: false },
 			timeout: config.timeouts.PAGINATION, ...options
 		};
 
@@ -75,7 +79,7 @@ class EmbedNavigator {
 			selectMenu: { optionValues: [] },
 
 			pagination: {
-				/** @type {{name:string, emoji:string}[]} */
+				/** @type {{name:string, id:string}[]} */
 				reactions: [],
 				required: false, requiresLong: false, canJump: false 
 			},
@@ -101,7 +105,7 @@ class EmbedNavigator {
 				}
 			},
 
-			messageComponents: []
+			message: null, messageComponents: []
 		};
 
 		// Add the StringSelectMenuBuilder component to the select menu action row
@@ -161,10 +165,51 @@ class EmbedNavigator {
 
 	/** @param {eN_sendOptions} options  */
 	async send(options) {
-		//
+		/// Update the configuration
+		this.#_updatePage();
+		this.#_configurePagination();
+		this.#_updateMessageComponents();
+
+		// Send the message
+		// prettier-ignore
+		this.data.message = await dynaSend({
+			interaction: this.options.interaction, channel: this.options.channel,
+			components: this.data.messageComponents, ...options
+		});
+
+		// Check if the send failed
+		if (!this.data.message) return null;
+
+		// Add reactions for pagination if enabled
+		// NOTE: this is not awaited since we want to be able to use the reactions while they're being added
+		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_addPaginationReactions();
+		// Collect message reactions
+		if (this.data.pagination.reactions.length) this.#_collect_reactions();
+		// Collect message component interactions
+		if (this.data.messageComponents.length) this.#_collect_interactions();
+
+		// Return the message
+		return this.data.message;
 	}
 
-	async refresh() {}
+	/** Refresh the message and its components */
+	async refresh() {
+		/// Error handling
+		if (!this.data.message) {
+			logger.error(`Failed to refresh EmbedNavigator`, `message not sent`);
+			return null;
+		}
+
+		if (!this.data.message.editable) {
+			logger.error(`Failed to refresh EmbedNavigator`, `message not editable`);
+			return null;
+		}
+
+		/// Update the configuration
+		this.#_updatePage();
+		this.#_configurePagination();
+		this.#_updateMessageComponents();
+	}
 }
 
 module.exports = EmbedNavigator;
