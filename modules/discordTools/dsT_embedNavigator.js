@@ -209,6 +209,19 @@ class EmbedNavigator {
 		this.#_updatePage();
 		this.#_configurePagination();
 		this.#_updateMessageComponents();
+		this.#_refreshPagination();
+
+		/// Reset collection timers
+		if (this.data.collectors.message) this.data.collectors.message.resetTimer();
+		if (this.data.collectors.reaction) this.data.collectors.reaction.resetTimer();
+
+		// Edit & return the message
+		// prettier-ignore
+		this.data.message = await this.data.message.edit({
+			embeds: [this.data.pages.current], components: this.data.messageComponents
+		});
+
+		return this.data.message;
 	}
 }
 
