@@ -45,15 +45,15 @@ logger.log("connecting to Discord...");
 client.login(TOKEN).then(async () => {
 	// await mongo.connect();
 
-	// Register slash commands to a specific server :: { local }
+	// Register slash commands to a specific server :: { LOCAL }
 	// await slashCommandManager.push(client, { ids: "your_server_id" });
 
-	// Register slash commands :: { global }
+	// Register slash commands :: { GLOBAL }
 	// await slashCommandManager.push(client, { global: true });
 
-	// Remove commands (does nothing if commands were registered globally) :: { local }
+	// Remove commands (does nothing if commands were registered globally) :: { LOCAL }
 	// await slashCommandManager.remove(client, { ids: "your_server_id" });
 
-	// Remove commands (does nothing if commands were registered locally) :: { global }
+	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
 	// await slashCommandManager.remove(client, { global: true });
 });

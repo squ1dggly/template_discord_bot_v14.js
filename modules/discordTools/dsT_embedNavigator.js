@@ -9,7 +9,7 @@
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
  * @property {EmbedBuilder|BetterEmbed} embeds can be an array/contain nested arrays
- * @property {boolean} selectMenu
+ * @property {boolean} selectMenuEnabled
  * @property {eN_paginationOptions} pagination
  * @property {number|string} timeout */
 
@@ -35,6 +35,98 @@ const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
 
 class EmbedNavigator {
+	#_updatePage() {
+		/// Clamp page index :: { CURRENT }
+		if (this.data.pages.idx.current < 0) this.data.pages.idx.current = 0;
+		if (this.data.pages.idx.current > this.options.embeds.length - 1)
+			this.data.pages.idx.current = this.options.embeds.length - 1;
+
+		/// Clamp page index :: { NESTED }
+		if (this.data.pages.idx.nested < 0) this.data.pages.idx.nested = 0;
+		if (this.data.pages.idx.nested > this.data.pages.nested_length - 1)
+			this.data.pages.idx.nested = this.data.pages.nested_length - 1;
+
+		let _page = this.options.embeds[this.data.pages.idx.current];
+
+		// Check if the current page is an array of embeds
+		// prettier-ignore
+		if (Array.isArray(_page) && _page.length)
+			this.data.pages.current = _page[this.data.pages.idx.nested];
+		else
+			this.data.pages = _page;
+
+		// Count how many nested pages there are currently
+		this.data.pages.nested_length = _page?.length || 0;
+
+		// Check if pagination is required
+		this.data.pagination.required = _page?.length >= 2;
+
+		// Check if long pagination could be used
+		this.data.pagination.requiresLong = _page?.length >= 4;
+
+		// Check if jumping could be used
+		this.data.pagination.canJump = _page?.length >= 4;
+	}
+
+	#_configureMessageComponents() {
+		this.data.messageComponents = [];
+
+		// Add the StringSelectMenu if enabled
+		// prettier-ignore
+		if (this.options.selectMenuEnabled)
+			this.data.messageComponents.push(this.data.actionRows.selectMenu);
+
+		// Add pagination if enabled (buttons)
+		if (this.data.pagination.required && !this.options.pagination.useReactions)
+			this.data.messageComponents.push(this.data.actionRows.pagination);
+	}
+
+	#_configurePagination() {
+		this.data.pagination.reactions = [];
+		let _buttonStringArray = [];
+
+		// prettier-ignore
+		if (this.data.pagination.required) switch (this.options.pagination.type) {
+			case "short": _buttonStringArray = ["back", "next"]; break;
+
+			case "shortJump": _buttonStringArray = this.options.pagination.enableDynamic
+				? this.data.pagination.canJump
+					? ["back", "jump", "next"]													// Default state :: { DYNAMIC }
+					: ["back", "next"]															// Short state :: { DYNAMIC }
+				: ["back", "jump", "next"];														// Default state
+				break;
+
+			case "long": _buttonStringArray = this.options.pagination.enableDynamic
+				? this.data.pagination.requiresLong
+					? ["to_first", "back", "next", "to_last"]									// Default state :: { DYNAMIC }
+					: ["back", "next"]															// Short state :: { DYNAMIC }
+				: ["to_first", "back", "next", "to_last"];										// Default state
+				break;
+
+			case "longJump": _buttonStringArray = this.options.pagination.enableDynamic
+				? this.data.pagination.requiresLong
+					? this.data.canJumpToPage
+						? ["to_first", "back", "jump", "next", "to_last"]						// Default state :: { DYNAMIC }
+						: ["to_first", "back", "next", "to_last"]								// Short state :: { DYNAMIC }
+					: ["back", "next"]															// Short state :: { DYNAMIC }
+				: ["to_first", "back", "jump", "next", "to_last"];								// Default state
+				break;
+		}
+
+		// Convert the button string array into button/emoji data
+		// prettier-ignore
+		if (this.options.pagination.useReactions)
+			// Using reactions
+			this.data.pagination.reactions = _buttonStringArray.map(type =>
+				_jsT.getProp(config.navigator.buttons, `${type}.emoji.ID`)
+			);
+		else
+			// Not using reactions
+			this.data.actionRows.pagination.setComponents(
+				..._buttonStringArray.map(type => _jsT.getProp(this.data.components.pagination, type))
+			);
+	}
+
 	#_createButton(label, customID) {
 		let _button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: customID });
 
@@ -59,7 +151,7 @@ class EmbedNavigator {
 		// prettier-ignore
 		this.options = {
 			interaction: null, channel: null, embeds: null,
-			selectMenu: false,
+			selectMenuEnabled: false,
 			pagination: { type: null, useReactions: false, enableDynamic: false },
 			timeout: config.timeouts.PAGINATION, ...options
 		};
@@ -97,11 +189,11 @@ class EmbedNavigator {
 					.setPlaceholder("choose a page to view..."),
 				
 				pagination: {
-					toFirst: this.#_createButton(config.navigator.buttons.to_first, "btn_toFirst"),
+					to_first: this.#_createButton(config.navigator.buttons.to_first, "btn_toFirst"),
 					back: this.#_createButton(config.navigator.buttons.back, "btn_back"),
 					jump: this.#_createButton(config.navigator.buttons.jump, "btn_jump"),
 					next: this.#_createButton(config.navigator.buttons.next, "btn_next"),
-					toLast: this.#_createButton(config.navigator.buttons.to_last, "btn_toLast")
+					to_last: this.#_createButton(config.navigator.buttons.to_last, "btn_toLast")
 				}
 			},
 
@@ -152,7 +244,7 @@ class EmbedNavigator {
 
 	// prettier-ignore
 	async setSelectMenuEnabled(enabled) {
-		this.options.selectMenu = enabled;
+		this.options.selectMenuEnabled = enabled;
 		await this.refresh(); return;
 	}
 
@@ -167,7 +259,7 @@ class EmbedNavigator {
 	async send(options) {
 		/// Update the configuration
 		this.#_updatePage();
-		this.#_updateMessageComponents();
+		this.#_configureMessageComponents();
 		this.#_configurePagination();
 
 		// Send the message
@@ -209,9 +301,9 @@ class EmbedNavigator {
 
 		/// Update the configuration
 		this.#_updatePage();
-		this.#_updateMessageComponents();
+		this.#_configureMessageComponents();
 		this.#_configurePagination();
-		this.#_refreshPagination();
+		this.#_refreshPaginationReactions();
 
 		/// Reset collection timers
 		if (this.data.collectors.message) this.data.collectors.message.resetTimer();
