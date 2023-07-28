@@ -29,12 +29,13 @@
 const config = require("./_dsT_config.json");
 
 // prettier-ignore
-const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require("discord.js");
+const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
 
 class EmbedNavigator {
+	/// -- Configuration --
 	#_updatePage() {
 		/// Clamp page index :: { CURRENT }
 		if (this.data.pages.idx.current < 0) this.data.pages.idx.current = 0;
@@ -118,7 +119,7 @@ class EmbedNavigator {
 		if (this.options.pagination.useReactions)
 			// Using reactions
 			this.data.pagination.reactions = _buttonStringArray.map(type =>
-				_jsT.getProp(config.navigator.buttons, `${type}.emoji.ID`)
+				_jsT.getProp(config.navigator.buttons, `${type}.emoji`)
 			);
 		else
 			// Not using reactions
@@ -127,6 +128,42 @@ class EmbedNavigator {
 			);
 	}
 
+	/// -- Components --
+	async #_paginationReactions_add() {
+		if (!this.options.pagination.useReactions) return;
+		if (!this.data.message) return;
+
+		// Get thhe name of each pagination reaction
+		// this will be used as a filter when getting the current reactions from the message
+		let _allPaginationReactionNames = Object.values(config.navigator.buttons).map(btnData => btnData.emoji.NAME);
+
+		// Get each reaction currently on the message
+		let _messageReactions = this.data.message.reactions.cache.filter(reaction =>
+			_allPaginationReactionNames.includes(reaction.emoji.name)
+		);
+
+		// Update pagination reactions if necessary
+		if (_messageReactions.size !== this.data.pagination.reactions.length) {
+			// Remove pagination reactions
+			await this.#_paginationReactions_remove();
+
+			try {
+				// Add pagination reactions
+				// prettier-ignore
+				for (let _reaction of this.data.pagination.reactions)
+					await this.data.message.react(_reaction.ID);
+			} catch {}
+		}
+		// Remove pagination reactions
+		else await this.#_paginationReactions_remove();
+	}
+
+	async #_paginationReactions_remove() {
+		// prettier-ignore
+		try { await this.data.message.reactions.removeAll();} catch {}
+	}
+
+	/// -- Constructor --
 	#_createButton(label, customID) {
 		let _button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: customID });
 
@@ -171,7 +208,7 @@ class EmbedNavigator {
 			selectMenu: { optionValues: [] },
 
 			pagination: {
-				/** @type {{name:string, id:string}[]} */
+				/** @type {{NAME:string, ID:string}[]} */
 				reactions: [],
 				required: false, requiresLong: false, canJump: false 
 			},
@@ -197,7 +234,9 @@ class EmbedNavigator {
 				}
 			},
 
-			message: null, messageComponents: []
+			/** @type {Message} */
+			message: null,
+			messageComponents: []
 		};
 
 		// Add the StringSelectMenuBuilder component to the select menu action row
