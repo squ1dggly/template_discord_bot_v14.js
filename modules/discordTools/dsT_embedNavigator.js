@@ -192,6 +192,7 @@ class EmbedNavigator {
 		// On collection
 		collector.on("collect", async interaction => {
 			// Ignore non-button/StringSelectMenu interactions
+			if (![ComponentType.Button, ComponentType.StringSelect].includes(interaction.componentType)) return;
 
 			// Filter out users that aren't allowed access
 			if (filter_userIDs.length && !filter_userIDs.includes(interaction.user.id)) return;
@@ -199,6 +200,47 @@ class EmbedNavigator {
 			// prettier-ignore
 			// Defer the interaction & reset the collector's timer
 			{ await interaction.deferReply(); collector.resetTimer }
+
+			// prettier-ignore
+			switch (interaction.customId) {
+				case "ssm_pageSelect":
+					// Find the page index for the option the user selected
+					this.data.pages.idx.current = this.data.selectMenu.optionValues.findIndex(
+						val => val === interaction.values[0]
+					);
+
+					// Reset nested index
+					this.data.pages.idx.nested = 0;
+
+					/// Change the default StringSelectMenu option to the option the user selected
+					this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
+					this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
+					
+					// Update the page
+					this.#_updatePage(); return await this.refresh();
+
+				case "btn_to_first":
+					this.data.pages.idx.nested = 0;
+					this.#_updatePage(); return await this.refresh();
+
+				case "btn_back":
+					this.data.pages.idx.nested--;
+					this.#_updatePage(); return await this.refresh();
+
+				case "btn_jump":
+					this.data.pages.idx.nested = await this.#_askPageNumber();
+					this.#_updatePage(); return await this.refresh();
+
+				case "btn_next":
+					this.data.pages.idx.nested++;
+					this.#_updatePage(); return await this.refresh();
+
+				case "btn_to_last":
+					this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
+					this.#_updatePage(); return await this.refresh();
+
+				default: return;
+			}
 		});
 	}
 
@@ -270,11 +312,11 @@ class EmbedNavigator {
 					.setPlaceholder("choose a page to view..."),
 				
 				pagination: {
-					to_first: this.#_createButton(config.navigator.buttons.to_first, "btn_toFirst"),
+					to_first: this.#_createButton(config.navigator.buttons.to_first, "btn_to_first"),
 					back: this.#_createButton(config.navigator.buttons.back, "btn_back"),
 					jump: this.#_createButton(config.navigator.buttons.jump, "btn_jump"),
 					next: this.#_createButton(config.navigator.buttons.next, "btn_next"),
-					to_last: this.#_createButton(config.navigator.buttons.to_last, "btn_toLast")
+					to_last: this.#_createButton(config.navigator.buttons.to_last, "btn_to_last")
 				}
 			},
 
