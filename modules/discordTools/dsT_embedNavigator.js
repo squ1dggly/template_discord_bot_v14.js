@@ -30,7 +30,11 @@
 const config = require("./_dsT_config.json");
 
 // prettier-ignore
-const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message, InteractionCollector, ReactionCollector, GuildMember, User, ComponentType } = require("discord.js");
+const {
+    CommandInteraction, TextChannel, GuildMember, User,
+    Message, InteractionCollector, ReactionCollector, ComponentType,
+    EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle
+} = require("discord.js");
 const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
@@ -418,7 +422,7 @@ class EmbedNavigator {
 	/** @param {eN_options} options  */
 	constructor(options) {
 		/// Error handling
-		if (!options?.interaction && !options?.channel) throw new Error("You must provide either an interaction or channel");
+		if (!options?.interaction && !options?.channel) throw new Error("You must provide either an Interaction or a TextChannel");
 		if (options?.pagination?.useReactions)
 			// prettier-ignore
 			for (let [key, val] of Object.entries(config.navigator.buttons)) {

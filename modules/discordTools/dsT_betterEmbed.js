@@ -29,7 +29,7 @@
 
 const config = require("./_dsT_config.json");
 
-const { CommandInteraction, User, GuildMember, TextChannel, ActionRowBuilder, EmbedBuilder } = require("discord.js");
+const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const _jsT = require("../jsTools/_jsT");
 
 class BetterEmbed extends EmbedBuilder {
