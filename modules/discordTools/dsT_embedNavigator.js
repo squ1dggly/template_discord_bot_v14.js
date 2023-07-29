@@ -31,10 +31,17 @@ const config = require("./_dsT_config.json");
 
 // prettier-ignore
 const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message, InteractionCollector, ReactionCollector, GuildMember, User, ComponentType } = require("discord.js");
+const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
+
 const _jsT = require("../jsTools/_jsT");
 const logger = require("../logger");
+
+/// Global Variables
+// Get thhe name of each pagination reaction
+// this will be used as a filter when getting the current reactions from the message
+const allPaginationReactionNames = Object.values(config.navigator.buttons).map(btnData => btnData.emoji.NAME);
 
 class EmbedNavigator {
 	/// -- Configuration --
@@ -141,13 +148,9 @@ class EmbedNavigator {
 		if (!this.options.pagination.useReactions) return;
 		if (!this.data.message) return;
 
-		// Get thhe name of each pagination reaction
-		// this will be used as a filter when getting the current reactions from the message
-		let _allPaginationReactionNames = Object.values(config.navigator.buttons).map(btnData => btnData.emoji.NAME);
-
 		// Get each reaction currently on the message
 		let _messageReactions = this.data.message.reactions.cache.filter(reaction =>
-			_allPaginationReactionNames.includes(reaction.emoji.name)
+			allPaginationReactionNames.includes(reaction.emoji.name)
 		);
 
 		// Update pagination reactions if necessary
@@ -175,7 +178,10 @@ class EmbedNavigator {
 	async #_askPageNumber(user) {
 		/// Error handling
 		if (!this.data.message) return null;
-		if (!user) return logger.error("Failed to await user's choice", "EmbedNavigator_askPageNumber", "user not defined");
+		if (!user) {
+			logger.error("Failed to await user's choice", "EmbedNavigator_askPageNumber", "user not defined");
+			return null;
+		}
 
 		// Variables
 		let _message = null;
@@ -191,11 +197,14 @@ class EmbedNavigator {
 		if (!_message) return null;
 
 		/// Create a message collector to await the user's next message
-		let _timeout = _jsT.parseTime(config.timeouts.CONFIRMATION);
+		let _timeouts = {
+			confirm: _jsT.parseTime(config.timeouts.CONFIRMATION),
+			error: _jsT.parseTime(config.timeouts.ERROR_MESSAGE)
+		};
 		let filter = msg => msg.author.id === user.id;
 
 		return await _message.channel
-			.awaitMessages({ filter, time: _timeout, max: 1 })
+			.awaitMessages({ filter, time: _timeouts.confirm, max: 1 })
 			.then(async collected => {
 				/// Variables
 				let _message_user = collected.first() || null;
@@ -205,11 +214,26 @@ class EmbedNavigator {
 
 				// prettier-ignore
 				// Delete the message we sent to ask the user
-				try { _message.delete(); } catch { }
+				try { _message.delete(); } catch {}
 
 				// prettier-ignore
 				// Delete the user's response if it was a number
-				if (isNaN(_number)) try { _message_user.delete(); } catch { }
+				if (!isNaN(_number)) try { _message_user.delete(); } catch { }
+
+				// Check if the response was within our page length
+				if (!_number || _number > this.data.pages.nested_length) {
+					/// Send a self destructing error message
+					let _message_error = await this.data.message.reply({
+						content: `${user} \`${_number}\` is not a valid page number`
+					});
+
+					deleteMesssageAfter(_message_error, _timeouts.error);
+
+					return null;
+				}
+
+				// Return the page number the user requested
+				return _number - 1;
 			})
 			.catch(async () => {
 				// prettier-ignore
@@ -225,12 +249,76 @@ class EmbedNavigator {
 			this.data.collectors.reaction.resetTimer();
 			return;
 		}
+
+		/// Variables
+		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
+		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
+
+		/// Create the reaction collector
+		const collector = this.data.message.createReactionCollector(
+			this.options.timeout ? { time: this.options.timeout, dispose: true } : { dispose: true }
+		);
+
+		this.data.collectors.reaction = collector;
+
+		return new Promise(resolve => {
+			// Collector :: { COLLECT }
+			collector.on("collect", async (_reaction, _user) => {
+				// Remove the reaction unless it's from the bot itself
+				if (_user.id !== this.data.interaction.guild.members.me.id) _reaction.users.remove(_user.id);
+
+				// Filter out users that aren't allowed access
+				if (filter_userIDs.length && !filter_userIDs.includes(_user.id)) return;
+
+				// Filter out non-relevant reactions
+				if (!allPaginationReactionNames.includes(_reaction.emoji.name)) return;
+
+				try {
+					// prettier-ignore
+					switch (_reaction.emoji.name) {	
+						case config.navigator.buttons.to_first.emoji.NAME:
+							this.data.pages.idx.nested = 0;
+							this.#_updatePage(); return await this.refresh();
+	
+						case config.navigator.buttons.back.emoji.NAME:
+							this.data.pages.idx.nested--;
+							this.#_updatePage(); return await this.refresh();
+	
+						case config.navigator.buttons.jump.emoji.NAME:
+							return await this.#_askPageNumber(_reaction.user).then(async idx => {
+								if (isNaN(idx)) return;
+
+								this.data.pages.idx.nested = _jumpIdx;
+								this.#_updatePage(); return await this.refresh();
+							});
+	
+						case config.navigator.buttons.next.emoji.NAME:
+							this.data.pages.idx.nested++;
+							this.#_updatePage(); return await this.refresh();
+	
+						case config.navigator.buttons.to_last.emoji.NAME:
+							this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
+							this.#_updatePage(); return await this.refresh();
+	
+						default: return;
+					}
+				} catch {}
+			});
+
+			// Collector :: { END }
+			collector.on("end", async () => {
+				this.data.collectors.reaction = null;
+				await this.#_paginationReactions_remove();
+
+				return resolve(true);
+			});
+		});
 	}
 
 	async #_collect_components() {
 		// Error handling
-		if (this.data.collectors.interaction) {
-			this.data.collectors.interaction.resetTimer();
+		if (this.data.collectors.component) {
+			this.data.collectors.component.resetTimer();
 			return;
 		}
 
@@ -243,7 +331,7 @@ class EmbedNavigator {
 			this.options.timeout ? { time: this.options.timeout } : {}
 		);
 
-		this.data.collectors.interaction = collector;
+		this.data.collectors.component = collector;
 
 		return new Promise(resolve => {
 			// Collector :: { COLLECT }
@@ -308,7 +396,7 @@ class EmbedNavigator {
 
 			// Collector :: { END }
 			collector.on("end", async () => {
-				this.data.collectors.interaction = null;
+				this.data.collectors.component = null;
 				await this.#_messageComponents_remove();
 
 				return resolve(true);
@@ -330,7 +418,18 @@ class EmbedNavigator {
 	/** @param {eN_options} options  */
 	constructor(options) {
 		/// Error handling
-		if (!options.interaction && !options.channel) throw new Error("You must provide either an interaction or channel");
+		if (!options?.interaction && !options?.channel) throw new Error("You must provide either an interaction or channel");
+		if (options?.pagination?.useReactions)
+			// prettier-ignore
+			for (let [key, val] of Object.entries(config.navigator.buttons)) {
+				if (!val.emoji.ID) throw new Error(
+					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in '_dsT_config.json'`
+				);
+			
+				if (!val.emoji.NAME) throw new Error(
+					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in '_dsT_config.json'`
+				);
+			}
 
 		// Embeds
 		if (!options.embeds) throw new Error("You must provide at least 1 embed");
@@ -368,7 +467,7 @@ class EmbedNavigator {
 
 			collectors: {
 				/** @type {InteractionCollector} */
-				interaction: null,
+				component: null,
 				/** @type {ReactionCollector} */
 				reaction: null
 			},
@@ -503,7 +602,7 @@ class EmbedNavigator {
 		this.#_paginationReactions_add();
 
 		/// Reset collection timers
-		if (this.data.collectors.interaction) this.data.collectors.interaction.resetTimer();
+		if (this.data.collectors.component) this.data.collectors.component.resetTimer();
 		if (this.data.collectors.reaction) this.data.collectors.reaction.resetTimer();
 
 		/// Start collectors if needed
