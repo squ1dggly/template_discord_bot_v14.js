@@ -163,6 +163,8 @@ class EmbedNavigator {
 		try { await this.data.message.reactions.removeAll();} catch {}
 	}
 
+	/// -- Collectors --
+
 	/// -- Constructor --
 	#_createButton(label, customID) {
 		let _button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: customID });
@@ -313,7 +315,7 @@ class EmbedNavigator {
 
 		// Add reactions for pagination if enabled
 		// NOTE: this is not awaited since we want to be able to use the reactions while they're being added
-		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_addPaginationReactions();
+		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_paginationReactions_add();
 
 		/// Start collectors if needed
 		// Collect message reactions
@@ -342,7 +344,7 @@ class EmbedNavigator {
 		this.#_updatePage();
 		this.#_configureMessageComponents();
 		this.#_configurePagination();
-		this.#_refreshPaginationReactions();
+		this.#_paginationReactions_add();
 
 		/// Reset collection timers
 		if (this.data.collectors.message) this.data.collectors.message.resetTimer();
