@@ -130,6 +130,12 @@ class EmbedNavigator {
 	}
 
 	/// -- Components --
+	async #_messageComponents_remove() {
+		if (!this.data.message) return;
+		// prettier-ignore
+		try { return this.data.message.edit({ components: [] }); } catch {}
+	}
+
 	async #_paginationReactions_add() {
 		if (!this.options.pagination.useReactions) return;
 		if (!this.data.message) return;
@@ -181,66 +187,83 @@ class EmbedNavigator {
 		}
 
 		/// Variables
+		let promise_resolve = null;
+		new Promise(resolve => (promise_resolve = resolve));
+
 		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
 		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
 
-		// Create the collector
+		/// Create the component collector
 		const collector = this.data.message.createMessageComponentCollector(
 			this.options.timeout ? { time: this.options.timeout } : {}
 		);
 
-		// On collection
-		collector.on("collect", async interaction => {
-			// Ignore non-button/StringSelectMenu interactions
-			if (![ComponentType.Button, ComponentType.StringSelect].includes(interaction.componentType)) return;
+		this.data.collectors.interaction = collector;
 
-			// Filter out users that aren't allowed access
-			if (filter_userIDs.length && !filter_userIDs.includes(interaction.user.id)) return;
+		return new Promise(resolve => {
+			// Collector :: { COLLECT }
+			collector.on("collect", async interaction => {
+				// Ignore non-button/StringSelectMenu interactions
+				if (![ComponentType.Button, ComponentType.StringSelect].includes(interaction.componentType)) return;
 
-			// prettier-ignore
-			// Defer the interaction & reset the collector's timer
-			{ await interaction.deferReply(); collector.resetTimer }
+				// Filter out users that aren't allowed access
+				if (filter_userIDs.length && !filter_userIDs.includes(interaction.user.id)) return;
 
-			// prettier-ignore
-			switch (interaction.customId) {
-				case "ssm_pageSelect":
-					// Find the page index for the option the user selected
-					this.data.pages.idx.current = this.data.selectMenu.optionValues.findIndex(
-						val => val === interaction.values[0]
-					);
+				// prettier-ignore
+				// Defer the interaction & reset the collector's timer
+				{ await interaction.deferReply(); collector.resetTimer }
 
-					// Reset nested index
-					this.data.pages.idx.nested = 0;
+				try {
+					// prettier-ignore
+					switch (interaction.customId) {
+					case "ssm_pageSelect":
+						// Find the page index for the option the user selected
+						this.data.pages.idx.current = this.data.selectMenu.optionValues.findIndex(
+							val => val === interaction.values[0]
+						);
+	
+						// Reset nested index
+						this.data.pages.idx.nested = 0;
+	
+						/// Change the default StringSelectMenu option to the option the user selected
+						this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
+						this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
+						
+						// Update the page
+						this.#_updatePage(); return await this.refresh();
+	
+					case "btn_to_first":
+						this.data.pages.idx.nested = 0;
+						this.#_updatePage(); return await this.refresh();
+	
+					case "btn_back":
+						this.data.pages.idx.nested--;
+						this.#_updatePage(); return await this.refresh();
+	
+					case "btn_jump":
+						this.data.pages.idx.nested = await this.#_askPageNumber();
+						this.#_updatePage(); return await this.refresh();
+	
+					case "btn_next":
+						this.data.pages.idx.nested++;
+						this.#_updatePage(); return await this.refresh();
+	
+					case "btn_to_last":
+						this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
+						this.#_updatePage(); return await this.refresh();
+	
+					default: return;
+				}
+				} catch {}
+			});
 
-					/// Change the default StringSelectMenu option to the option the user selected
-					this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
-					this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
-					
-					// Update the page
-					this.#_updatePage(); return await this.refresh();
+			// Collector :: { END }
+			collector.on("end", async () => {
+				this.data.collectors.interaction = null;
+				await this.#_messageComponents_remove();
 
-				case "btn_to_first":
-					this.data.pages.idx.nested = 0;
-					this.#_updatePage(); return await this.refresh();
-
-				case "btn_back":
-					this.data.pages.idx.nested--;
-					this.#_updatePage(); return await this.refresh();
-
-				case "btn_jump":
-					this.data.pages.idx.nested = await this.#_askPageNumber();
-					this.#_updatePage(); return await this.refresh();
-
-				case "btn_next":
-					this.data.pages.idx.nested++;
-					this.#_updatePage(); return await this.refresh();
-
-				case "btn_to_last":
-					this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
-					this.#_updatePage(); return await this.refresh();
-
-				default: return;
-			}
+				return resolve(true);
+			});
 		});
 	}
 
