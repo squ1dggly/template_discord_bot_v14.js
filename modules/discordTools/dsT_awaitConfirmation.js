@@ -35,8 +35,8 @@ async function awaitConfirmation(options) {
 	/// Error Handeling
 	if (!options.interaction) throw new Error("CommandInteraction not provided");
 
-	/// Create the confirmation embed
 	// prettier-ignore
+	/// Create the confirmation embed
 	if (options.interaction) options.title.text = options.title.text
 		.replace(/\$USER/g, options.interaction?.user)
 		.replace(/\$USERNAME/g, options.interaction?.member?.displayName || options.interaction?.user?.username);
@@ -49,8 +49,8 @@ async function awaitConfirmation(options) {
 		footer: { text: options.footer }
 	});
 
-	// Set the embed's author name or title
 	// prettier-ignore
+	// Set the embed's author name or title
 	if (options.title.useAuthor)
 		embed.data.author.name = options.title.text
 	else
@@ -83,8 +83,8 @@ async function awaitConfirmation(options) {
 					return resolve(false);
 			})
 			.catch(async () => {
-				// Delete the confirmation embed
 				// prettier-ignore
+				// Delete the confirmation embed
 				try { await message.delete() } catch { }
 				return resolve(false);
 			});

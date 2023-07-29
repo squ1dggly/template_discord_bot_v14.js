@@ -8,10 +8,11 @@
 /** @typedef eN_options
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
+ * @property {GuildMember|User|Array<GuildMember|User>} users extra users that are allowed to use the navigator
  * @property {EmbedBuilder|BetterEmbed} embeds can be an array/contain nested arrays
  * @property {boolean} selectMenuEnabled
  * @property {eN_paginationOptions} pagination
- * @property {number|string} timeout */
+ * @property {number|string|null} timeout set to `null` to never timeout */
 
 /** @typedef eN_selectMenuOptionData
  * @property {string} emoji
@@ -21,7 +22,7 @@
  * @property {string} isDefault */
 
 /** @typedef eN_sendOptions
- * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if "reply" fails it will use "editReply" | "reply" is default
+ * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
  * @property {boolean} ephemeral
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {boolean} deleteAfter */
@@ -29,7 +30,7 @@
 const config = require("./_dsT_config.json");
 
 // prettier-ignore
-const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message } = require("discord.js");
+const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, Message, InteractionCollector, ReactionCollector, GuildMember, User, ComponentType } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
@@ -49,8 +50,8 @@ class EmbedNavigator {
 
 		let _page = this.options.embeds[this.data.pages.idx.current];
 
-		// Check if the current page is an array of embeds
 		// prettier-ignore
+		// Check if the current page is an array of embeds
 		if (Array.isArray(_page) && _page.length)
 			this.data.pages.current = _page[this.data.pages.idx.nested];
 		else
@@ -72,8 +73,8 @@ class EmbedNavigator {
 	#_configureMessageComponents() {
 		this.data.messageComponents = [];
 
-		// Add the StringSelectMenu if enabled
 		// prettier-ignore
+		// Add the StringSelectMenu if enabled
 		if (this.options.selectMenuEnabled)
 			this.data.messageComponents.push(this.data.actionRows.selectMenu);
 
@@ -114,8 +115,8 @@ class EmbedNavigator {
 				break;
 		}
 
-		// Convert the button string array into button/emoji data
 		// prettier-ignore
+		// Convert the button string array into button/emoji data
 		if (this.options.pagination.useReactions)
 			// Using reactions
 			this.data.pagination.reactions = _buttonStringArray.map(type =>
@@ -148,8 +149,8 @@ class EmbedNavigator {
 			await this.#_paginationReactions_remove();
 
 			try {
-				// Add pagination reactions
 				// prettier-ignore
+				// Add pagination reactions
 				for (let _reaction of this.data.pagination.reactions)
 					await this.data.message.react(_reaction.ID);
 			} catch {}
@@ -164,6 +165,42 @@ class EmbedNavigator {
 	}
 
 	/// -- Collectors --
+	async #_collect_reactions() {
+		// Error handling
+		if (this.data.collectors.reaction) {
+			this.data.collectors.reaction.resetTimer();
+			return;
+		}
+	}
+
+	#_collect_components() {
+		// Error handling
+		if (this.data.collectors.interaction) {
+			this.data.collectors.interaction.resetTimer();
+			return;
+		}
+
+		/// Variables
+		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
+		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
+
+		// Create the collector
+		const collector = this.data.message.createMessageComponentCollector(
+			this.options.timeout ? { time: this.options.timeout } : {}
+		);
+
+		// On collection
+		collector.on("collect", async interaction => {
+			// Ignore non-button/StringSelectMenu interactions
+
+			// Filter out users that aren't allowed access
+			if (filter_userIDs.length && !filter_userIDs.includes(interaction.user.id)) return;
+
+			// prettier-ignore
+			// Defer the interaction & reset the collector's timer
+			{ await interaction.deferReply(); collector.resetTimer }
+		});
+	}
 
 	/// -- Constructor --
 	#_createButton(label, customID) {
@@ -179,7 +216,6 @@ class EmbedNavigator {
 	/** @param {eN_options} options  */
 	constructor(options) {
 		/// Error handling
-		// Send method
 		if (!options.interaction && !options.channel) throw new Error("You must provide either an interaction or channel");
 
 		// Embeds
@@ -189,12 +225,13 @@ class EmbedNavigator {
 		/// Parse options
 		// prettier-ignore
 		this.options = {
-			interaction: null, channel: null, embeds: null,
+			interaction: null, channel: null, users: null, embeds: null,
 			selectMenuEnabled: false,
 			pagination: { type: null, useReactions: false, enableDynamic: false },
 			timeout: config.timeouts.PAGINATION, ...options
 		};
 
+		if (!Array.isArray(this.options.users)) this.options.users = [this.options.users];
 		if (!Array.isArray(this.data.embeds)) this.options.embeds = [this.data.embeds];
 		options.timeout = _jsT.parseTime(options.timeout);
 
@@ -215,7 +252,12 @@ class EmbedNavigator {
 				required: false, requiresLong: false, canJump: false 
 			},
 
-			collectors: { message: null, reaction: null },
+			collectors: {
+				/** @type {InteractionCollector} */
+				interaction: null,
+				/** @type {ReactionCollector} */
+				reaction: null
+			},
 
 			actionRows: {
 				selectMenu: new ActionRowBuilder(),
@@ -303,8 +345,8 @@ class EmbedNavigator {
 		this.#_configureMessageComponents();
 		this.#_configurePagination();
 
-		// Send the message
 		// prettier-ignore
+		// Send the message
 		this.data.message = await dynaSend({
 			interaction: this.options.interaction, channel: this.options.channel,
 			components: this.data.messageComponents, ...options
@@ -321,7 +363,7 @@ class EmbedNavigator {
 		// Collect message reactions
 		if (this.data.pagination.reactions.length) this.#_collect_reactions();
 		// Collect message component interactions
-		if (this.data.messageComponents.length) this.#_collect_interactions();
+		if (this.data.messageComponents.length) this.#_collect_components();
 
 		// Return the message
 		return this.data.message;
@@ -347,17 +389,17 @@ class EmbedNavigator {
 		this.#_paginationReactions_add();
 
 		/// Reset collection timers
-		if (this.data.collectors.message) this.data.collectors.message.resetTimer();
+		if (this.data.collectors.interaction) this.data.collectors.interaction.resetTimer();
 		if (this.data.collectors.reaction) this.data.collectors.reaction.resetTimer();
 
 		/// Start collectors if needed
 		// Collect message reactions
 		if (this.data.pagination.reactions.length) this.#_collect_reactions();
 		// Collect message component interactions
-		if (this.data.messageComponents.length) this.#_collect_interactions();
+		if (this.data.messageComponents.length) this.#_collect_components();
 
-		// Edit & return the message
 		// prettier-ignore
+		// Edit & return the message
 		this.data.message = await this.data.message.edit({
 			embeds: [this.data.pages.current], components: this.data.messageComponents
 		});

@@ -1,10 +1,10 @@
 const _nT = require("./jsT_number");
 
+// prettier-ignore
 /** @typedef parse_options
  * @property {"ms"|"s"} type return "s" (seconds) or "ms" (milliseconds)
  * @property {boolean} fromNow add Date.now() to the result */
 
-// prettier-ignore
 /** Parse a string into either milliseconds or seconds
  * @param {string} str string to parse
  * @param {parse_options} options

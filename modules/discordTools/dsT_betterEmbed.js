@@ -21,7 +21,7 @@
  * @property {string} thumbnailURL
  * @property {string} imageURL
  * @property {string} color
- * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if "reply" fails it will use "editReply" | "reply" is default
+ * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {boolean} ephemeral
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
@@ -71,20 +71,20 @@ class BetterEmbed extends EmbedBuilder {
 
 		// Title
 		if (_options.title.text) this.setTitle(_options.title.text);
-		// Title URL
 		// prettier-ignore
+		// Title URL
 		if (_options.title.linkURL)
 			try { this.setURL(_options.title.linkURL); }
 			catch { logger.error("Could not configure embed", "invalid_linkURL", `\`${_options.title.linkURL}\``); }
 
-		// Image URL
 		// prettier-ignore
+		// Image URL
 		if (_options.imageURL)
 			try { this.setImage(_options.imageURL); }
 			catch { logger.error("Could not configure embed", "invalid_imageURL", `\`${_options.imageURL}\``); }
 
-		// Image thumbnail URL
 		// prettier-ignore
+		// Image thumbnail URL
 		if (_options.thumbnailURL)
 			try { this.setThumbnail(_options.thumbnailURL); }
 			catch { logger.error("Could not configure embed", "invalid_thumbnailURL", `\`${_options.thumbnailURL}\``); }
@@ -96,8 +96,8 @@ class BetterEmbed extends EmbedBuilder {
 		if (_options.footer.text) this.#_setFooter(_options.footer.text, "text");
 		if (_options.footer.iconURL) this.#_setFooter(_options.footer.iconURL, "iconURL");
 
-		// Color
 		// prettier-ignore
+		// Color
 		if (_options.color.length)
 			try { this.setColor(_options.color.length > 1 ? _jsT.choice(_options.color) : _options.color[0]); }
 			catch { logger.error("Could not configure embed", "invalid_color", `\`${_options.color}\``); }

@@ -40,7 +40,6 @@ module.exports = {
 
 		// Register slash commands (globally)
 		if (options.global) {
-			// prettier-ignore
 			logger.log(`registering slash commands globally...`);
 
 			return await rest
@@ -85,7 +84,6 @@ module.exports = {
 
 		// Remove slash commands (globally)
 		if (options.global) {
-			// prettier-ignore
 			logger.log(`removing slash commands globally...`);
 
 			return await rest
