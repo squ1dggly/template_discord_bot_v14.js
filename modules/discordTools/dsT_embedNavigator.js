@@ -34,6 +34,7 @@ const { CommandInteraction, TextChannel, EmbedBuilder, ActionRowBuilder, ButtonB
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
+const logger = require("../logger");
 
 class EmbedNavigator {
 	/// -- Configuration --
@@ -170,6 +171,53 @@ class EmbedNavigator {
 		try { await this.data.message.reactions.removeAll();} catch {}
 	}
 
+	/// -- Pagination --
+	async #_askPageNumber(user) {
+		/// Error handling
+		if (!this.data.message) return null;
+		if (!user) return logger.error("Failed to await user's choice", "EmbedNavigator_askPageNumber", "user not defined");
+
+		// Variables
+		let _message = null;
+
+		try {
+			// Send a message to the channel asking the user to respond with a number
+			_message = await this.data.message.reply({
+				content: `${user} say the number you want to jump to`
+			});
+		} catch { return null; } // prettier-ignore
+
+		// + Error handling
+		if (!_message) return null;
+
+		/// Create a message collector to await the user's next message
+		let _timeout = _jsT.parseTime(config.timeouts.CONFIRMATION);
+		let filter = msg => msg.author.id === user.id;
+
+		return await _message.channel
+			.awaitMessages({ filter, time: _timeout, max: 1 })
+			.then(async collected => {
+				/// Variables
+				let _message_user = collected.first() || null;
+				if (!_message_user) return null;
+
+				let _number = +_message_user.content;
+
+				// prettier-ignore
+				// Delete the message we sent to ask the user
+				try { _message.delete(); } catch { }
+
+				// prettier-ignore
+				// Delete the user's response if it was a number
+				if (isNaN(_number)) try { _message_user.delete(); } catch { }
+			})
+			.catch(async () => {
+				// prettier-ignore
+				try { await _message.delete(); } catch {}
+				return null;
+			});
+	}
+
 	/// -- Collectors --
 	async #_collect_reactions() {
 		// Error handling
@@ -179,7 +227,7 @@ class EmbedNavigator {
 		}
 	}
 
-	#_collect_components() {
+	async #_collect_components() {
 		// Error handling
 		if (this.data.collectors.interaction) {
 			this.data.collectors.interaction.resetTimer();
@@ -187,9 +235,6 @@ class EmbedNavigator {
 		}
 
 		/// Variables
-		let promise_resolve = null;
-		new Promise(resolve => (promise_resolve = resolve));
-
 		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
 		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
 
@@ -202,58 +247,62 @@ class EmbedNavigator {
 
 		return new Promise(resolve => {
 			// Collector :: { COLLECT }
-			collector.on("collect", async interaction => {
+			collector.on("collect", async _interaction => {
 				// Ignore non-button/StringSelectMenu interactions
-				if (![ComponentType.Button, ComponentType.StringSelect].includes(interaction.componentType)) return;
+				if (![ComponentType.Button, ComponentType.StringSelect].includes(_interaction.componentType)) return;
 
 				// Filter out users that aren't allowed access
-				if (filter_userIDs.length && !filter_userIDs.includes(interaction.user.id)) return;
+				if (filter_userIDs.length && !filter_userIDs.includes(_interaction.user.id)) return;
 
 				// prettier-ignore
 				// Defer the interaction & reset the collector's timer
-				{ await interaction.deferReply(); collector.resetTimer }
+				{ await _interaction.deferReply(); collector.resetTimer }
 
 				try {
 					// prettier-ignore
-					switch (interaction.customId) {
-					case "ssm_pageSelect":
-						// Find the page index for the option the user selected
-						this.data.pages.idx.current = this.data.selectMenu.optionValues.findIndex(
-							val => val === interaction.values[0]
-						);
+					switch (_interaction.customId) {
+						case "ssm_pageSelect":
+							// Find the page index for the option the user selected
+							this.data.pages.idx.current = this.data.selectMenu.optionValues.findIndex(
+								val => val === _interaction.values[0]
+							);
 	
-						// Reset nested index
-						this.data.pages.idx.nested = 0;
+							// Reset nested index
+							this.data.pages.idx.nested = 0;
 	
-						/// Change the default StringSelectMenu option to the option the user selected
-						this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
-						this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
+							/// Change the default StringSelectMenu option to the option the user selected
+							this.data.components.selectMenu.options.forEach(option => option.setDefault(false));
+							this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
 						
-						// Update the page
-						this.#_updatePage(); return await this.refresh();
+							// Update the page
+							this.#_updatePage(); return await this.refresh();
 	
-					case "btn_to_first":
-						this.data.pages.idx.nested = 0;
-						this.#_updatePage(); return await this.refresh();
+						case "btn_to_first":
+							this.data.pages.idx.nested = 0;
+							this.#_updatePage(); return await this.refresh();
 	
-					case "btn_back":
-						this.data.pages.idx.nested--;
-						this.#_updatePage(); return await this.refresh();
+						case "btn_back":
+							this.data.pages.idx.nested--;
+							this.#_updatePage(); return await this.refresh();
 	
-					case "btn_jump":
-						this.data.pages.idx.nested = await this.#_askPageNumber();
-						this.#_updatePage(); return await this.refresh();
+						case "btn_jump":
+							return await this.#_askPageNumber(_interaction.user).then(async idx => {
+								if (isNaN(idx)) return;
+
+								this.data.pages.idx.nested = _jumpIdx;
+								this.#_updatePage(); return await this.refresh();
+							});
 	
-					case "btn_next":
-						this.data.pages.idx.nested++;
-						this.#_updatePage(); return await this.refresh();
+						case "btn_next":
+							this.data.pages.idx.nested++;
+							this.#_updatePage(); return await this.refresh();
 	
-					case "btn_to_last":
-						this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
-						this.#_updatePage(); return await this.refresh();
+						case "btn_to_last":
+							this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
+							this.#_updatePage(); return await this.refresh();
 	
-					default: return;
-				}
+						default: return;
+					}
 				} catch {}
 			});
 
