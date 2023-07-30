@@ -427,11 +427,11 @@ class EmbedNavigator {
 			// prettier-ignore
 			for (let [key, val] of Object.entries(config.navigator.buttons)) {
 				if (!val.emoji.ID) throw new Error(
-					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in '_dsT_config.json'`
+					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'_dsT_config.json\'`
 				);
 			
 				if (!val.emoji.NAME) throw new Error(
-					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in '_dsT_config.json'`
+					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'_dsT_config.json\'`
 				);
 			}
 

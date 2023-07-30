@@ -10,7 +10,7 @@
 
 	"navigator": {
 		"buttons": {
-			"to_first": { "TEXT": "◀◀", "emoji": { "NAME": "test", "ID": "test" } },
+			"to_first": { "TEXT": "◀◀", "emoji": { "NAME": "", "ID": "" } },
 			"back": { "TEXT": "◀", "emoji": { "NAME": "", "ID": "" } },
 			"jump": { "TEXT": "📄", "emoji": { "NAME": "", "ID": "" } },
 			"next": { "TEXT": "▶", "emoji": { "NAME": "", "ID": "" } },
