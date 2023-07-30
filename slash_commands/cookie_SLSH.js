@@ -22,7 +22,12 @@ module.exports = {
             "%USER. It's your lucky day! Have a glass of milk! :milk:",
         ];
 
-		let response = _jsT.choice(choices).replace("%USER", interaction.user);
-		return await interaction.reply({ content: response });
+		// prettier-ignore
+		let embed_cookie = new BetterEmbed({
+			interaction, author: { user: interaction.member },
+			description: _jsT.choice(choices)
+        });
+
+		return await embed_cookie.send();
 	}
 };

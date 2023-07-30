@@ -43,27 +43,25 @@ class BetterEmbed extends EmbedBuilder {
 	#_configure(options = {}) {
 		let _options = { ...this.options, ...options };
 
-		/// Apply shorthand formatting
-		_options.description = this.#_formatMarkdown(_options.description);
-		_options.author.name = this.#_formatMarkdown(_options.author.text);
-		_options.title = this.#_formatMarkdown(_options.title.text);
-		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
-
-		// Error preventing
+		/// Error preventing
 		if (!_options.description) _options.description = " ";
 		if (!_options.author.text) _options.author.text = " ";
 		if (!_options.footer.text) _options.footer.text = " ";
 		if (!_options.color) _options.color = config.EMBED_COLOR || "Random";
 		if (!Array.isArray(_options.color)) _options.color = [_options.color];
 
+		/// Apply shorthand formatting
+		_options.description = this.#_formatMarkdown(_options.description);
+		_options.author.name = this.#_formatMarkdown(_options.author.text);
+		_options.title = this.#_formatMarkdown(_options.title.text);
+		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
+
 		/// Author
 		// if (this.data.author.text) this.data.author.name = _options.author.text;
 		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
 		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
 		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
-			// Get the authorURL() method from within the GuildMember or from the user itself
-			let _foo_avatarURL = _options.author?.user?.user?.avatarURL || _options.author?.user?.avatarURL;
-			let _avatarURL = _foo_avatarURL({ dynamic: true });
+			let _avatarURL = _options.author?.user?.avatarURL({ dynamic: true });
 
 			// prettier-ignore
 			try { this.#_setAuthor(_avatarURL, "iconURL"); }
@@ -111,14 +109,14 @@ class BetterEmbed extends EmbedBuilder {
 	#_setAuthor(update, type) {
 		// prettier-ignore
 		switch (type) {
-			case "name": return this.setAuthor({ name: update, url: this.data.author.url, iconURL: this.data.author.icon_url });
+			case "name": return this.setAuthor({ name: update, url: this.data.author?.url, iconURL: this.data.author?.icon_url });
 
 			case "linkURL":
-				try { return this.setAuthor({ name: this.data.author.name, url: update, iconURL: this.data.author.icon_url }); }
+				try { return this.setAuthor({ name: this.data.author?.name, url: update, iconURL: this.data.author?.icon_url }); }
 				catch { return logger.error("Could not configure embed", "invalid: author_linkURL", `\`${update}\``); }
 
 			case "iconURL":
-				try { return this.setAuthor({ name: this.data.author.name, url: this.data.author.url, iconURL: update }); }
+				try { return this.setAuthor({ name: this.data.author?.name, url: this.data.author?.url, iconURL: update }); }
 				catch { return logger.error("Could not configure embed", "invalid: author_iconURL", `\`${update}\``); }
 
 			default: throw new Error(`\`${type}\` is not a valid setAuthorType`);
@@ -129,10 +127,10 @@ class BetterEmbed extends EmbedBuilder {
 	#_setFooter(update, type) {
 		// prettier-ignore
 		switch (type) {
-			case "text": return this.setFooter({ text: update, iconURL: this.data.footer.icon_url });
+			case "text": return this.setFooter({ text: update, iconURL: this.data.footer?.icon_url });
 
 			case "iconURL":
-				try { return this.setFooter({ text: update, iconURL: this.data.footer.icon_url }); }
+				try { return this.setFooter({ text: this.data.footer?.text, iconURL: update }); }
 				catch { logger.error("Could not configure embed", "invalid: footer_iconURL", `\`${update}\``); }
 		}
 	}
@@ -149,10 +147,10 @@ class BetterEmbed extends EmbedBuilder {
 		this.options = {
 			interaction: null, channel: null,
 			author: { user: null, text: "", iconURL: "", linkURL: "" },
-            title: { text: "", linkURL: "" }, footer: { text: "", iconURL: "" },
-            description: "", imageURL: "", thumbnailURL: "",
-            color: config.EMBED_COLOR || null,
-            showTimestamp: false, ...options
+			title: { text: "", linkURL: "" }, footer: { text: "", iconURL: "" },
+			description: "", imageURL: "", thumbnailURL: "",
+			color: config.EMBED_COLOR || null,
+			showTimestamp: false, ...options
 		};
 
 		this.#_configure();
@@ -181,68 +179,7 @@ class BetterEmbed extends EmbedBuilder {
 		if (!Array.isArray(options.components)) options.components = [options.components];
 
 		// Send the message
-		return await dynaSend(options);
-
-		/* try {
-			switch (options.sendMethod) {
-				// prettier-ignore
-				case "reply":
-					if (!options.interaction)
-						throw new Error("sendMethod \`reply\` not allowed; CommandInteraction not provided");
-
-					try {
-						return await this.options.interaction.reply({
-							content: options.messageContent, components: options.components,
-							embeds: [this], ephemeral: options.ephemeral, fetchReply: true,
-							allowedMentions: options.allowedMentions
-						});
-					} catch {
-						// Fallback to "editReply"
-						return await this.options.interaction.editReply({
-							content: options.messageContent, components: options.components,
-							embeds: [this], fetchReply: true, allowedMentions: options.allowedMentions
-						});
-					}
-
-				// prettier-ignore
-				case "editReply":
-					if (!options.interaction)
-						throw new Error("sendMethod \`editReply\` not allowed; CommandInteraction not provided");
-					
-					return await this.options.interaction.editReply({
-						content: options.messageContent, components: options.components,
-						embeds: [this], fetchReply: true, allowedMentions: options.allowedMentions
-					});
-
-				// prettier-ignore
-				case "followUp":
-					if (!options.interaction)
-						throw new Error("sendMethod \`followUp\` not allowed; CommandInteraction not provided");
-					
-						return await this.options.interaction.followUp({
-							content: options.messageContent, components: options.components,
-							embeds: [this], ephemeral: options.ephemeral, fetchReply: true,
-							allowedMentions: options.allowedMentions
-						});
-
-				// prettier-ignore
-				case "channel":
-					if (!options.channel)
-						throw new Error("sendMethod \`channel\` not allowed; TextChannel not provided");
-					
-					return await options.channel.send({
-						content: options.messageContent, components: options.components,
-						embeds: [this],fetchReply: true, allowedMentions: options.allowedMentions
-					});
-
-				default:
-					logger.error("Failed to send embed", "invalid_sendMethod", `\`${options.sendMethod}\``);
-					return null;
-			}
-		} catch (err) {
-			logger.error("Failed to send embed", "BetterEmbed.send()", err);
-			return null;
-		} */
+		return await dynaSend({ embeds: [this], ...options });
 	}
 }
 

@@ -14,7 +14,9 @@
 const { CommandInteraction, TextChannel, ActionRowBuilder, EmbedBuilder } = require("discord.js");
 const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
+
 const _jsT = require("../jsTools/_jsT");
+const logger = require("../logger");
 
 /** @param {dS_sendOptions} options  */
 async function dynaSend(options) {
@@ -49,7 +51,7 @@ async function dynaSend(options) {
                         content: options.messageContent, components: options.components,
                         embeds: options.embeds, fetchReply: true, allowedMentions: options.allowedMentions
                     });
-                }
+                } break;
 
 			// prettier-ignore
 			case "editReply":
@@ -59,18 +61,18 @@ async function dynaSend(options) {
                 message = await options.interaction.editReply({
                     content: options.messageContent, components: options.components,
                     embeds: options.embeds, fetchReply: true, allowedMentions: options.allowedMentions
-                });
+                }); break;
 
 			// prettier-ignore
 			case "followUp":
                 if (!options.interaction)
                     throw new Error("sendMethod \`followUp\` not allowed; CommandInteraction not provided");
                 
-                    message = await options.interaction.followUp({
-                        content: options.messageContent, components: options.components,
-                        embeds: options.embeds, ephemeral: options.ephemeral, fetchReply: true,
-                        allowedMentions: options.allowedMentions
-                    });
+                message = await options.interaction.followUp({
+                    content: options.messageContent, components: options.components,
+                    embeds: options.embeds, ephemeral: options.ephemeral, fetchReply: true,
+                    allowedMentions: options.allowedMentions
+                }); break;
 
 			// prettier-ignore
 			case "channel":
@@ -79,11 +81,16 @@ async function dynaSend(options) {
                 
                 message = await options.channel.send({
                     content: options.messageContent, components: options.components,
-                    embeds: options.embeds,fetchReply: true, allowedMentions: options.allowedMentions
-                });
+                    embeds: options.embeds, fetchReply: true, allowedMentions: options.allowedMentions
+                }); break;
 
 			default:
-				logger.error("Failed to send message", "dynaSend.invalid_sendMethod", `method given: \`${options.sendMethod}\``);
+				logger.error(
+					"Failed to send message",
+					"dynaSend.invalid_sendMethod",
+					`method given: \`${options.sendMethod}\``
+				);
+				break;
 		}
 	} catch (err) {
 		logger.error("Failed to send message", "dynaSend()", err);
