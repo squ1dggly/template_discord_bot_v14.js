@@ -30,6 +30,7 @@
 const config = require("./_dsT_config.json");
 
 const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder } = require("discord.js");
+const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
 
 class BetterEmbed extends EmbedBuilder {
@@ -179,8 +180,10 @@ class BetterEmbed extends EmbedBuilder {
 		// If a single component was given, convert it into an array
 		if (!Array.isArray(options.components)) options.components = [options.components];
 
-		// Send the embed
-		try {
+		// Send the message
+		return await dynaSend(options);
+
+		/* try {
 			switch (options.sendMethod) {
 				// prettier-ignore
 				case "reply":
@@ -239,7 +242,7 @@ class BetterEmbed extends EmbedBuilder {
 		} catch (err) {
 			logger.error("Failed to send embed", "BetterEmbed.send()", err);
 			return null;
-		}
+		} */
 	}
 }
 
