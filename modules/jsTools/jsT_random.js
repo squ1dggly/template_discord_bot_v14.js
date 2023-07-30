@@ -18,10 +18,10 @@ const alphabet = [
  * @param {boolean} round round up the sum */
 function randomNumber(min, max, round = true) {
     min = +min; if (isNaN(min)) throw new TypeError(`\`${min}\` must be a valid number`);
-    max = +max; if (isNaN(max)) throw new TypeError(`\`${max}\` must be a valid number`);
-
-    return round
-        ? Math.floor(Math.random() * (max - min))
+	max = +max; if (isNaN(max)) throw new TypeError(`\`${max}\` must be a valid number`);
+	
+    return min + round
+        ? Math.round(Math.random() * (max - min))
         : Math.random() * (max - min);
 }
 
@@ -38,8 +38,10 @@ function numericString(len) {
  * @param {boolean} includeCaps include uppercase letters */
 function alphaString(len, includeCaps = false) {
 	let str = "";
-	for (let i = 0; i < len; i++)
-		str += includeCaps && chance() ? choice(alphabet).toUpperCase() : choice(alphabet);
+	// prettier-ignore
+	for (let i = 0; i < len; i++) str += includeCaps && chance()
+		? choice(alphabet).toUpperCase()
+		: choice(alphabet);
 	return str;
 }
 
@@ -61,7 +63,7 @@ function alphaNumericString(len, includeCaps = false) {
  * chance is 50% by default
  * @param {number|string} percent a number between 1 and 100 */
 function chance(percent = 50) {
-    percent = +percent; if (isNaN(percent)) throw new TypeError(`\`${percent}\` must be a number `);
+    percent = +percent; if (isNaN(percent)) throw new TypeError(`\`${percent}\` must be a number`);
     if (percent < 1 || percent > 100) throw new Error(`\`${percent}\` must be within a range of 1 and 100`);
     return randomNumber(0, 100) < percent;
 }
@@ -70,7 +72,7 @@ function chance(percent = 50) {
  * @param {array} arr array of items to choose from
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
 function choice(arr, copy = false) {
-	if (!Array.isArray(arr)) throw new TypeError(`You must provide a valid array`);
+	if (!Array.isArray(arr)) throw new TypeError("You must provide a valid array");
 	let item = arr[randomNumber(0, arr.length - 1)];
 	return copy ? structuredClone(item) : item;
 }
@@ -78,7 +80,7 @@ function choice(arr, copy = false) {
 /** Return a psuedo-random number index from an array's length
  * @param {array} arr array of items to choose from */
 function choiceIndex(arr) {
-	if (!Array.isArray(arr)) throw new TypeError(`You must provide a valid array`);
+	if (!Array.isArray(arr)) throw new TypeError("You must provide a valid array");
 	return randomNumber(0, arr.length - 1);
 }
 
@@ -88,7 +90,7 @@ function choiceIndex(arr) {
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
 function choiceWeighted(arr, clone = false) {
 	/// Error handling
-	if (!Array.isArray(arr)) throw new TypeError(`You must provide a valid array`);
+	if (!Array.isArray(arr)) throw new TypeError("You must provide a valid array");
 
 	// Check if the object array has a "rarity" property
 	arr.forEach((obj, idx) => {

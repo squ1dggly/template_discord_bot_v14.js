@@ -1,7 +1,7 @@
 const config = require("./_dsT_config.json");
 
-const betterEmbed = require("./dsT_betterEmbed");
-const embedNavigator = require("./dsT_embedNavigator");
+const BetterEmbed = require("./dsT_betterEmbed");
+const EmbedNavigator = require("./dsT_embedNavigator");
 
 const deleteMessageAfter = require("./dsT_deleteMessageAfter");
 const awaitConfirmation = require("./dsT_awaitConfirmation");
@@ -26,8 +26,8 @@ for (let [key, val] of Object.entries(config.navigator.buttons)) if (!val.TEXT) 
 );
 
 module.exports = {
-	betterEmbed,
-	embedNavigator,
+	BetterEmbed,
+	EmbedNavigator,
 
 	deleteMessageAfter,
 	awaitConfirmation,
