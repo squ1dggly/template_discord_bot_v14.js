@@ -18,8 +18,8 @@ module.exports = {
 	execute: async (client, interaction) => {
 		// prettier-ignore
 		let choices = [
-            "Hey, %USER! Have a cookie! :cookie:",
-            "%USER. It's your lucky day! Have a glass of milk! :milk:",
+            "Hey, $USER! Have a cookie! :cookie:",
+            "$USER. It's your lucky day! Have a glass of milk! :milk:",
         ];
 
 		// prettier-ignore

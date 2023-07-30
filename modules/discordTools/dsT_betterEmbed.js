@@ -36,8 +36,8 @@ const _jsT = require("../jsTools/_jsT");
 class BetterEmbed extends EmbedBuilder {
 	#_formatMarkdown(str) {
 		return str
-			.replace(/\$USER/g, this.data.author?.user)
-			.replace(/\$USERNAME/g, this.data.author?.user?.displayName || this.data.author?.user?.username);
+			.replace(/\$USER\b/g, this.options.author?.user)
+			.replace(/\$USERNAME\b/g, this.options.author?.user?.displayName || this.options.author?.user?.username);
 	}
 
 	#_configure(options = {}) {
@@ -57,11 +57,10 @@ class BetterEmbed extends EmbedBuilder {
 		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
 
 		/// Author
-		// if (this.data.author.text) this.data.author.name = _options.author.text;
 		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
 		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
 		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
-			let _avatarURL = _options.author?.user?.avatarURL({ dynamic: true });
+			let _avatarURL = _options.author.user.avatarURL({ dynamic: true });
 
 			// prettier-ignore
 			try { this.#_setAuthor(_avatarURL, "iconURL"); }
@@ -119,7 +118,7 @@ class BetterEmbed extends EmbedBuilder {
 				try { return this.setAuthor({ name: this.data.author?.name, url: this.data.author?.url, iconURL: update }); }
 				catch { return logger.error("Could not configure embed", "invalid: author_iconURL", `\`${update}\``); }
 
-			default: throw new Error(`\`${type}\` is not a valid setAuthorType`);
+			default: throw new TypeError(`\`${type}\` is not a valid SetAuthorType`);
 		}
 	}
 
@@ -132,6 +131,8 @@ class BetterEmbed extends EmbedBuilder {
 			case "iconURL":
 				try { return this.setFooter({ text: this.data.footer?.text, iconURL: update }); }
 				catch { logger.error("Could not configure embed", "invalid: footer_iconURL", `\`${update}\``); }
+
+			default: throw new TypeError(`\`${type}\` is not a valid SetFooterType`);
 		}
 	}
 
