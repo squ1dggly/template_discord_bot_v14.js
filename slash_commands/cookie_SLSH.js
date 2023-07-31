@@ -31,9 +31,11 @@ module.exports = {
 
 		// prettier-ignore
 		let embedNav = new EmbedNavigator({
-			interaction, embeds: [embed_cookies],
-			pagination: { type: "short", useReactions: true }
+			interaction, embeds: embed_cookies,
+			selectMenuEnabled: true
 		});
+
+		embedNav.addSelectMenuOptions([{ label: "option 1" }, { label: "option 2" }]);
 
 		return await embedNav.send();
 	}

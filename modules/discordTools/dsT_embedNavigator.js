@@ -51,14 +51,14 @@ class EmbedNavigator {
 	/// -- Configuration --
 	#_updatePage() {
 		/// Clamp page index :: { CURRENT }
-		if (this.data.pages.idx.current < 0) this.data.pages.idx.current = 0;
-		if (this.data.pages.idx.current > this.options.embeds.length)
+		if (this.data.pages.idx.current < 0)
 			this.data.pages.idx.current = _jsT.clamp(this.options.embeds.length - 1, { min: 0 });
+		if (this.data.pages.idx.current > this.options.embeds.length - 1) this.data.pages.idx.current = 0;
 
 		/// Clamp page index :: { NESTED }
-		if (this.data.pages.idx.nested < 0) this.data.pages.idx.nested = 0;
-		if (this.data.pages.idx.nested > this.data.pages.nested_length)
+		if (this.data.pages.idx.nested < 0)
 			this.data.pages.idx.nested = _jsT.clamp(this.data.pages.nested_length - 1, { min: 0 });
+		if (this.data.pages.idx.nested > this.data.pages.nested_length - 1) this.data.pages.idx.nested = 0;
 
 		let _page = this.options.embeds[this.data.pages.idx.current];
 
@@ -87,7 +87,7 @@ class EmbedNavigator {
 
 		// prettier-ignore
 		// Add the StringSelectMenu if enabled
-		if (this.options.selectMenuEnabled)
+		if (this.options.selectMenuEnabled && this.data.components.selectMenu.options.length)
 			this.data.messageComponents.push(this.data.actionRows.selectMenu);
 
 		// Add pagination if enabled (buttons)
@@ -171,8 +171,6 @@ class EmbedNavigator {
 					await this.data.message.react(_reaction.ID);
 			} catch {}
 		}
-		// Remove pagination reactions
-		else await this.#_paginationReactions_remove();
 	}
 
 	async #_paginationReactions_remove() {
@@ -262,7 +260,7 @@ class EmbedNavigator {
 
 		/// Create the reaction collector
 		const collector = this.data.message.createReactionCollector(
-			this.options.timeout ? { time: this.options.timeout, dispose: true } : { dispose: true }
+			this.options.timeout ? { time: this.options.timeout } : {}
 		);
 
 		this.data.collectors.reaction = collector;
@@ -270,8 +268,10 @@ class EmbedNavigator {
 		return new Promise(resolve => {
 			// Collector :: { COLLECT }
 			collector.on("collect", async (_reaction, _user) => {
+				collector.resetTimer();
+
 				// Remove the reaction unless it's from the bot itself
-				if (_user.id !== this.data.interaction.guild.members.me.id) _reaction.users.remove(_user.id);
+				if (_user.id !== _reaction.message.guild.members.me.id) await _reaction.users.remove(_user.id);
 
 				// Filter out users that aren't allowed access
 				if (filter_userIDs.length && !filter_userIDs.includes(_user.id)) return;
@@ -507,33 +507,34 @@ class EmbedNavigator {
 		this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
 	}
 
-	/** @param {eN_selectMenuOptionData} options */
+	/** @param {...eN_selectMenuOptionData} options */
 	addSelectMenuOptions(...options) {
 		for (let _data of options) {
-			// Error handling
-			if (!data.emoji && !data.label) throw new Error("You must provide either an emoji or label");
+			/// Error handling
+			if (Array.isArray(_data)) throw new TypeError("You can't pass an array as an argument for `...options`");
+			if (!_data.emoji && !_data.label) throw new Error("You must provide either an emoji or label");
 
 			let idx_current = this.data.selectMenu.optionValues.length;
 			let idx_new = this.data.selectMenu.optionValues.length + 1;
 
 			// prettier-ignore
-			data = {
+			_data = {
 				emoji: "", label: `page ${idx_new}`, description: "",
-				value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ...data
+				value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ..._data
 			};
 
 			// Add the new option ID (value) to our selectMenuOptionValues array
-			this.data.selectMenu.optionValues.push(data.value);
+			this.data.selectMenu.optionValues.push(_data.value);
 
 			// Create a new StringSelectMenuOption
 			let option = new StringSelectMenuOptionBuilder();
 
 			// Configure options
-			if (data.emoji) option.setEmoji(data.emoji);
-			if (data.label) option.setLabel(data.label);
-			if (data.description) option.setDescription(data.description);
-			if (data.value) option.setValue(data.value);
-			if (data.isDefault) option.setDefault(data.isDefault);
+			if (_data.emoji) option.setEmoji(_data.emoji);
+			if (_data.label) option.setLabel(_data.label);
+			if (_data.description) option.setDescription(_data.description);
+			if (_data.value) option.setValue(_data.value);
+			if (_data.isDefault) option.setDefault(_data.isDefault);
 
 			// Add the new StringSelectMenuOption to the SelectMenu
 			this.data.components.selectMenu.addOptions(option);
