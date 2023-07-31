@@ -28,8 +28,8 @@ async function dynaSend(options) {
 			...options
     };
 
-	options.deleteAfter = _jsT.parseTime(options.deleteAfter);
-
+    options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+    
 	let message = null;
 
 	try {
@@ -45,7 +45,7 @@ async function dynaSend(options) {
                         embeds: options.embeds, ephemeral: options.ephemeral, fetchReply: true,
                         allowedMentions: options.allowedMentions
                     });
-                } catch {
+                } catch (err) {
                     // Fallback to "editReply"
                     message = await options.interaction.editReply({
                         content: options.messageContent, components: options.components,

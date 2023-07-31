@@ -52,13 +52,13 @@ class EmbedNavigator {
 	#_updatePage() {
 		/// Clamp page index :: { CURRENT }
 		if (this.data.pages.idx.current < 0) this.data.pages.idx.current = 0;
-		if (this.data.pages.idx.current > this.options.embeds.length - 1)
-			this.data.pages.idx.current = this.options.embeds.length - 1;
+		if (this.data.pages.idx.current > this.options.embeds.length)
+			this.data.pages.idx.current = _jsT.clamp(this.options.embeds.length - 1, { min: 0 });
 
 		/// Clamp page index :: { NESTED }
 		if (this.data.pages.idx.nested < 0) this.data.pages.idx.nested = 0;
-		if (this.data.pages.idx.nested > this.data.pages.nested_length - 1)
-			this.data.pages.idx.nested = this.data.pages.nested_length - 1;
+		if (this.data.pages.idx.nested > this.data.pages.nested_length)
+			this.data.pages.idx.nested = _jsT.clamp(this.data.pages.nested_length - 1, { min: 0 });
 
 		let _page = this.options.embeds[this.data.pages.idx.current];
 
@@ -67,7 +67,7 @@ class EmbedNavigator {
 		if (Array.isArray(_page) && _page.length)
 			this.data.pages.current = _page[this.data.pages.idx.nested];
 		else
-			this.data.pages = _page;
+			this.data.pages.current = _page;
 
 		// Count how many nested pages there are currently
 		this.data.pages.nested_length = _page?.length || 0;
@@ -98,6 +98,8 @@ class EmbedNavigator {
 	#_configurePagination() {
 		this.data.pagination.reactions = [];
 		let _buttonStringArray = [];
+
+		if (!this.options.pagination.type) return;
 
 		// prettier-ignore
 		if (this.data.pagination.required) switch (this.options.pagination.type) {
@@ -327,7 +329,7 @@ class EmbedNavigator {
 		}
 
 		/// Variables
-		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
+		let filter_userIDs = this.options.users?.length ? this.options.users.map(user => user.id) : [];
 		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
 
 		/// Create the component collector
@@ -348,7 +350,7 @@ class EmbedNavigator {
 
 				// prettier-ignore
 				// Defer the interaction & reset the collector's timer
-				{ await _interaction.deferReply(); collector.resetTimer }
+				{ await _interaction.deferUpdate(); collector.resetTimer }
 
 				try {
 					// prettier-ignore
@@ -422,7 +424,8 @@ class EmbedNavigator {
 	/** @param {eN_options} options  */
 	constructor(options) {
 		/// Error handling
-		if (!options?.interaction && !options?.channel) throw new Error("You must provide either an Interaction or a TextChannel");
+		if (!options?.interaction && !options?.channel)
+			throw new Error("You must provide either an Interaction or a TextChannel");
 		if (options?.pagination?.useReactions)
 			// prettier-ignore
 			for (let [key, val] of Object.entries(config.navigator.buttons)) {
@@ -448,9 +451,9 @@ class EmbedNavigator {
 			timeout: config.timeouts.PAGINATION, ...options
 		};
 
-		if (!Array.isArray(this.options.users)) this.options.users = [this.options.users];
-		if (!Array.isArray(this.data.embeds)) this.options.embeds = [this.data.embeds];
-		options.timeout = _jsT.parseTime(options.timeout);
+		if (!Array.isArray(this.options.users) && this.options.users) this.options.users = [this.options.users];
+		if (!Array.isArray(this.options.embeds) && this.options.embeds) this.options.embeds = [this.options.embeds];
+		this.options.timeout = _jsT.parseTime(this.options.timeout);
 
 		/// Configure data & variables
 		// prettier-ignore
@@ -566,7 +569,8 @@ class EmbedNavigator {
 		// Send the message
 		this.data.message = await dynaSend({
 			interaction: this.options.interaction, channel: this.options.channel,
-			components: this.data.messageComponents, ...options
+			components: this.data.messageComponents, embeds: [this.data.pages.current],
+			...options
 		});
 
 		// Check if the send failed

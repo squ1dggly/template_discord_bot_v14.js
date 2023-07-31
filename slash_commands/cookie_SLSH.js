@@ -1,6 +1,6 @@
 const { Client, CommandInteraction, SlashCommandBuilder } = require("discord.js");
 
-const { BetterEmbed } = require("../modules/discordTools/_dsT");
+const { BetterEmbed, EmbedNavigator } = require("../modules/discordTools/_dsT");
 const _jsT = require("../modules/jsTools/_jsT");
 
 module.exports = {
@@ -23,11 +23,18 @@ module.exports = {
         ];
 
 		// prettier-ignore
-		let embed_cookie = new BetterEmbed({
-			interaction, author: { text: "I am an embed", user: interaction.member },
-			description: _jsT.choice(choices)
+		let embed_cookies = [...Array(5)].map((v, idx) => new BetterEmbed({
+			interaction, author: { user: interaction.member },
+			description: _jsT.choice(choices),
+			footer: `embed ${idx}`, showTimestamp: true
+		}));
+
+		// prettier-ignore
+		let embedNav = new EmbedNavigator({
+			interaction, embeds: [embed_cookies],
+			pagination: { type: "short", useReactions: true }
 		});
 
-		return await embed_cookie.send();
+		return await embedNav.send();
 	}
 };

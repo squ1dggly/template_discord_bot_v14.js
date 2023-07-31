@@ -2,12 +2,12 @@
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
  * @property {{user:GuildMember|User, text:string, iconURL:string, linkURL: string}} author
- * @property {{text:string, linkURL:string}} title
- * @property {{text:string, iconURL:string}} footer
+ * @property {string|{text:string, linkURL:string}} title
+ * @property {string|{text:string, iconURL:string}} footer
  * @property {string} description
  * @property {string} thumbnailURL
  * @property {string} imageURL
- * @property {string} color
+ * @property {string|string[]} color
  * @property {boolean} showTimestamp */
 
 /** @typedef bE_sendOptions
@@ -15,12 +15,12 @@
  * @property {TextChannel} channel
  * @property {string} messageContent
  * @property {{user:GuildMember|User, text:string, iconURL:string, linkURL: string}} author
- * @property {{text:string, linkURL:string}} title
- * @property {{text:string, iconURL:string}} footer
+ * @property {string|{text:string, linkURL:string}} title
+ * @property {string|{text:string, iconURL:string}} footer
  * @property {string} description
  * @property {string} thumbnailURL
  * @property {string} imageURL
- * @property {string} color
+ * @property {string|string[]} color
  * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {boolean} ephemeral
@@ -44,8 +44,13 @@ class BetterEmbed extends EmbedBuilder {
 		let _options = { ...this.options, ...options };
 
 		/// Error preventing
+		/// Incase a string was provided instead of an object
+		if (typeof _options.footer === "string") _options.footer = { text: _options.footer, iconURL: "" };
+		if (typeof _options.title === "string") _options.title = { text: _options.title, linkURL: "" };
+
 		if (!_options.description) _options.description = " ";
 		if (!_options.author.text) _options.author.text = " ";
+		if (!_options.title.text) _options.title.text = " ";
 		if (!_options.footer.text) _options.footer.text = " ";
 		if (!_options.color) _options.color = config.EMBED_COLOR || "Random";
 		if (!Array.isArray(_options.color)) _options.color = [_options.color];
@@ -53,13 +58,13 @@ class BetterEmbed extends EmbedBuilder {
 		/// Apply shorthand formatting
 		_options.description = this.#_formatMarkdown(_options.description);
 		_options.author.name = this.#_formatMarkdown(_options.author.text);
-		_options.title = this.#_formatMarkdown(_options.title.text);
+		_options.title.text = this.#_formatMarkdown(_options.title?.text || _options.title);
 		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
 
 		/// Author
 		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
 		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
-		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
+		if ((_options.author.user || _options.author.iconURL) && ![null, false].includes(_options.author.iconURL)) {
 			let _avatarURL = _options.author.iconURL || "";
 
 			// prettier-ignore
