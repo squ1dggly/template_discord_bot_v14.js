@@ -511,7 +511,7 @@ class EmbedNavigator {
 	addSelectMenuOptions(...options) {
 		for (let _data of options) {
 			/// Error handling
-			if (Array.isArray(_data)) throw new TypeError("You can't pass an array as an argument for `...options`");
+			if (Array.isArray(_data)) throw new TypeError("You can't pass an array as an argument for `eN_selectMenuOptionData`");
 			if (!_data.emoji && !_data.label) throw new Error("You must provide either an emoji or label");
 
 			let idx_current = this.data.selectMenu.optionValues.length;

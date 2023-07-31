@@ -5,29 +5,38 @@
 		"body": [
 			"const { Client, CommandInteraction, SlashCommandBuilder } = require('discord.js');\n",
 
-			"const { randomTools } = require('../modules/jsTools');\n",
+			"const { BetterEmbed } = require(`../modules/discordTools/_dsT`);",
+			"const _jsT = require(`../modules/jsTools/_jsT`);\n",
 
 			"module.exports = {",
+			"    // prettier-ignore",
+			"    options: {",
+			"        icon: \"🍪\", deferReply: false",
+			"        // botAdminOnly: true // guildAdminOnly: true",
+			"    },\n",
+
+			"    // prettier-ignore",
 			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
-			"        .setDescription(\"${2:Get a cookie, or a glass of milk.}\"),\n",
+			"        .setDescription(\"${2:Get a cookie, or a glass of milk}\"),\n",
 
-			"    // ownerOnly: true, // Only allow the owner and admins defined in config_client to use this command",
-			"    // requireGuildAdmin: true, // Only allow users with admin to use this command\n",
-
-			"    /**",
-			"     * @param {Client} client",
-			"     * @param {CommandInteraction} interaction",
-			"     */",
+			"    /** @param {Client} client @param {CommandInteraction} interaction */",
 			"    execute: async (client, interaction) => {",
+			"        // prettier-ignore",
 			"        let choices = [",
-			"            \"Hey, %USER! Have a cookie! :cookie:\",",
-			"            \"%USER. It's your lucky day! Have a glass of milk! :milk:\",",
+			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\",",
 			"        ];\n",
 
-			"        let response = randomTools.choice(choices).replace(\"%USER\", interaction.user);",
-			"        return await interaction.reply({ content: response });$0",
+			"        // prettier-ignore",
+			"        let embed_cookie = new BetterEmbed({",
+			"            interaction, author: { user: interaction.member },",
+			"            description: _jsT.choice(choices), showTimestamp: true",
+			"        });\n",
+
+			"        return await embed_cookie.send();$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	}
 }
