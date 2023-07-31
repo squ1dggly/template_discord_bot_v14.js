@@ -57,7 +57,7 @@ class BetterEmbed extends EmbedBuilder {
 
 		/// Apply shorthand formatting
 		_options.description = this.#_formatMarkdown(_options.description);
-		_options.author.name = this.#_formatMarkdown(_options.author.text);
+		_options.author.text = this.#_formatMarkdown(_options.author.text);
 		_options.title.text = this.#_formatMarkdown(_options.title?.text || _options.title);
 		_options.footer.text = this.#_formatMarkdown(_options.footer.text);
 

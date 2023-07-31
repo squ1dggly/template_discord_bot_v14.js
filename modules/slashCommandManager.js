@@ -30,12 +30,12 @@ module.exports = {
 		options = { slashCommands: [], ids: [], global: false, ...options };
 
 		// Get the slash commands from the client
-		options.slashCommands ||= [...client.slashCommands.values()].map(slsh => slsh.builder);
+		if (!options.slashCommands.length)
+			options.slashCommands = [...client.slashCommands.values()].map(slsh => slsh.builder);
 		// prettier-ignore
 		if (!options.slashCommands.length) return logger.error(
 			"Failed to register slash commands",
-			`type: ${options.global ? "global" : "local"}`,
-			"No slash commands found"
+			`type: ${options.global ? "global" : "local"}`, "No slash commands found"
 		);
 
 		// Register slash commands (globally)
@@ -56,8 +56,7 @@ module.exports = {
 		// prettier-ignore
 		if (!options.ids.length) return logger.error(
 			"Failed to register slash commands",
-			"type: local",
-			"You must provide at least 1 guild ID"
+			"type: local", "You must provide at least 1 guild ID"
         );
 
 		// prettier-ignore
@@ -100,8 +99,7 @@ module.exports = {
 		// prettier-ignore
 		if (!options.ids.length) return logger.error(
 			"Failed to remove slash commands",
-			"type: local",
-			"You must provide at least 1 guild ID"
+			"type: local", "You must provide at least 1 guild ID"
         );
 
 		// prettier-ignore
