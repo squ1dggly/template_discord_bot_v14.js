@@ -60,11 +60,18 @@ class BetterEmbed extends EmbedBuilder {
 		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
 		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
 		if ((_options.author.user || _options.author.iconURL) && _options.author.iconURL !== (false || null)) {
-			let _avatarURL = _options.author.user.avatarURL({ dynamic: true });
+			let _avatarURL = _options.author.iconURL || "";
+
+			// prettier-ignore
+			// Check if this is a GuildMember or a User
+			if (_options.author.user?.guild)
+				_avatarURL ||= _options.author.user.user.avatarURL({ dynamic: true });
+			else
+				_avatarURL ||= _options.author.user.avatarURL({ dynamic: true });
 
 			// prettier-ignore
 			try { this.#_setAuthor(_avatarURL, "iconURL"); }
-			catch { logger.error("Could not configure embed", `invalid title URL: \`${_avatarURL}\``); }
+			catch { logger.error("Could not configure embed", `invalid_avatarURL: \`${_avatarURL}\``); }
 		}
 
 		// Title
