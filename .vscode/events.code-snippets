@@ -5,8 +5,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, Guild } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, Guild } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
@@ -26,8 +26,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, Guild } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, Guild } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
@@ -47,8 +47,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, Message } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, Message } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
@@ -68,8 +68,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, Message } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, Message } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
@@ -89,8 +89,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, Message } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, Message } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
@@ -110,8 +110,8 @@
 		"body": [
 			"// An example of an event function.\n",
 
-			"const { Client, BaseInteraction } = require("discord.js');",
-			"const logger = require("../../../modules/logger');\n",
+			"const { Client, BaseInteraction } = require(\"discord.js\");",
+			"const logger = require(\"../../../modules/logger\");\n",
 
 			"module.exports = {",
 			"    name: \"${1:EXAMPLE}\",",
