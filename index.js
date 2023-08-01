@@ -19,9 +19,10 @@ const client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.MessageContent
-		// GatewayIntentBits.DirectMessageReactions // Allows bot to see reactions in DMs
-		// GatewayIntentBits.DirectMessages // Allows bot to read DMs
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.DirectMessageReactions, // Allows bot to see reactions in DMs
+		GatewayIntentBits.DirectMessages // Allows bot to read DMs
 	]
 
 	// partials: [Partials.Channel] // Allows bot to use non-guild channels
