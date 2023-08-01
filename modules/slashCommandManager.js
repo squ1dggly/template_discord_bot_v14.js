@@ -60,7 +60,7 @@ module.exports = {
         );
 
 		// prettier-ignore
-		logger.log(`registering slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guilds" : "guild"}...`);
+		logger.log(`registering slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guild" : "guilds"}...`);
 
 		// prettier-ignore
 		// Iterate through each guild ID and register slash commands
@@ -71,7 +71,7 @@ module.exports = {
             .then(sucessful => {
                 // Get the number of guilds that were successfully registered
                 let sucessful_count = sucessful.filter(s => s).length;
-                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guilds" : "guild"} (local)`)
+                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guild" : "guilds"} (local)`)
             }).catch(err => logger.error("Failed to register slash commands", "type: local", err));
 	},
 
@@ -103,7 +103,7 @@ module.exports = {
         );
 
 		// prettier-ignore
-		logger.log(`removing slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guilds" : "guild"}...`);
+		logger.log(`removing slash commands for ${options.ids.length} ${options.ids.length === 1 ? "guild" : "guilds"}...`);
 
 		// prettier-ignore
 		// Iterate through each guild ID and remove slash commands
@@ -114,7 +114,7 @@ module.exports = {
             .then(sucessful => {
                 // Get the number of guilds that were successfully registered
                 let sucessful_count = sucessful.filter(s => s).length;
-                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guilds" : "guild"} (local)`)
+                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guild" : "guilds"} (local)`)
             }).catch(err => logger.error("Failed to remove slash commands", "type: local", err));
 	},
 
