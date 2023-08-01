@@ -4,7 +4,7 @@ const fs = require("fs");
 
 const { Client } = require("discord.js");
 const logger = require("../logger");
-// const mongo = require('../mongo');
+// const mongo = require("../mongo');
 
 module.exports = {
 	/** @param {Client} client */

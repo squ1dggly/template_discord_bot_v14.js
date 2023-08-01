@@ -1,4 +1,4 @@
-/* Reusable functions for printing out console.log() in 4k ultra HD full color. */
+// Reusable functions for printing out console.log() in 4k ultra HD full color.
 
 const chalk = require("chalk");
 

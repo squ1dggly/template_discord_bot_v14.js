@@ -1,14 +1,14 @@
 /* Initializes the bot and gets everything up and running. */
 
-require(`dotenv`).config();
-const fs = require(`fs`);
+require("dotenv").config();
+const fs = require("fs");
 
-const { Client, Collection, GatewayIntentBits, Partials } = require(`discord.js`);
-const slashCommandManager = require(`./modules/slashCommandManager`);
-const logger = require(`./modules/logger`);
-const mongo = require(`./modules/mongo`);
+const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
+const slashCommandManager = require("./modules/slashCommandManager");
+const logger = require("./modules/logger");
+const mongo = require("./modules/mongo");
 
-const TOKEN = process.env.TOKEN || require(`./configs/config_client.json`).TOKEN;
+const TOKEN = process.env.TOKEN || require("./configs/config_client.json").TOKEN;
 
 logger.log("initializing...");
 

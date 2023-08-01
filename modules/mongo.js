@@ -1,10 +1,10 @@
-/* Connects us to our Mongo database so we can save and retrieve data. */
+// Connects us to our Mongo database so we can save and retrieve data.
 
 const logger = require("./logger");
 
 // Models
 const models = {
-	// user: require('../models/userModel').model
+	// user: require("../models/userModel').model
 };
 
 const mongoose = require("mongoose");
