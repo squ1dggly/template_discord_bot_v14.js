@@ -7,10 +7,7 @@ module.exports = {
     name: "EXAMPLE",
     event: "interaction_create",
 
-    /**
-     * @param {Client} client 
-     * @param {{ interaction: BaseInteraction }} args
-     */
+    /** @param {Client} client @param {{ interaction: BaseInteraction }} args */
     execute: async (client, args) => {
         return logger.log(`${args.interaction.user.username} triggered an interaction`);
     }

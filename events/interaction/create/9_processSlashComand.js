@@ -20,10 +20,7 @@ module.exports = {
 	name: "process_slashCommand",
 	event: "interaction_create",
 
-	/**
-	 * @param {Client} client
-	 * @param {{ interaction: BaseInteraction }} args
-	 */
+	/** @param {Client} client @param {{ interaction: BaseInteraction }} args */
 	execute: async (client, args) => {
 		// Filter out non-guild and non-command interactions
 		if (!args.interaction.guild || !args.interaction.isCommand()) return;

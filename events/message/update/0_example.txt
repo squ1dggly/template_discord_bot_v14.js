@@ -7,10 +7,7 @@ module.exports = {
     name: "EXAMPLE",
     event: "message_update",
 
-    /**
-     * @param {Client} client 
-     * @param {{ message: { before: Message, after: Message } }} args
-     */
+    /** @param {Client} client @param {{ message: Message }} args */
     execute: async (client, args) => {
         return logger.log(`${args.message.after.author.username} updated a message`);
     }
