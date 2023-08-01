@@ -3,7 +3,7 @@
 	"MONGO_URI": "",
 	"DEV_MODE": false,
 
-	"OWNER_IDS": "",
+	"OWNER_ID": "",
 	"ADMIN_IDS": [""],
 	"admin_bypass_ids": {},
 
