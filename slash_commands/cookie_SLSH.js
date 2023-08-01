@@ -1,7 +1,7 @@
 const { Client, CommandInteraction, SlashCommandBuilder } = require("discord.js");
 
-const { BetterEmbed } = require(`../modules/discordTools/_dsT`);
-const _jsT = require(`../modules/jsTools/_jsT`);
+const { BetterEmbed } = require("../modules/discordTools/_dsT");
+const _jsT = require("../modules/jsTools/_jsT");
 
 module.exports = {
 	options: { icon: "🍪", deferReply: false },
