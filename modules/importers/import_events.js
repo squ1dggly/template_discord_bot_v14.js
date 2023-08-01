@@ -1,4 +1,4 @@
-// Imports our event scripts and binds them to their intended event triggers.
+/* Imports our event scripts and binds them to their intended event triggers. */
 
 const fs = require("fs");
 

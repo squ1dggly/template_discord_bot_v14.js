@@ -1,4 +1,4 @@
-// Runs as soon as the bot's connected to discord.
+/* Runs as soon as the bot's connected to discord. */
 
 const { Client, ActivityType } = require("discord.js");
 const { DEV_MODE, client_presence } = require("../../configs/config_client.json");

@@ -1,4 +1,4 @@
-// Initializes the bot and gets everything up and running.
+/* Initializes the bot and gets everything up and running. */
 
 require("dotenv").config();
 const fs = require("fs");

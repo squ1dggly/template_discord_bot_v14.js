@@ -1,4 +1,4 @@
-// Imports all slash commands found in ('../../slash_commands').
+/* Imports all slash commands found in ('../../slash_commands'). */
 
 const { readdirSync } = require("fs");
 

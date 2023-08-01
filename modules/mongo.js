@@ -1,4 +1,4 @@
-// Connects us to our Mongo database so we can save and retrieve data.
+/* Connects us to our Mongo database so we can save and retrieve data. */
 
 const logger = require("./logger");
 

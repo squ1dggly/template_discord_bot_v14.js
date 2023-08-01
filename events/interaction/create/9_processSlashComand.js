@@ -1,4 +1,4 @@
-// Executes commands requested by a command interaction.
+/* Executes commands requested by a command interaction. */
 
 const { Client, BaseInteraction, PermissionsBitField } = require("discord.js");
 
