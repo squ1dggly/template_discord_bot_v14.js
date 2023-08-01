@@ -28,6 +28,7 @@ module.exports = {
 		let slash_commands = importSlashCommands("../../slash_commands");
 		// let slash_commands = importSlashCommands('./slash_commands'); // Use instead when uploaded to a host
 
+		// prettier-ignore
 		for (let slash_command of slash_commands)
 			client.slashCommands.set(slash_command.builder.name, slash_command);
 	}

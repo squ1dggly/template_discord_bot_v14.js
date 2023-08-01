@@ -97,7 +97,6 @@ function executeEvent(foo, ...args) {
 	try {
 		foo.execute.apply(null, args);
 	} catch (err) {
-		// prettier-ignore
 		logger.error("Failed to execute event function", `\"${foo.name}\" on event \"${foo.event}\"`, err);
 	}
 }
