@@ -5,8 +5,8 @@ const fs = require("fs");
 
 const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
 const slashCommandManager = require("./modules/slashCommandManager");
+const mongo = require("./modules/mongo/index");
 const logger = require("./modules/logger");
-const mongo = require("./modules/mongo");
 
 const TOKEN = process.env.TOKEN || require("./configs/config_client.json").TOKEN;
 
