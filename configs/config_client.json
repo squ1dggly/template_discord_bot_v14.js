@@ -1,28 +1,29 @@
 {
-    "TOKEN": "",
-    "MONGO_URI": "",
-    "DEVMODE": false,
+	"TOKEN": "",
+	"MONGO_URI": "",
+	"DEV_MODE": false,
 
-    "ownerID": "",
-    "adminIDs": [""],
+	"OWNER_IDS": "",
+	"ADMIN_IDS": [""],
+	"admin_bypass_ids": {},
 
-    "clientPresence": {
-        "default": {
-            "STATUS": "online",
-            "activity": {
-                "TYPE": "WATCHING",
-                "NAME": "/invite",
-                "STREAM_URL": ""
-            }
-        },
+	"client_presence": {
+		"default": {
+			"STATUS": "online",
+			"activity": {
+				"TYPE": "WATCHING",
+				"NAME": "/invite",
+				"STREAM_URL": ""
+			}
+		},
 
-        "dev": {
-            "STATUS": "dnd",
-            "activity": {
-                "TYPE": "PLAYING",
-                "NAME": "with unstable substances",
-                "STREAM_URL": ""
-            }
-        }
-    }
+		"dev": {
+			"STATUS": "dnd",
+			"activity": {
+				"TYPE": "PLAYING",
+				"NAME": "with unstable substances",
+				"STREAM_URL": ""
+			}
+		}
+	}
 }

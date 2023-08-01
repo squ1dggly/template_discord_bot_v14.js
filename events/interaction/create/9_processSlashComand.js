@@ -2,11 +2,11 @@
 
 const { Client, BaseInteraction, PermissionsBitField } = require("discord.js");
 
-const { ownerID, adminIDs } = require("../../../configs/config_client.json");
+const { OWNER_IDS, ADMIN_IDS, admin_bypass_ids } = require("../../../configs/config_client.json");
 const logger = require("../../../modules/logger");
 
 function userIsBotAdminOrBypass(interaction) {
-	return [ownerID, ...adminIDs, ...(adminBypassIDs[interaction.commandName] || [])].includes(interaction.user.id);
+	return [OWNER_IDS, ...ADMIN_IDS, ...(admin_bypass_ids[interaction.commandName] || [])].includes(interaction.user.id);
 }
 
 function userIsGuildAdminOrBypass(interaction) {

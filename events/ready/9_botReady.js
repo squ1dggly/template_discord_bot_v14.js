@@ -8,9 +8,7 @@ module.exports = {
     name: "BOT_READY",
     event: "ready",
 
-    /**
-     * @param {Client} client 
-     */
+    /** @param {Client} client  */
     execute: async (client) => {
         logger.success(`${name} successfully connected to Discord`);
     }
