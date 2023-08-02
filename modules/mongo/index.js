@@ -1,4 +1,4 @@
-// Connects us to our Mongo database so we can save and retrieve data.
+/* Connects us to our Mongo database so we can save and retrieve data. */
 
 const logger = require("../logger");
 
@@ -8,12 +8,12 @@ const models = {
 };
 
 const mongoose = require("mongoose");
-const MONGO_URI = process.env.MONGO_URI || require("../configs/config_client").MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI || require("../../configs/config_client.json").MONGO_URI;
 
 //! Database Operations
 
 module.exports = {
-	/** Connect to MongoDB. */
+	/** Connect to MongoDB */
 	connect: async (uri = MONGO_URI) => {
 		// Try to connect to MongoDB
 		let connection = await new Promise((resolve, reject) => {
