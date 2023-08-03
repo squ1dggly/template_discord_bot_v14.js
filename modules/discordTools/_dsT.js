@@ -31,5 +31,9 @@ module.exports = {
 
 	deleteMessageAfter,
 	awaitConfirmation,
-	dynaSend
+	dynaSend,
+
+	markdown: {
+		link: (label, url, tooltip = "") => `[${label}](${url}${tooltip ? ` "${tooltip}"` : ""})`
+	}
 };
