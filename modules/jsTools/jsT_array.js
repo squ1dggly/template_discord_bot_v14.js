@@ -7,7 +7,7 @@ const _o = require("./jsT_object");
 function chunk(arr, size, copy = false) {
 	if (!Array.isArray(arr)) throw new TypeError("A valid array must be provided");
 	if (size <= 0) throw new Error("Size cannot be 0 or negative");
-	if (!arr.length || arr.length < size) return arr;
+	if (!arr.length || arr.length < size) return [arr];
 
 	let chunk = [];
 
