@@ -25,7 +25,18 @@ function chunk(arr, size, copy = false) {
  * @param {string} prop a nested property within each item to filter by
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
 function unique(arr, prop = "", copy = false) {
-	let arr_new = [...new Map(arr.map(item => [_o.getProp(item, prop)], item)).values()];
+	let arr_new = [];
+	let map = new Map();
+
+	for (let item of arr) {
+		let _prop = typeof item === "object" ? _o.getProp(item, prop) : item;
+
+		// prettier-ignore
+		if (!map.has(_prop)) {
+			map.set(_prop, true); arr_new.push(item);
+		}
+	}
+
 	return copy ? structuredClone(arr_new) : arr_new;
 }
 
