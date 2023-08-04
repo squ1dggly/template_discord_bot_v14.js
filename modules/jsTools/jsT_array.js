@@ -14,7 +14,7 @@ function chunk(arr, size, copy = false) {
 	// Iterate through the array
 	for (let i = 0; i < arr.length; i += size) {
 		// Slice the array from the current index
-		chunk = arr.slice(i, i + size);
+		chunk.push(arr.slice(i, i + size));
 	}
 
 	return copy ? structuredClone(chunk) : chunk;
