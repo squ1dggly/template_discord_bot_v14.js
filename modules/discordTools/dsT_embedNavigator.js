@@ -3,7 +3,7 @@
 /** @typedef eN_paginationOptions
  * @property {eN_paginationType} type
  * @property {boolean} useReactions
- * @property {boolean} enableDynamic */
+ * @property {boolean} dynamic */
 
 /** @typedef eN_options
  * @property {CommandInteraction} interaction
@@ -105,21 +105,21 @@ class EmbedNavigator {
 		if (this.data.pagination.required) switch (this.options.pagination.type) {
 			case "short": _buttonStringArray = ["back", "next"]; break;
 
-			case "shortJump": _buttonStringArray = this.options.pagination.enableDynamic
+			case "shortJump": _buttonStringArray = this.options.pagination.dynamic
 				? this.data.pagination.canJump
 					? ["back", "jump", "next"]													// Default state :: { DYNAMIC }
 					: ["back", "next"]															// Short state :: { DYNAMIC }
 				: ["back", "jump", "next"];														// Default state
 				break;
 
-			case "long": _buttonStringArray = this.options.pagination.enableDynamic
+			case "long": _buttonStringArray = this.options.pagination.dynamic
 				? this.data.pagination.requiresLong
 					? ["to_first", "back", "next", "to_last"]									// Default state :: { DYNAMIC }
 					: ["back", "next"]															// Short state :: { DYNAMIC }
 				: ["to_first", "back", "next", "to_last"];										// Default state
 				break;
 
-			case "longJump": _buttonStringArray = this.options.pagination.enableDynamic
+			case "longJump": _buttonStringArray = this.options.pagination.dynamic
 				? this.data.pagination.requiresLong
 					? this.data.canJumpToPage
 						? ["to_first", "back", "jump", "next", "to_last"]						// Default state :: { DYNAMIC }
@@ -228,7 +228,7 @@ class EmbedNavigator {
 				if (!_number || _number > this.data.pages.nested_length) {
 					/// Send a self destructing error message
 					let _message_error = await this.data.message.reply({
-						content: `${user} \`${_number}\` is not a valid page number`
+						content: `${user} \`${_message_user.content}\` is not a valid page number`
 					});
 
 					deleteMesssageAfter(_message_error, _timeouts.error);
@@ -291,7 +291,7 @@ class EmbedNavigator {
 							this.#_updatePage(); return await this.refresh();
 	
 						case config.navigator.buttons.jump.emoji.NAME:
-							return await this.#_askPageNumber(_reaction.user).then(async idx => {
+							return await this.#_askPageNumber(_user).then(async idx => {
 								if (isNaN(idx)) return;
 
 								this.data.pages.idx.nested = _jumpIdx;
@@ -447,7 +447,7 @@ class EmbedNavigator {
 		this.options = {
 			interaction: null, channel: null, users: null, embeds: null,
 			selectMenuEnabled: false,
-			pagination: { type: null, useReactions: false, enableDynamic: false },
+			pagination: { type: null, useReactions: false, dynamic: false },
 			timeout: config.timeouts.PAGINATION, ...options
 		};
 
@@ -511,7 +511,8 @@ class EmbedNavigator {
 	addSelectMenuOptions(...options) {
 		for (let _data of options) {
 			/// Error handling
-			if (Array.isArray(_data)) throw new TypeError("You can't pass an array as an argument for `eN_selectMenuOptionData`");
+			if (Array.isArray(_data))
+				throw new TypeError("You can't pass an array as an argument for `eN_selectMenuOptionData`");
 			if (!_data.emoji && !_data.label) throw new Error("You must provide either an emoji or label");
 
 			let idx_current = this.data.selectMenu.optionValues.length;
@@ -555,7 +556,7 @@ class EmbedNavigator {
 	/** @param {eN_paginationType} type */
 	// prettier-ignore
 	async setPaginationType(type) {
-		this.options.paginationType = type;
+		this.options.pagination.type = type;
 		await this.refresh(); return;
 	}
 

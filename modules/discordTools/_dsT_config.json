@@ -10,11 +10,11 @@
 
 	"navigator": {
 		"buttons": {
-			"to_first": { "TEXT": "◀◀", "emoji": { "NAME": "◀◀", "ID": "◀◀" } },
-			"back": { "TEXT": "◀", "emoji": { "NAME": "◀", "ID": "◀" } },
+			"to_first": { "TEXT": "◀◀", "emoji": { "NAME": "⏮️", "ID": "⏮️" } },
+			"back": { "TEXT": "◀", "emoji": { "NAME": "◀️", "ID": "◀️" } },
 			"jump": { "TEXT": "📄", "emoji": { "NAME": "📄", "ID": "📄" } },
-			"next": { "TEXT": "▶", "emoji": { "NAME": "▶", "ID": "▶" } },
-			"to_last": { "TEXT": "▶▶", "emoji": { "NAME": "▶▶", "ID": "▶▶" } }
+			"next": { "TEXT": "▶", "emoji": { "NAME": "▶️", "ID": "▶️" } },
+			"to_last": { "TEXT": "▶▶", "emoji": { "NAME": "⏭️", "ID": "⏭️" } }
 		}
 	}
 }

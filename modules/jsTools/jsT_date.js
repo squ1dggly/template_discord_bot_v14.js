@@ -67,7 +67,7 @@ function eta(options) {
 	if (isNaN(options.then)) options.then = Date.now() + parseTime(options.then.trim(), "ms");
 	else options.then = +options.then;
 
-	if (!options.then) throw new Error(`\'${options.then}\' is not a valid time/number`);
+	if (typeof options.then !== ("number" || "string")) throw new Error(`\'${options.then}\' is not a valid time/number`);
 
 	// Get the resulting time between the 2 times
 	let timeDifference = _nT.msToSec(options.then - options.now);
