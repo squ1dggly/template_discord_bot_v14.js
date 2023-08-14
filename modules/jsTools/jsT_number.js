@@ -8,22 +8,13 @@ const _oT = require("./jsT_object");
 function sum(arr, path = "", ignoreNaN = false) {
 	path = path.trim();
 
-	// Use object property path
-	if (path)
-		return arr.reduce((a, b) => {
-            b = +_oT.getProp(b, path); if (isNaN(b) && !ignoreNaN)
-                throw new TypeError(`\'${b}\' is not a valid number`);
+	return arr.reduce((a, b) => {
+		let _b = path ? +_oT.getProp(b, path) : +b;
 
-			return b < 0 ? a - -b : a + (b || 0);
-		});
-	// Assume the array is an array of numbers
-	else
-		return arr.reduce((a, b) => {
-            b = +b; if (isNaN(b) && !ignoreNaN)
-				throw new TypeError(`\'${b}\' is not a valid number`);
-			
-			return b < 0 ? a - -b : a + (b || 0);
-		});
+		if (isNaN(b) && !ignoreNaN) throw new TypeError(`\'${b}\' is not a valid number`);
+
+		return _b < 0 ? (a - -_b) : a + (_b || 0);
+	});
 }
 
 // prettier-ignore

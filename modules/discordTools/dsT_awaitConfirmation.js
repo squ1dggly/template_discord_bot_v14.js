@@ -35,18 +35,13 @@ async function awaitConfirmation(options) {
 	/// Error Handeling
 	if (!options.interaction) throw new Error("CommandInteraction not provided");
 
-	// prettier-ignore
 	/// Create the confirmation embed
-	if (options.interaction) options.title.text = options.title.text
-		.replace(/\$USER/g, options.interaction?.user)
-		.replace(/\$USERNAME/g, options.interaction?.member?.displayName || options.interaction?.user?.username);
-
+	// prettier-ignore
 	/** @type {Embed} */
 	let embed = new BetterEmbed({
 		interaction: options.interaction,
-		author: { iconURL: options.showAuthorIcon ? "" : false },
-		description: options.description,
-		footer: { text: options.footer }
+		author: { text: options.title, iconURL: options.showAuthorIcon ? "" : false },
+		description: options.description, footer: options.footer
 	});
 
 	// prettier-ignore
@@ -63,7 +58,7 @@ async function awaitConfirmation(options) {
 	};
 
 	// Action row
-	let actionRow = new ActionRowBuilder().addComponents(...buttons);
+	let actionRow = new ActionRowBuilder().addComponents(...Object.values(buttons));
 
 	// Send the confirmation embed
 	let message = await embed.send({ method: options.sendMethod, components: actionRow });
@@ -73,19 +68,25 @@ async function awaitConfirmation(options) {
 		// Collect button interactions
 		let filter = i => i.componentType === ComponentType.Button && i.user.id === options.interaction.user.id;
 
-		// prettier-ignore
-		message.awaitMessageComponent({ filter, time: options.timeout })
+		message
+			.awaitMessageComponent({ filter, time: options.timeout })
 			.then(async i => {
+				await i.deferUpdate();
+
 				// Return true if the user clicked the confirm button
-				if (i.customId === "btn_confirm")
-					return resolve(true);
-				else
-					return resolve(false);
+				if (i.customId === "btn_confirm") resolve(true);
+				else resolve(false);
+
+				// prettier-ignore
+				// Delete/edit the confirmation embed
+				if (options.deleteOnConfirmation) try { return await message.delete() } catch { }
+				else try { return await message.edit({components: []}) } catch { }
 			})
 			.catch(async () => {
 				// prettier-ignore
-				// Delete the confirmation embed
-				try { await message.delete() } catch { }
+				// Delete/edit the confirmation embed
+				if (options.deleteOnConfirmation) try { return await message.delete() } catch { }
+				else try { return await message.edit({components: []}) } catch { }
 				return resolve(false);
 			});
 	});
