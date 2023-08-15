@@ -40,6 +40,14 @@ function unique(arr, prop = "", copy = false) {
 	return copy ? structuredClone(arr_new) : arr_new;
 }
 
+/** Check if the given item is an array, return the item in an array if it isn't
+ * @param {Array} item array to filter
+ * @param {boolean} copy return a deep copy of the array using structuredClone() */
+function isArray(item, copy) {
+	if (!Array.isArray(item)) item = [item];
+	return copy ? structuredClone(item) : item;
+}
+
 /** Called once for every element in the array
  * @callback bM_callback
  * @param {never} value element being processed
@@ -64,4 +72,4 @@ function betterMap(arr, callback) {
 	return arr_new;
 }
 
-module.exports = { chunk, unique, betterMap };
+module.exports = { chunk, unique, isArray, betterMap };

@@ -42,6 +42,7 @@ class BetterEmbed extends EmbedBuilder {
 			.replace(/\$USERNAME\b/g, this.options.author?.user?.displayName || this.options.author?.user?.username);
 	}
 
+	// TODO: ONLY UPDATE OPTIONS THAT WERE PREVIDED, REGARDLESS IF BLANK
 	/** @param {bE_options} options */
 	#_configure(options = {}) {
 		let _options = { ...this.options, ...options };
@@ -83,27 +84,27 @@ class BetterEmbed extends EmbedBuilder {
 		}
 
 		// Title
-		if (_options.title.text) this.setTitle(_options.title.text);
+		if (_options.title.text) super.setTitle(_options.title.text);
 		// prettier-ignore
 		// Title URL
 		if (_options.title.linkURL)
-			try { this.setURL(_options.title.linkURL); }
+			try { super.setURL(_options.title.linkURL); }
 			catch { logger.error("Could not configure embed", "invalid_linkURL", `\`${_options.title.linkURL}\``); }
 
 		// prettier-ignore
 		// Image URL
 		if (_options.imageURL)
-			try { this.setImage(_options.imageURL); }
+			try { super.setImage(_options.imageURL); }
 			catch { logger.error("Could not configure embed", "invalid_imageURL", `\`${_options.imageURL}\``); }
 
 		// prettier-ignore
 		// Image thumbnail URL
 		if (_options.thumbnailURL)
-			try { this.setThumbnail(_options.thumbnailURL); }
+			try { super.setThumbnail(_options.thumbnailURL); }
 			catch { logger.error("Could not configure embed", "invalid_thumbnailURL", `\`${_options.thumbnailURL}\``); }
 
 		// Description
-		if (_options.description) this.setDescription(_options.description);
+		if (_options.description) super.setDescription(_options.description);
 
 		/// Footer
 		if (_options.footer.text) this.#_setFooter(_options.footer.text, "text");
@@ -112,25 +113,25 @@ class BetterEmbed extends EmbedBuilder {
 		// prettier-ignore
 		// Color
 		if (_options.color.length)
-			try { this.setColor(_options.color.length > 1 ? _jsT.choice(_options.color) : _options.color[0]); }
+			try { super.setColor(_options.color.length > 1 ? _jsT.choice(_options.color) : _options.color[0]); }
 			catch { logger.error("Could not configure embed", "invalid_color", `\`${_options.color}\``); }
 
 		// Timestamp
-		if (_options.showTimestamp) this.setTimestamp();
+		if (_options.showTimestamp) super.setTimestamp();
 	}
 
 	/** @param {string} update @param {"name"|"linkURL"|"iconURL"} type */
 	#_setAuthor(update, type) {
 		// prettier-ignore
 		switch (type) {
-			case "name": return this.setAuthor({ name: update, url: this.data.author?.url, iconURL: this.data.author?.icon_url });
+			case "name": return super.setAuthor({ name: update, url: this.data.author?.url, iconURL: this.data.author?.icon_url });
 
 			case "linkURL":
 				try { return this.setAuthor({ name: this.data.author?.name, url: update, iconURL: this.data.author?.icon_url }); }
 				catch { return logger.error("Could not configure embed", "invalid: author_linkURL", `\`${update}\``); }
 
 			case "iconURL":
-				try { return this.setAuthor({ name: this.data.author?.name, url: this.data.author?.url, iconURL: update }); }
+				try { return super.setAuthor({ name: this.data.author?.name, url: this.data.author?.url, iconURL: update }); }
 				catch { return logger.error("Could not configure embed", "invalid: author_iconURL", `\`${update}\``); }
 
 			default: throw new TypeError(`\`${type}\` is not a valid SetAuthorType`);
@@ -141,10 +142,10 @@ class BetterEmbed extends EmbedBuilder {
 	#_setFooter(update, type) {
 		// prettier-ignore
 		switch (type) {
-			case "text": return this.setFooter({ text: update, iconURL: this.data.footer?.icon_url });
+			case "text": return super.setFooter({ text: update, iconURL: this.data.footer?.icon_url });
 
 			case "iconURL":
-				try { return this.setFooter({ text: this.data.footer?.text, iconURL: update }); }
+				try { return super.setFooter({ text: this.data.footer?.text, iconURL: update }); }
 				catch { logger.error("Could not configure embed", "invalid: footer_iconURL", `\`${update}\``); }
 
 			default: throw new TypeError(`\`${type}\` is not a valid SetFooterType`);
@@ -169,6 +170,26 @@ class BetterEmbed extends EmbedBuilder {
 			showTimestamp: false, ...options
 		};
 
+		this.#_configure();
+	}
+
+	setDescription(description) {
+		this.options.description = description;
+		this.#_configure();
+	}
+
+	setFooter(options) {
+		this.options.footer = options;
+		this.#_configure({ footer: options });
+	}
+
+	setColor(color) {
+		this.options.color = color;
+		this.#_configure();
+	}
+
+	setAuthor(author) {
+		this.options.author = author;
 		this.#_configure();
 	}
 
