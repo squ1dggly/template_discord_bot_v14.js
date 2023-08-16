@@ -17,7 +17,7 @@
 const { Client, SlashCommandBuilder, REST, Routes } = require("discord.js");
 const logger = require("./logger");
 
-const TOKEN = process.env.TOKEN || require("../configs/config_client").TOKEN;
+const TOKEN = process.env.TOKEN || require("../configs/config_client.json").TOKEN;
 
 // Create an instance of the REST api
 const rest = new REST().setToken(TOKEN);
