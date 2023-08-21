@@ -80,13 +80,13 @@ async function awaitConfirmation(options) {
 				// prettier-ignore
 				// Delete/edit the confirmation embed
 				if (options.deleteOnConfirmation) try { return await message.delete() } catch { }
-				else try { return await message.edit({components: []}) } catch { }
+				// else try { return await message.edit({components: []}) } catch { }
 			})
 			.catch(async () => {
 				// prettier-ignore
 				// Delete/edit the confirmation embed
 				if (options.deleteOnConfirmation) try { return await message.delete() } catch { }
-				else try { return await message.edit({components: []}) } catch { }
+				// else try { return await message.edit({components: []}) } catch { }
 				return resolve(false);
 			});
 	});

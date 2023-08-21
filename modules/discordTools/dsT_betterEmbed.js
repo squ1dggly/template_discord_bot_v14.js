@@ -34,6 +34,7 @@ const config = require("./_dsT_config.json");
 const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools/_jsT");
+const logger = require("../logger");
 
 class BetterEmbed extends EmbedBuilder {
 	#_formatMarkdown(str) {
@@ -54,6 +55,7 @@ class BetterEmbed extends EmbedBuilder {
 
 		if (!_options.description) _options.description = " ";
 		if (!_options.author.text) _options.author.text = " ";
+		if (!_options.author.user) _options.author.user = _options.interaction?.member || _options.interaction?.user || null;
 		if (!_options.title.text) _options.title.text = " ";
 		if (!_options.footer.text) _options.footer.text = " ";
 		if (!_options.color) _options.color = config.EMBED_COLOR || "Random";
@@ -68,15 +70,15 @@ class BetterEmbed extends EmbedBuilder {
 		/// Author
 		if (_options.author.text) this.#_setAuthor(_options.author.text, "name");
 		if (_options.author.linkURL) this.#_setAuthor(_options.author.linkURL, "linkURL");
-		if ((_options.author.user || _options.author.iconURL) && ![null, false].includes(_options.author.iconURL)) {
+		if ((_options.author.user || _options.author.iconURL) && ![undefined, null, false].includes(_options.author.iconURL)) {
 			let _avatarURL = _options.author.iconURL || "";
 
 			// prettier-ignore
-			// Check if this is a GuildMember or a User
-			if (_options.author.user?.guild)
-				_avatarURL ||= _options.author.user.user.avatarURL({ dynamic: true });
+			/// Check if this is a GuildMember or a User
+			if (_options.author?.user)
+				_avatarURL = _options.author.user.user.avatarURL({ dynamic: true });
 			else
-				_avatarURL ||= _options.author.user.avatarURL({ dynamic: true });
+				_avatarURL = _options.author.user.avatarURL({ dynamic: true });
 
 			// prettier-ignore
 			try { this.#_setAuthor(_avatarURL, "iconURL"); }
