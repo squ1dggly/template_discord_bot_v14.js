@@ -1,3 +1,19 @@
+/** Called once for every element in the array
+ * @callback bM_callback
+ * @param {never} value element being processed
+ * @param {number} idx index of the element being processed
+ * @param {never} lastElement the last element in the array
+ * @param {Array} arrayNew new array being constructed
+ * @param {Array} arrayOriginal original array being processed */
+
+/** Called once for every element in the array
+ * @callback tM_callback
+ * @param {never} value element being processed
+ * @param {number} idx index of the element being processed
+ * @param {never} lastElement the last element in the map
+ * @param {Map} mapNew new map being constructed
+ * @param {Array} arrayOriginal original array being processed */
+
 const _o = require("./jsT_object");
 
 /** Split an array into smaller arrays that don't exceed a given size
@@ -43,24 +59,17 @@ function unique(arr, prop = "", copy = false) {
 /** Check if the given item is an array, return the item in an array if it isn't
  * @param {Array} item array to filter
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
-function isArray(item, copy) {
+function isArray(item, copy = false) {
 	if (!Array.isArray(item)) item = [item];
 	return copy ? structuredClone(item) : item;
 }
 
-/** Called once for every element in the array
- * @callback bM_callback
- * @param {never} value element being processed
- * @param {number} idx index of the element being processed
- * @param {never} lastElement the last element in the new array
- * @param {Array} arrayNew new array being constructed
- * @param {Array} arrayOriginal original array being processed */
-
 /** Create an array that contains the results of the given callback function
  *
  * - Gives callback access to the new array being constructed
- * @param {bM_callback} callback */
-function betterMap(arr, callback) {
+ * @param {bM_callback} callback
+ * @param {boolean} copy return a deep copy of the array using structuredClone() */
+function betterMap(arr, callback, copy = false) {
 	let arr_original = arr;
 	let arr_new = [];
 
@@ -69,7 +78,29 @@ function betterMap(arr, callback) {
 		arr_new.push(callback(arr_original[idx], idx, _lastElement, arr_new, arr_original));
 	}
 
-	return arr_new;
+	return copy ? structuredClone(arr_new) : arr_new;
 }
 
-module.exports = { chunk, unique, isArray, betterMap };
+/** Create a map that contains the results of the given callback function
+ *
+ * - Gives callback access to the new map being constructed
+ * @param {tM_callback} callback
+ * @param {boolean} copy deep copy each item added to the map using structuredClone() */
+function toMap(arr, callback, copy = false) {
+	let arr_original = arr;
+	let map_new = new Map();
+
+	for (let idx = 0; idx < arr.length; idx++) {
+		let _lastElement = Array.from(map_new.values()).pop();
+		let item = callback(arr[idx], idx, _lastElement, map_new, arr_original);
+
+		if (!"key" in item) throw new Error("Callback did not return a { key }");
+		if (!"value" in item) throw new Error("Callback did not return a { value }");
+
+		map_new.set(item.key, copy ? structuredClone(item.value) : item.value);
+	}
+
+	return map_new;
+}
+
+module.exports = { chunk, unique, isArray, betterMap, toMap };
