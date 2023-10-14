@@ -1,0 +1,32 @@
+{
+	"DATE_FORMAT": "yyyy-mm-dd",
+	"TIMEOUT": "1m",
+
+	"init": {
+        "messageContent": "",
+		"author": { "name": "", "iconURL": "" },
+		"title": { "text": "", "url": "" },
+		"description": "",
+		"footer": "",
+		"color": "",
+        "imageURL": "",
+        "showTimestamp": false
+	},
+
+	"template_default": {
+		"title": { "text": "Embed Maker" },
+		"description": [
+			"# Welcome to the embed maker!",
+			"> Here's some useful tricks to get you started:",
+			"",
+			"- Prefixing a **`channel ID`** with `#` will mention that channel",
+			"- Prefixing a **`user ID`** with `@` will mention that user",
+			"- Prefixing **`USER`** with `$` will mention yourself",
+			"- Prefixing **`USERNAME`** with `$` will be replaced with your user/display name"
+		],
+		"footer": "🔻 Use the buttons down below to get started 🔻",
+		"color": "Random"
+	},
+
+	"templates": []
+}

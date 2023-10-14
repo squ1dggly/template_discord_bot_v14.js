@@ -190,6 +190,11 @@ class BetterEmbed extends EmbedBuilder {
 		this.#_configure();
 	}
 
+	setTitle(title) {
+		this.options.title = title;
+		this.#_configure();
+	}
+
 	setAuthor(author) {
 		this.options.author = author;
 		this.#_configure();
