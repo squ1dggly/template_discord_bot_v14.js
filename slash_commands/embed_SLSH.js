@@ -32,7 +32,7 @@ module.exports = {
 		let template_name = interaction.options.getString("template") || "";
 
 		/// Parse the template
-		let template = { ...config.init, ...config.template_default };
+		let template = config.init;
 		let templateUsed = false;
 
 		// Get the template data if the user selected one
@@ -53,7 +53,7 @@ module.exports = {
 		let embed = new BetterEmbed({ interaction });
 
 		// Apply the template to the embed
-		applyEmbedTemplate(embed, template);
+		applyEmbedTemplate(embed, templateUsed ? template : formatTemplate(config.template_default, interaction.member));
 
 		/* - - - - - { Configure Message Components } - - - - - */
 		// prettier-ignore
@@ -251,6 +251,50 @@ module.exports = {
 					applyEmbedTemplate(embed, template);
 					return await refreshEmbed(message, embed, template);
 
+				case "btn_embedContent":
+					// Set the modal's components
+					modal_embedMaker.setComponents(...modal_actionRows.embedContent);
+
+					// Show the modal and await submit
+					let modalData_embedContent = await showModal(i, modal_embedMaker, collector);
+					if (!modalData_embedContent) return;
+
+					/* - - - - - { Parse Modal Data } - - - - - */
+					template.author.name = modalData_embedContent.fields.getTextInputValue("mti_authorName") || "";
+					template.description = modalData_embedContent.fields.getTextInputValue("mti_description") || "";
+					template.imageURL = modalData_embedContent.fields.getTextInputValue("mti_imageURL") || "";
+					formatTemplate(template, interaction.member);
+
+					// Update the modal's text fields to reflect the updated information
+					modal_components.embedContent[0].setValue(template.author.name);
+					modal_components.embedContent[1].setValue(template.description);
+					modal_components.embedContent[2].setValue(template.imageURL);
+
+					applyEmbedTemplate(embed, template);
+					return await refreshEmbed(message, embed, template);
+
+				case "btn_embedDetails":
+					// Set the modal's components
+					modal_embedMaker.setComponents(...modal_actionRows.embedDetails);
+
+					// Show the modal and await submit
+					let modalData_embedDetails = await showModal(i, modal_embedMaker, collector);
+					if (!modalData_embedDetails) return;
+
+					/* - - - - - { Parse Modal Data } - - - - - */
+					template.author.iconURL = modalData_embedDetails.fields.getTextInputValue("mti_authorIconURL") || "";
+					template.title = modalData_embedDetails.fields.getTextInputValue("mti_titleURL") || "";
+					template.color = modalData_embedDetails.fields.getTextInputValue("mti_color") || "";
+					formatTemplate(template, interaction.member);
+
+					// Update the modal's text fields to reflect the updated information
+					modal_components.embedDetails[0].setValue(template.author.iconURL);
+					modal_components.embedDetails[1].setValue(template.title);
+					modal_components.embedDetails[2].setValue(template.color);
+
+					applyEmbedTemplate(embed, template);
+					return await refreshEmbed(message, embed, template);
+
 				case "btn_timestamp":
 					await i.deferUpdate();
 
@@ -288,30 +332,39 @@ function formatTemplate(template, user) {
 		// Self username
 		.replace(/\$USERNAME\b/g, user?.displayName || user?.username || "{invalid user}");
 
-	template.messageContent = parse(template.messageContent);
-	template.author.name = parse(template.author.name);
-	template.title.text = parse(template.title.text);
-	template.description = parse(template.description);
-	template.footer = parse(template.footer);
+	if (template.messageContent) template.messageContent = parse(template.messageContent);
+	if (template.author?.name) template.author.name = parse(template.author.name);
+	if (template.title?.text) template.title.text = parse(template.title.text);
+	if (template.description) template.description = parse(template.description);
+	if (template.footer) template.footer = parse(template.footer);
+
+	return template;
 }
 
 function applyEmbedTemplate(embed, template) {
 	/// Author
-	if (template.author.name) embed.setAuthor({ name: template.author.name });
+	if (template.author?.name) embed.setAuthor({ name: template.author.name });
+	else embed.setAuthor({ name: null });
+
 	// prettier-ignore
-	if (template.author.iconURL) try {
+	if (template.author?.iconURL) try {
 		embed.setAuthor({ iconURL: template.author.iconURL });
 	} catch { }
+	else embed.setAuthor({ iconURL: null });
 
 	/// Title
-	if (template.title.text) embed.setTitle(template.title.text);
+	if (template.title?.text) embed.setTitle(template.title.text);
+	else embed.setTitle(null);
+
 	// prettier-ignore
-	if (template.title.url) try {
+	if (template.title?.url) try {
 		embed.setURL(template.title.url);
 	} catch { }
+	else embed.setURL(null);
 
 	// Description
 	if (template.description) embed.setDescription(template.description);
+	else embed.setDescription(null);
 
 	// Footer
 	if (template.footer) embed.setFooter(template.footer);
@@ -325,6 +378,10 @@ function applyEmbedTemplate(embed, template) {
 	if (template.color) try {
 		embed.setColor(template.color);
 	} catch { }
+	else embed.setColor(null);
+
+	if (!template.author?.name && !template.title?.text && !template.description && !template.imageURL)
+		embed.setDescription("Embeds can't be empty!");
 
 	return embed;
 }
@@ -333,11 +390,15 @@ function applyEmbedTemplate(embed, template) {
  * @param {CommandInteraction} interaction @param {ModalBuilder} modal  @param {InteractionCollector} collector */
 async function showModal(interaction, modal, collector) {
 	try {
+		// Reset the modal's customId so canceling doesn't break the next modal submit
+		let uniqueID = `modal_embedMaker_${Date.now()}`;
+		modal.setCustomId(uniqueID);
+
 		// Show the modal
 		await interaction.showModal(modal);
 
 		// Create a filter to look for the correct modal
-		let modalSubmit_filter = i => i.customId === modal.data.custom_id;
+		let modalSubmit_filter = i => i.customId === uniqueID;
 
 		// Create a collector to catch the modal submit | timeout after 10 minutes
 		let modalSubmit = await interaction.awaitModalSubmit({ filter: modalSubmit_filter, time: timeouts.base });
