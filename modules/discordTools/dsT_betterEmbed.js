@@ -124,13 +124,18 @@ class BetterEmbed extends EmbedBuilder {
 
 			// Remove the avatar icon from the embed
 			else if (this.options.author.iconURL === null)
-				super.setAuthor({ iconURL: null });
-		} catch {
+				this.data.author.icon_url = undefined;
+		} catch (err) {
+			// console.error(err);
 			logger.error("Could not configure embed", "invalid_authorIconURL", `\`${this.options.author.iconURL}\``);
 		}
 
 		try {
-			super.setAuthor({ url: this.options.author.linkURL });
+			// prettier-ignore
+			if (this.options.author.linkURL)
+				super.setAuthor({ url: this.options.author.linkURL });
+			else
+				this.data.author.url = undefined;
 		} catch {
 			logger.error("Could not configure embed", "invalid_authorLinkURL", `\`${this.options.author.linkURL}\``);
 		}
@@ -161,7 +166,11 @@ class BetterEmbed extends EmbedBuilder {
 		super.setTitle(this.#_formatMarkdown(this.options.title.text));
 
 		try {
-			super.setURL(this.options.title.linkURL);
+			// prettier-ignore
+			if (this.options.title.linkURL)
+				super.setURL(this.options.title.linkURL);
+			else
+				this.data.url = undefined;
 		} catch {
 			logger.error("Could not configure embed", "invalid_titleLinkURL", `\`${this.options.title.linkURL}\``);
 		}
@@ -182,7 +191,11 @@ class BetterEmbed extends EmbedBuilder {
 
 	#_setThumbnail() {
 		try {
-			super.setImage(this.options.thumbnailURL);
+			// prettier-ignore
+			if (this.options.thumbnailURL)
+				super.setThumbnail(this.options.thumbnailURL);
+			else
+				this.data.thumbnail = undefined;
 		} catch {
 			logger.error("Could not configure embed", "invalid_thumbnailURL", `\`${this.options.thumbnailURL}\``);
 		}
@@ -208,7 +221,11 @@ class BetterEmbed extends EmbedBuilder {
 
 	#_setImage() {
 		try {
-			super.setImage(this.options.imageURL);
+			// prettier-ignore
+			if (this.options.imageURL)
+				super.setImage(this.options.imageURL);
+			else
+				this.data.image = undefined;
 		} catch {
 			logger.error("Could not configure embed", "invalid_imageURL", `\`${this.options.imageURL}\``);
 		}
@@ -239,7 +256,11 @@ class BetterEmbed extends EmbedBuilder {
 		super.setFooter({ text: this.#_formatMarkdown(this.options.footer.text) });
 
 		try {
-			super.setFooter({ iconURL: this.options.footer.iconURL });
+			// prettier-ignore
+			if (this.options.footer.iconURL)
+				super.setFooter({ iconURL: this.options.footer.iconURL });
+			else
+				this.data.footer.icon_url = undefined;
 		} catch {
 			logger.error("Could not configure embed", "invalid_footerIconURL", `\`${this.options.footer.iconURL}\``);
 		}
