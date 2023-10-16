@@ -343,42 +343,22 @@ function formatTemplate(template, user) {
 
 function applyEmbedTemplate(embed, template) {
 	/// Author
-	if (template.author?.name) embed.setAuthor({ name: template.author.name });
-	else embed.setAuthor({ name: null });
-
-	// prettier-ignore
-	if (template.author?.iconURL) try {
-		embed.setAuthor({ iconURL: template.author.iconURL });
-	} catch { }
-	else embed.setAuthor({ iconURL: null });
+	embed.setAuthor({ text: template.author?.name || null, iconURL: template.author?.iconURL || null });
 
 	/// Title
-	if (template.title?.text) embed.setTitle(template.title.text);
-	else embed.setTitle(null);
-
-	// prettier-ignore
-	if (template.title?.url) try {
-		embed.setURL(template.title.url);
-	} catch { }
-	else embed.setURL(null);
+	embed.setTitle({ text: template.title?.text || null, linkURL: template.title?.url || null });
 
 	// Description
-	if (template.description) embed.setDescription(template.description);
-	else embed.setDescription(null);
+	embed.setDescription(template.description);
 
 	// Footer
-	if (template.footer) embed.setFooter(template.footer);
+	embed.setFooter(template.footer);
 
 	// Timestamp
-	if (template.showTimestamp) embed.setTimestamp();
-	else embed.setTimestamp(null);
+	embed.setTimestamp();
 
-	// prettier-ignore
 	// Color
-	if (template.color) try {
-		embed.setColor(template.color);
-	} catch { }
-	else embed.setColor(null);
+	embed.setColor(template.color);
 
 	if (!template.author?.name && !template.title?.text && !template.description && !template.imageURL)
 		embed.setDescription("Embeds can't be empty!");

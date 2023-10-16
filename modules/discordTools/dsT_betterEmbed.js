@@ -271,10 +271,10 @@ class BetterEmbed extends EmbedBuilder {
 		// prettier-ignore
 		/// Format color strings
 		if (Array.isArray(color)) color.forEach((str, idx) => {
-			if (str[0] !== "#") color[idx] = `#${str}`.trim().toUpperCase();
+			if (str[0] !== "#") color[idx] = `#${str}`.trim();
 			else color[idx] = str.trim().toUpperCase();
 		});
-		else if (color !== null) color = color.trim().toUpperCase();
+		else if (color !== null) color = color.trim();
 
 		this.options.color = color || config.EMBED_COLOR;
 		this.#_setColor();
@@ -375,7 +375,7 @@ class BetterEmbed extends EmbedBuilder {
 			interaction: null, channel: null,
 			messageContent: "", components: [], allowedMentions: {},
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
-			...options
+			...this.options, ...options
 		};
 
 		this.#_configure(options);
