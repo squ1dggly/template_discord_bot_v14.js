@@ -44,8 +44,21 @@ const _jsT = require("../jsTools/_jsT");
 const logger = require("../logger");
 
 class BetterEmbed extends EmbedBuilder {
+	#init = {
+		interaction: null,
+		channel: null,
+		author: { user: null, text: null, iconURL: null, linkURL: null },
+		title: { text: null, linkURL: null },
+		thumbnailURL: null,
+		description: null,
+		imageURL: null,
+		footer: { text: null, iconURL: null },
+		color: config.EMBED_COLOR || null,
+		timestamp: null
+	};
+
 	#_formatMarkdown(str) {
-		if (!str) return str;
+		if (!str) return null;
 
 		return str
 			.replace(/\$USER\b/g, this.options.author?.user)
@@ -59,25 +72,11 @@ class BetterEmbed extends EmbedBuilder {
 	 * @param {bE_options} options */
 	constructor(options) {
 		super();
-
-		this.options = {
-			interaction: null,
-			channel: null,
-			author: { user: null, text: null, iconURL: null, linkURL: null },
-			title: { text: null, linkURL: null },
-			thumbnailURL: null,
-			description: null,
-			imageURL: null,
-			footer: { text: null, iconURL: null },
-			color: config.EMBED_COLOR || null,
-			timestamp: false,
-			...options
-		};
-
-		this.#_configureAll();
+		this.options = { ...this.#init, ...options };
+		this.#_configure();
 	}
 
-	/** Sets the author of this embed @param {bE_author} author */
+	/** Set this embed's author @param {bE_author} author */
 	setAuthor(author) {
 		let _author = { user: null, text: null, iconURL: null, linkURL: null };
 
@@ -137,7 +136,7 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Sets the title of this embed @param {bE_title} title */
+	/** Set this embed's title @param {bE_title} title */
 	setTitle(title) {
 		let _title = { text: null, linkURL: null };
 
@@ -174,7 +173,7 @@ class BetterEmbed extends EmbedBuilder {
 		return this;
 	}
 
-	/** Sets the thumbnail of this embed @param {bE_thumbnailURL} url */
+	/** Set this embed's thumbnail @param {bE_thumbnailURL} url */
 	setThumbnail(url) {
 		this.options.thumbnailURL = url;
 		this.#_setThumbnail();
@@ -189,7 +188,7 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Sets the description of this embed @param {bE_description} description */
+	/** Set this embed's description @param {bE_description} description */
 	setDescription(description) {
 		this.options.description = this.#_formatMarkdown(description);
 		this.#_setDescription();
@@ -200,7 +199,7 @@ class BetterEmbed extends EmbedBuilder {
 		super.setDescription(this.#_formatMarkdown(this.options.description));
 	}
 
-	/** Sets the image of this embed @param {bE_imageURL} url */
+	/** Set this embed's image @param {bE_imageURL} url */
 	setImage(url) {
 		this.options.imageURL = url;
 		this.#_setImage();
@@ -215,7 +214,7 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Sets the footer of this embed @param {bE_footer} footer */
+	/** Set this embed's footer @param {bE_footer} footer */
 	setFooter(footer) {
 		let _footer = { text: null, iconURL: null };
 
@@ -246,7 +245,7 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Sets the color of this embed @param {bE_footer} color */
+	/** Set this embed's color @param {bE_footer} color */
 	setColor(color) {
 		// prettier-ignore
 		/// Format color strings
@@ -271,9 +270,9 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	/** Sets the timestamp of this embed @param {bE_timestamp} timestamp */
+	/** Set this embed's timestamp @param {bE_timestamp} timestamp */
 	setTimestamp(timestamp) {
-		this.options.timestamp = timestamp;
+		this.options.timestamp = timestamp || null;
 		this.#_setTimestamp();
 		return this;
 	}
@@ -293,26 +292,54 @@ class BetterEmbed extends EmbedBuilder {
 		}
 	}
 
-	#_configureAll(options_temporary) {
-		let options_previous = structuredClone(this.options);
-		this.options = options_temporary;
+	#_parseOptions() {
+		/* - - - - - { Cleanup Shorthand Configurations } - - - - - */
+		if (typeof this.options.author === "string")
+			this.options.author = { user: null, text: this.options.author, iconURL: null, linkURL: null };
 
-		/// Formatting
+		// prettier-ignore
+		if (typeof this.options.title === "string")
+			this.options.title = { text: this.options.title, linkURL: null };
+
+		// prettier-ignore
+		if (typeof this.options.footer === "string")
+			this.options.footer = { text: this.options.footer, iconURL: null };
+
+		// Add the interaction's member as the author's user if needed
+		if (!this.options.author.user && this.options.interaction)
+			this.options.author.user = this.options.interaction.member;
+
+		/* - - - - - { Formatting } - - - - - */
 		this.options.author.text = this.#_formatMarkdown(this.options.author.text);
 		this.options.title.text = this.#_formatMarkdown(this.options.title.text);
-		this.options.description = this.#_formatMarkdown(description);
+		this.options.description = this.#_formatMarkdown(this.options.description);
 		this.options.footer.text = this.#_formatMarkdown(this.options.footer.text);
+	}
 
-		this.#_setAuthor();
-		this.#_setTitle();
-		this.#_setThumbnail();
-		this.#_setDescription();
-		this.#_setImage();
-		this.#_setFooter();
-		this.#_setColor();
-		this.#_setTimestamp();
+	/** @param {{}} options Configure with temporary options */
+	#_configure(options) {
+		const execute = () => {
+			this.#_setAuthor();
+			this.#_setTitle();
+			this.#_setThumbnail();
+			this.#_setDescription();
+			this.#_setImage();
+			this.#_setFooter();
+			this.#_setColor();
+			this.#_setTimestamp();
+		};
 
-		this.options = options_previous;
+		if (options) {
+			let _prev = structuredClone(this.options);
+
+			this.options = { ...this.options, ...options };
+			execute();
+			this.options = _prev;
+			return;
+		}
+
+		this.#_parseOptions();
+		execute();
 	}
 
 	/** Send the embed using the interaction or channel
@@ -327,15 +354,15 @@ class BetterEmbed extends EmbedBuilder {
 			interaction: null, channel: null,
 			messageContent: "", components: [], allowedMentions: {},
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
-			...this.options, ...options
+			...options
 		};
 
-		this.#_configureAll(options);
+		this.#_configure(options);
 		options.messageContent = this.#_formatMarkdown(options.messageContent);
 		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
 
 		// If a single component was given, convert it into an array
-		if (!Array.isArray(options.components)) options.components = [options.components];
+		options.components = _jsT.isArray(options.components);
 
 		// Send the message
 		return await dynaSend({ embeds: [this], ...options });
