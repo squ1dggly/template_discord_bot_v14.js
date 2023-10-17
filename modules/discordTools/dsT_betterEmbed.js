@@ -98,35 +98,37 @@ class BetterEmbed extends EmbedBuilder {
 
 	#_setAuthor() {
 		super.setAuthor({ name: this.#_formatMarkdown(this.options.author.text) });
+		this.#_parseOptions();
 
 		try {
 			// prettier-ignore
 			if (typeof this.options.author.iconURL === "string")
-				super.setAuthor({ iconURL: this.options.author.iconURL });
+				super.setAuthor({ name: this.options.author.text, iconURL: this.options.author.iconURL });
 
 			else if (this.options.author.iconURL === true) {
 				let _iconURL = "";
 
 				// Get the avatar URL of the provided user
 				if (this.options.author.user) {
-					if (this.options.author.user instanceof GuildMember)
+					try {
 						_iconURL = this.options.author.user.user.avatarURL({ dynamic: true });
-					else if (this.options.author.user instanceof User)
+					} catch {
 						_iconURL = this.options.author.user.avatarURL({ dynamic: true });
+					}
 				}
 
 				// Get the avatar URL from the user's interaction
 				else if (this.options.interaction)
 					_iconURL = this.options.interaction.user.avatarURL({ dynamic: true });
 
-				super.setAuthor({ iconURL: _iconURL });
+				super.setAuthor({ name: this.options.author.text, iconURL: _iconURL });
 			}
 
 			// Remove the avatar icon from the embed
 			else if (this.options.author.iconURL === null)
 				this.data.author.icon_url = undefined;
 		} catch (err) {
-			// console.error(err);
+			console.error(err);
 			logger.error("Could not configure embed", "invalid_authorIconURL", `\`${this.options.author.iconURL}\``);
 		}
 

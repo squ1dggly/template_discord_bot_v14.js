@@ -101,10 +101,18 @@ module.exports = {
 
 			embedContent: [
 				new TextInputBuilder()
-					.setCustomId("mti_authorName")
+					.setCustomId("mti_authorText")
 					.setLabel("Author:")
 					.setStyle(TextInputStyle.Short)
-					.setValue((templateUsed ? template : config.init).author?.name || "")
+					.setValue((templateUsed ? template : config.init).author?.text || "")
+					.setMaxLength(256)
+					.setRequired(false),
+
+				new TextInputBuilder()
+					.setCustomId("mti_titleText")
+					.setLabel("Title:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).title?.text || "")
 					.setMaxLength(256)
 					.setRequired(false),
 
@@ -133,7 +141,7 @@ module.exports = {
 					.setRequired(false),
 
 				new TextInputBuilder()
-					.setCustomId("mti_titleURL")
+					.setCustomId("mti_titleLinkURL")
 					.setLabel("Title URL (this makes the title into a link):")
 					.setStyle(TextInputStyle.Short)
 					.setValue((templateUsed ? template : config.init).title?.url || "")
@@ -187,52 +195,6 @@ module.exports = {
 
 			// Determine the operation
 			switch (i.customId) {
-				case "btn_edit":
-					// Set the modal's components
-					modal_embedMaker.setComponents(...modal_actionRow);
-
-					// Show the modal and await submit
-					let modalData_edit = await showModal(i, modal_embedMaker, collector);
-					if (!modalData_edit) return;
-
-					/* - - - - - { Parse Modal Data } - - - - - */
-					data.messageContent = modalData_edit.fields.getTextInputValue("mti_messageContent") || "";
-					data.embed.author.name = modalData_edit.fields.getTextInputValue("mti_authorName") || "";
-					data.embed.author.iconURL = modalData_edit.fields.getTextInputValue("mti_authorIconURL") || "";
-					data.embed.description = modalData_edit.fields.getTextInputValue("mti_description") || "";
-					data.embed.imageURL = modalData_edit.fields.getTextInputValue("mti_imageURL") || "";
-					formatCustomizedData(data);
-
-					/// Update the modal's text fields to show the updated information
-					modal_components[0].setValue(data.messageContent);
-					modal_components[1].setValue(data.embed.author.name);
-					modal_components[2].setValue(data.embed.author.iconURL);
-					modal_components[3].setValue(data.embed.description);
-					modal_components[4].setValue(data.embed.imageURL);
-
-					/// Update the embed
-					if (data.embed.author.name) embed.setAuthor({ name: data.embed.author.name });
-
-					// prettier-ignore
-					if (data.embed.author.iconURL) try {
-						embed.setAuthor({ iconURL: data.embed.author.iconURL });
-					} catch {
-						await i.followUp({ content: `An invalid author icon URL was provided`, ephemeral: true });
-						modal_components[2].setValue("");
-					}
-
-					if (data.embed.description) embed.setDescription(data.embed.description);
-
-					if (data.embed.imageURL)
-						try {
-							embed.setImage(data.embed.imageURL);
-						} catch {
-							await i.followUp({ content: `An invalid image URL was provided`, ephemeral: true });
-							modal_components[4].setValue("");
-						}
-
-					return await refreshEmbed(message, embed, data);
-
 				case "btn_message":
 					// Set the modal's components
 					modal_embedMaker.setComponents(...modal_actionRows.message);
@@ -260,15 +222,17 @@ module.exports = {
 					if (!modalData_embedContent) return;
 
 					/* - - - - - { Parse Modal Data } - - - - - */
-					template.author.name = modalData_embedContent.fields.getTextInputValue("mti_authorName") || "";
+					template.author.text = modalData_embedContent.fields.getTextInputValue("mti_authorText") || "";
+					template.title.text = modalData_embedContent.fields.getTextInputValue("mti_titleText") || "";
 					template.description = modalData_embedContent.fields.getTextInputValue("mti_description") || "";
 					template.imageURL = modalData_embedContent.fields.getTextInputValue("mti_imageURL") || "";
 					formatTemplate(template, interaction.member);
 
 					// Update the modal's text fields to reflect the updated information
-					modal_components.embedContent[0].setValue(template.author.name);
-					modal_components.embedContent[1].setValue(template.description);
-					modal_components.embedContent[2].setValue(template.imageURL);
+					modal_components.embedContent[0].setValue(template.author.text);
+					modal_components.embedContent[1].setValue(template.title.text);
+					modal_components.embedContent[2].setValue(template.description);
+					modal_components.embedContent[3].setValue(template.imageURL);
 
 					applyEmbedTemplate(embed, template);
 					return await refreshEmbed(message, embed, template);
@@ -283,13 +247,13 @@ module.exports = {
 
 					/* - - - - - { Parse Modal Data } - - - - - */
 					template.author.iconURL = modalData_embedDetails.fields.getTextInputValue("mti_authorIconURL") || "";
-					template.title = modalData_embedDetails.fields.getTextInputValue("mti_titleURL") || "";
+					template.title.linkURL = modalData_embedDetails.fields.getTextInputValue("mti_titleLinkURL") || "";
 					template.color = modalData_embedDetails.fields.getTextInputValue("mti_color") || "";
 					formatTemplate(template, interaction.member);
 
 					// Update the modal's text fields to reflect the updated information
 					modal_components.embedDetails[0].setValue(template.author.iconURL);
-					modal_components.embedDetails[1].setValue(template.title);
+					modal_components.embedDetails[1].setValue(template.title.linkURL);
 					modal_components.embedDetails[2].setValue(template.color);
 
 					applyEmbedTemplate(embed, template);
@@ -298,7 +262,7 @@ module.exports = {
 				case "btn_timestamp":
 					await i.deferUpdate();
 
-					template.showTimestamp = !template.showTimestamp;
+					template.timestamp = !template.timestamp;
 
 					applyEmbedTemplate(embed, template);
 					return await refreshEmbed(message, embed, template);
@@ -333,7 +297,7 @@ function formatTemplate(template, user) {
 		.replace(/\$USERNAME\b/g, user?.displayName || user?.username || "{invalid user}");
 
 	if (template.messageContent) template.messageContent = parse(template.messageContent);
-	if (template.author?.name) template.author.name = parse(template.author.name);
+	if (template.author?.text) template.author.text = parse(template.author.text);
 	if (template.title?.text) template.title.text = parse(template.title.text);
 	if (template.description) template.description = parse(template.description);
 	if (template.footer) template.footer = parse(template.footer);
@@ -342,25 +306,29 @@ function formatTemplate(template, user) {
 }
 
 function applyEmbedTemplate(embed, template) {
-	/// Author
-	embed.setAuthor({ text: template.author?.name || null, iconURL: template.author?.iconURL || null });
+	// Author
+	embed.setAuthor({ text: template.author?.text || null, iconURL: template.author?.iconURL || null });
 
-	/// Title
-	embed.setTitle({ text: template.title?.text || null, linkURL: template.title?.url || null });
+	// Title
+	embed.setTitle({ text: template.title?.text || null, linkURL: template.title?.linkURL || null });
 
 	// Description
-	embed.setDescription(template.description);
+	embed.setDescription(template.description || null);
 
 	// Footer
-	embed.setFooter(template.footer);
+	embed.setFooter(template.footer || null);
+
+	// Image URL
+	embed.setImage(template.imageURL || null);
 
 	// Timestamp
-	embed.setTimestamp();
+	embed.setTimestamp(template.timestamp);
 
 	// Color
-	embed.setColor(template.color);
+	embed.setColor(template.color || null);
 
-	if (!template.author?.name && !template.title?.text && !template.description && !template.imageURL)
+	// Prevents crashing as embeds cannot be empty
+	if (!template.author?.text && !template.title?.text && !template.description && !template.imageURL)
 		embed.setDescription("Embeds can't be empty!");
 
 	return embed;

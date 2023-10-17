@@ -4,13 +4,13 @@
 
 	"init": {
         "messageContent": "",
-		"author": { "name": "", "iconURL": "" },
-		"title": { "text": "", "url": "" },
+		"author": { "text": "", "iconURL": "" },
+		"title": { "text": "", "linkURL": "" },
 		"description": "",
 		"footer": "",
 		"color": "",
         "imageURL": "",
-        "showTimestamp": false
+        "timestamp": false
 	},
 
 	"template_default": {
