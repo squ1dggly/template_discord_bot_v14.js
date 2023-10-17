@@ -3,7 +3,7 @@ const {
 	Client, Message, CommandInteraction, InteractionCollector,
 	SlashCommandBuilder, ModalBuilder, TextInputBuilder,
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
-	ButtonStyle, ComponentType, TextInputStyle,
+	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder,
 } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools/_dsT");
@@ -61,9 +61,18 @@ module.exports = {
 		let message_components = {
 			/// Edit
 			message: new ButtonBuilder().setLabel("Message").setStyle(ButtonStyle.Secondary).setCustomId("btn_message"),
-			embedContent: new ButtonBuilder().setLabel("Embed Content").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedContent"),
-			embedDetails: new ButtonBuilder().setLabel("Embed Details").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedDetails"),
+			embedContent: new ButtonBuilder().setLabel("Content").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedContent"),
+			embedDetails: new ButtonBuilder().setLabel("Details").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedDetails"),
+			fieldMode_toggle: new ButtonBuilder().setLabel("Fields").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_toggle"),
 			timestamp: new ButtonBuilder().setLabel("Timestamp").setStyle(ButtonStyle.Primary).setCustomId("btn_timestamp"),
+
+			/// Field Edit Mode
+			fieldMode_selectMenu: new StringSelectMenuBuilder().setOptions({label: "deez nuts", value: "defr"}).setPlaceholder("Select a field to edit...").setCustomId("ssm_fieldSelect"),
+
+			fieldMode_back: new ButtonBuilder().setLabel("Back").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_back"),
+			fieldMode_add: new ButtonBuilder().setLabel("Add").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_add"),
+			fieldMode_remove: new ButtonBuilder().setLabel("Remove").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_remove"),
+			fieldMode_edit: new ButtonBuilder().setLabel("Edit").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_edit"),
 
 			/// Submit
 			confirm: new ButtonBuilder().setLabel("Confirm").setStyle(ButtonStyle.Success).setCustomId("btn_confirm"),
@@ -71,15 +80,25 @@ module.exports = {
 		};
 
 		// Create the embed's ActionRow
-		let embed_actionRows = {
-			edit: new ActionRowBuilder().addComponents(
+		let message_actionRow = {
+			buttons_edit: new ActionRowBuilder().addComponents(
 				message_components.message,
 				message_components.embedContent,
 				message_components.embedDetails,
+				message_components.fieldMode_toggle,
 				message_components.timestamp
 			),
 
-			submit: new ActionRowBuilder().addComponents(message_components.confirm, message_components.cancel)
+			buttons_fieldMode: new ActionRowBuilder().addComponents(
+				message_components.fieldMode_back,
+				message_components.fieldMode_add,
+				message_components.fieldMode_remove,
+				message_components.fieldMode_edit
+			),
+
+			buttons_submit: new ActionRowBuilder().addComponents(message_components.confirm, message_components.cancel),
+
+			selectMenu_fieldMode: new ActionRowBuilder().addComponents(message_components.fieldMode_selectMenu)
 		};
 
 		/* - - - - - { Configure the Modal } - - - - - */
@@ -166,7 +185,9 @@ module.exports = {
 		// let modal_actionRow = modal_components..map(component => new ActionRowBuilder().addComponents(component));
 
 		// Send the base embed
-		let message = await embed.send({ components: [embed_actionRows.edit, embed_actionRows.submit] });
+		let message = await embed.send({
+			components: [message_actionRow.buttons_edit, message_actionRow.buttons_submit]
+		});
 
 		/* - - - - - { Collect Button Interactions } - - - - - */
 		// Create a filter to look for only button interactions from the user that ran this command
@@ -266,6 +287,18 @@ module.exports = {
 
 					applyEmbedTemplate(embed, template);
 					return await refreshEmbed(message, embed, template);
+
+				case "btn_fieldMode_toggle":
+					await i.deferUpdate();
+					return await message.edit({
+						components: [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
+					});
+
+				case "btn_fieldMode_back":
+					await i.deferUpdate();
+					return await message.edit({
+						components: [message_actionRow.buttons_edit, message_actionRow.buttons_submit]
+					});
 
 				case "btn_cancel":
 					await i.deferUpdate();
