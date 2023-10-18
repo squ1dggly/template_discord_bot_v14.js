@@ -12,7 +12,8 @@ const _jsT = require("../modules/jsTools/_jsT");
 const config = require("./embed_config.json");
 
 const timeouts = {
-	base: _jsT.parseTime(config.TIMEOUT)
+	base: _jsT.parseTime(config.timeouts.BASE),
+	channelSelect: _jsT.parseTime(config.timeouts.CHANNEL_SELECT)
 };
 
 module.exports = {
@@ -221,7 +222,7 @@ module.exports = {
 		});
 
 		/* - - - - - { Collect Interactions } - - - - - */
-		// Create a filter to look for only button interactions from the user that ran this command
+		// Create a filter to look for interactions from the user that ran this command
 		let filter = i => {
 			let passed = i.user.id === interaction.user.id;
 
@@ -351,6 +352,11 @@ module.exports = {
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_fieldMode_add":
+					// prettier-ignore
+					if (template?.fields && template.fields.length >= 25) return await i.reply({
+						content: "You can only have a max of `25` fields", ephemeral: true
+					});
+
 					/// Configure the components being used
 					modal_components.fieldEdit[0].setValue("");
 					modal_components.fieldEdit[1].setValue("");
@@ -490,6 +496,91 @@ module.exports = {
 						ephemeral: true
 					});
 
+				case "btn_confirm":
+					await i.deferUpdate();
+
+					/// Update the embed to reflect its final changes
+					formatTemplate(template, interaction.member);
+					applyEmbedTemplate(embed, message_components, template);
+					await refreshEmbed(message, embed, template);
+
+					/// Send a follow up message asking where the user wants to send the embed
+					let cS_channelSelectMenu = new ChannelSelectMenuBuilder()
+						.setCustomId("csm_channelSelect")
+						.setPlaceholder("Select channel(s)...")
+						.setMinValues(1)
+						.setMaxValues(5);
+
+					let cS_actionRow = new ActionRowBuilder().addComponents(cS_channelSelectMenu);
+
+					// Send the message
+					let cS_message = await message.reply({ components: [cS_actionRow] });
+
+					/* - - - - - { Collect Interactions } - - - - - */
+					// Create a filter to look for interactions from the user that ran this command
+					let cS_filter = cS_i =>
+						cS_i.componentType === ComponentType.ChannelSelect && cS_i.user.id === interaction.user.id;
+
+					// Create an interaction collector
+					return await cS_message
+						.awaitMessageComponent({ filter: cS_filter, time: timeouts.channelSelect })
+						.then(async cS_i => {
+							await cS_i.deferUpdate();
+
+							// Send the custom embed to the selected channels
+							cS_i.channels.forEach(c => c.send({ content: template.messageContent, embeds: [embed] }));
+
+							// prettier-ignore
+							// Delete this message
+							try { await cS_message.delete(); } catch { }
+
+							// End the main interaction collector
+							collector.stop();
+						})
+						.catch(async err => {
+							// Log the error
+							console.log(err);
+
+							// Let the user know something went wrong
+							try {
+								await message.reply({ content: "An error occurred while sending the embeds. Try again" });
+							} catch {}
+
+							// prettier-ignore
+							// Delete this message
+							try { await cS_message.delete(); } catch { }
+						});
+
+				/* // Get the channels from the followUp message
+					// Create a filter to look for only channel select interactions from the user that ran this command
+					let filter_channels = ii =>
+						ii.componentType === ComponentType.ChannelSelect && ii.user.id === interaction.user.id;
+
+					// Create a collector to catch interactions | timeout after 5 minutes
+					return await message_channelSelect
+						.awaitMessageComponent({ filter: filter_channels, time: 300000 })
+						.then(async ii => {
+							// Send the custom embed to the selected channels
+							ii.channels.forEach(channel => channel.send({ content: messageContent, embeds: [embed] }));
+
+							// Delete the channel select message
+							try {
+								await message_channelSelect.delete();
+							} catch {}
+
+							// End the button collector
+							collector.stop();
+						})
+						.catch(async err => {
+							// Log the error
+							console.error(err);
+
+							// Delete the channel select message
+							try {
+								await message_channelSelect.delete();
+							} catch {}
+						}); */
+
 				case "btn_cancel":
 					await i.deferUpdate();
 					return collector.stop();
@@ -541,13 +632,14 @@ function formatTemplate(template, user) {
 
 function applyEmbedTemplate(embed, messageComponents, template) {
 	// Set field select menu options
-	messageComponents.fieldMode_selectMenu.setOptions(
-		template.fields.map((f, idx) => ({
-			label: `Field ${idx + 1}`,
-			value: `field_${idx + 1}`,
-			description: `${f.name.substring(0, 16)}...`
-		}))
-	);
+	if (template?.fields && template.fields.length)
+		messageComponents.fieldMode_selectMenu.setOptions(
+			template.fields.map((f, idx) => ({
+				label: `Field ${idx + 1}`,
+				value: `field_${idx + 1}`,
+				description: `${f.name.substring(0, 16)}...`
+			}))
+		);
 
 	// Author
 	embed.setAuthor({ text: template.author?.text || null, iconURL: template.author?.iconURL || null });
