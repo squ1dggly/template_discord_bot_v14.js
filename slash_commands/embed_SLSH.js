@@ -551,36 +551,6 @@ module.exports = {
 							try { await cS_message.delete(); } catch { }
 						});
 
-				/* // Get the channels from the followUp message
-					// Create a filter to look for only channel select interactions from the user that ran this command
-					let filter_channels = ii =>
-						ii.componentType === ComponentType.ChannelSelect && ii.user.id === interaction.user.id;
-
-					// Create a collector to catch interactions | timeout after 5 minutes
-					return await message_channelSelect
-						.awaitMessageComponent({ filter: filter_channels, time: 300000 })
-						.then(async ii => {
-							// Send the custom embed to the selected channels
-							ii.channels.forEach(channel => channel.send({ content: messageContent, embeds: [embed] }));
-
-							// Delete the channel select message
-							try {
-								await message_channelSelect.delete();
-							} catch {}
-
-							// End the button collector
-							collector.stop();
-						})
-						.catch(async err => {
-							// Log the error
-							console.error(err);
-
-							// Delete the channel select message
-							try {
-								await message_channelSelect.delete();
-							} catch {}
-						}); */
-
 				case "btn_cancel":
 					await i.deferUpdate();
 					return collector.stop();
