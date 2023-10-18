@@ -207,7 +207,7 @@ module.exports = {
 
 		/* - - - - - { Configure the Embed } - - - - - */
 		// Create the embed :: { CUSTOM EMBED }
-		let embed = new BetterEmbed({ interaction });
+		let embed = new BetterEmbed({ interaction, disableFormatting: true });
 
 		// prettier-ignore
 		// Apply the template to the embed
@@ -569,16 +569,27 @@ function formatTemplate(template, user) {
 	if (Array.isArray(template.description)) template.description = template.description.join("\n");
 
 	// prettier-ignore
+	// Uses negative lookbehind for "\" to allow escaping
 	const parse = str => `${str}`
 		// User mentions
-		.replace(/@[0-9]{18}/gm, s => `<@${s.substring(1)}>`)
+		.replace(/(?<!\\)@[0-9]{18}/g, s => `<@${s.substring(1)}>`)
 		// Channel mentions
-		.replace(/#[0-9]{19}/gm, s => `<#${s.substring(1)}>`)
+		.replace(/(?<!\\)#[0-9]{19}/g, s => `<#${s.substring(1)}>`)
 
 		// Self mention
-		.replace(/\$USER\b/g, user.toString())
+		.replace(/(?<!\\)\$USER\b/g, user.toString())
 		// Self username
-		.replace(/\$USERNAME\b/g, user?.displayName || user?.username || "{invalid user}");
+		.replace(/(?<!\\)\$USERNAME\b/g, user?.displayName || user?.username || "{invalid user}")
+		
+		/// Dates
+		.replace(/(?<!\\)\$YEAR/g, new Date().getFullYear())
+		.replace(/(?<!\\)\$MONTH/g, `0${new Date().getMonth() + 1}`.slice(-2))
+		.replace(/(?<!\\)\$DAY/g, `0${new Date().getDate()}`.slice(-2))
+		.replace(/(?<!\\)\$year/g, new Date().getFullYear().toString().substring(2))
+		.replace(/(?<!\\)\$month/g, new Date().getMonth() + 1)
+		.replace(/(?<!\\)\$day/g, new Date().getDate())
+		
+		.replace(/\\/g, "");
 
 	if (template.messageContent) template.messageContent = parse(template.messageContent);
 	if (template.author?.text) template.author.text = parse(template.author.text);

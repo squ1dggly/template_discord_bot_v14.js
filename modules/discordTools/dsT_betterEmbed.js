@@ -17,7 +17,8 @@
  * @property {string} imageURL
  * @property {bE_footer} footer
  * @property {bE_color} color
- * @property {bE_timestamp} timestamp */
+ * @property {bE_timestamp} timestamp
+ * @property {boolean} disableFormatting */
 
 /** @typedef bE_sendOptions
  * @property {CommandInteraction} interaction
@@ -54,15 +55,17 @@ class BetterEmbed extends EmbedBuilder {
 		imageURL: null,
 		footer: { text: null, iconURL: null },
 		color: config.EMBED_COLOR || null,
-		timestamp: null
+		timestamp: null,
+		disableFormatting: false
 	};
 
 	#_formatMarkdown(str) {
 		if (!str) return null;
+		if (this.options.disableFormatting) return str;
 
 		return str
-			.replace(/\$USER\b/g, this.options.author?.user)
-			.replace(/\$USERNAME\b/g, this.options.author?.user?.displayName || this.options.author?.user?.username);
+			.replace(/(?<!\\)\$USER\b/g, this.options.author?.user)
+			.replace(/(?<!\\)\$USERNAME\b/g, this.options.author?.user?.displayName || this.options.author?.user?.username);
 	}
 
 	/** A better version of the classic EmbedBuilder
