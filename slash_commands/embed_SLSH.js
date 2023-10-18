@@ -165,13 +165,14 @@ module.exports = {
 			/// Field Edit Mode
 			fieldMode_selectMenu: new StringSelectMenuBuilder().setPlaceholder("Select a field to edit...").setCustomId("ssm_fieldSelect"),
 
-			fieldMode_back: new ButtonBuilder().setLabel("Back").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_back"),
 			fieldMode_add: new ButtonBuilder().setLabel("Add").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_add"),
 			fieldMode_remove: new ButtonBuilder().setLabel("Remove").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_remove"),
 			fieldMode_edit: new ButtonBuilder().setLabel("Edit").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_edit"),
-			fieldMode_inline: new ButtonBuilder().setLabel("Inline").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_Inline"),
+			fieldMode_inline: new ButtonBuilder().setLabel("Toggle Inline").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_inline"),
+			fieldMode_back: new ButtonBuilder().setLabel("Back").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_back"),
 
 			/// Submit
+			toJSON: new ButtonBuilder().setLabel("JSON").setStyle(ButtonStyle.Success).setCustomId("btn_toJSON"),
 			confirm: new ButtonBuilder().setLabel("Confirm").setStyle(ButtonStyle.Success).setCustomId("btn_confirm"),
 			cancel: new ButtonBuilder().setLabel("Cancel").setStyle(ButtonStyle.Danger).setCustomId("btn_cancel")
 		};
@@ -187,14 +188,18 @@ module.exports = {
 			),
 
 			buttons_fieldMode: new ActionRowBuilder().addComponents(
-				message_components.fieldMode_back,
 				message_components.fieldMode_add,
 				message_components.fieldMode_remove,
 				message_components.fieldMode_edit,
-				message_components.fieldMode_inline
+				message_components.fieldMode_inline,
+				message_components.fieldMode_back
 			),
 
-			buttons_submit: new ActionRowBuilder().addComponents(message_components.confirm, message_components.cancel),
+			buttons_submit: new ActionRowBuilder().addComponents(
+				message_components.toJSON,
+				message_components.confirm,
+				message_components.cancel
+			),
 
 			selectMenu_fieldMode: new ActionRowBuilder().addComponents(message_components.fieldMode_selectMenu)
 		};
@@ -203,8 +208,12 @@ module.exports = {
 		// Create the embed :: { CUSTOM EMBED }
 		let embed = new BetterEmbed({ interaction });
 
+		// prettier-ignore
 		// Apply the template to the embed
-		applyEmbedTemplate(embed, templateUsed ? template : formatTemplate(config.template_default, interaction.member));
+		applyEmbedTemplate(
+			embed, message_components,
+			templateUsed ? template : formatTemplate(config.template_default, interaction.member)
+		);
 
 		// Send the embed
 		let message = await embed.send({
@@ -238,6 +247,15 @@ module.exports = {
 
 			// Determine the operation
 			switch (i.customId) {
+				case "ssm_fieldSelect":
+					await i.deferUpdate();
+
+					fieldMode_selectedFieldIndex = message_components.fieldMode_selectMenu.options.findIndex(
+						option => option.data.value === i.values[0]
+					);
+
+					return;
+
 				case "btn_message":
 					// Set the modal's components
 					modal_embedMaker.setComponents(...modal_actionRows.message);
@@ -307,7 +325,7 @@ module.exports = {
 
 					template.timestamp = !template.timestamp;
 
-					applyEmbedTemplate(embed, template);
+					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_fieldMode_toggle":
@@ -322,17 +340,18 @@ module.exports = {
 						? [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
 						: [message_actionRow.buttons_fieldMode];
 
-					// Edit the message
-					return await message.edit({ components: _components_fieldModeToggle });
+					// Edit the message's components
+					message.components = _components_fieldModeToggle;
+					return await refreshEmbed(message, embed, template);
 
 				case "btn_fieldMode_back":
 					await i.deferUpdate();
-					return await message.edit({
-						components: [message_actionRow.buttons_edit, message_actionRow.buttons_submit]
-					});
+
+					message.components = [message_actionRow.buttons_edit, message_actionRow.buttons_submit];
+					return await refreshEmbed(message, embed, template);
 
 				case "btn_fieldMode_add":
-					// Configure the components being used
+					/// Configure the components being used
 					modal_components.fieldEdit[0].setValue("");
 					modal_components.fieldEdit[1].setValue("");
 
@@ -351,15 +370,9 @@ module.exports = {
 						inline: false
 					});
 
-					// Apply changes
+					/// Apply changes
 					formatTemplate(template, interaction.member);
 					applyEmbedTemplate(embed, message_components, template);
-
-					// Add the field to the select menu
-					message_components.fieldMode_selectMenu.addOptions({
-						label: `Field ${message_components.fieldMode_selectMenu.options.length + 1}`,
-						value: `field_${message_components.fieldMode_selectMenu.options.length + 1}`
-					});
 
 					// Add the field select menu to the message
 					await message.edit({
@@ -386,18 +399,100 @@ module.exports = {
 
 					return await refreshEmbed(message, embed, template);
 
+				case "btn_fieldMode_edit":
+					// prettier-ignore
+					if (fieldMode_selectedFieldIndex === null) return await i.reply({
+						content: "No field was selected to edit", ephemeral: true
+					});
+
+					let _field_edit = template.fields[fieldMode_selectedFieldIndex];
+
+					// prettier-ignore
+					if (!_field_edit) return await i.reply({
+						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be edited`, ephemeral: true
+					});
+
+					/// Configure the components being used
+					modal_components.fieldEdit[0].setValue(_field_edit.name || "");
+					modal_components.fieldEdit[1].setValue(_field_edit.value || "");
+
+					// Set the modal's components
+					modal_embedMaker.setComponents(...modal_actionRows.fieldEdit);
+
+					// Show the modal and await submit
+					let modalData_fieldMode_edit = await showModal(i, modal_embedMaker, collector);
+					if (!modalData_fieldMode_edit) return;
+
+					/* - - - - - { Parse Modal Data } - - - - - */
+					_field_edit.name = modalData_fieldMode_edit.fields.getTextInputValue("mti_fieldName") || "";
+					_field_edit.value = modalData_fieldMode_edit.fields.getTextInputValue("mti_fieldValue") || "";
+
+					/// Apply changes
+					formatTemplate(template, interaction.member);
+					applyEmbedTemplate(embed, message_components, template);
+
+					return await refreshEmbed(message, embed, template);
+
+				case "btn_fieldMode_inline":
+					// prettier-ignore
+					if (fieldMode_selectedFieldIndex === null) return await i.reply({
+						content: "No field was selected to edit", ephemeral: true
+					});
+
+					let _field_toggleInline = template.fields[fieldMode_selectedFieldIndex];
+
+					// prettier-ignore
+					if (!_field_toggleInline) return await i.reply({
+						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be edited`, ephemeral: true
+					});
+
+					await i.deferUpdate();
+
+					/* - - - - - { Parse Modal Data } - - - - - */
+					_field_toggleInline.inline = !_field_toggleInline.inline || false;
+
+					/// Apply changes
+					formatTemplate(template, interaction.member);
+					applyEmbedTemplate(embed, message_components, template);
+
+					return await refreshEmbed(message, embed, template);
+
+				case "btn_toJSON":
+					let _templateJSON = structuredClone(template);
+
+					/// Clean up the template
+					delete _templateJSON.meta;
+
+					if (!_templateJSON.messageContent) delete _templateJSON.messageContent;
+
+					// prettier-ignore
+					if (_templateJSON?.author && !_templateJSON?.author?.text && !_templateJSON.author.iconURL) delete _templateJSON.author;
+					if (_templateJSON?.author && !_templateJSON?.author?.text) delete _templateJSON.author.text;
+					if (_templateJSON?.author && !_templateJSON?.author?.iconURL) delete _templateJSON.author.iconURL;
+
+					// prettier-ignore
+					if (_templateJSON?.title && !_templateJSON?.title?.text && !_templateJSON.title?.linkURL) delete _templateJSON.title;
+					if (_templateJSON?.title && !_templateJSON?.title?.text) delete _templateJSON.title.text;
+					if (_templateJSON?.title && !_templateJSON?.title?.linkURL) delete _templateJSON.title.linkURL;
+
+					if (_templateJSON.description === "") delete _templateJSON.description;
+					if (_templateJSON.imageURL === "") delete _templateJSON.imageURL;
+					if (_templateJSON.footer === "") delete _templateJSON.footer;
+					if (_templateJSON.color === "") delete _templateJSON.color;
+
+					if (!_templateJSON.fields.length) delete _templateJSON.fields;
+
+					// Add meta values
+					_templateJSON = { meta: { name: "Untitled Template", value: "untitled_template" }, ..._templateJSON };
+
+					return await i.reply({
+						content: `\`\`\`json\n${JSON.stringify(_templateJSON, null, 2)}\`\`\``,
+						ephemeral: true
+					});
+
 				case "btn_cancel":
 					await i.deferUpdate();
 					return collector.stop();
-
-				case "ssm_fieldSelect":
-					await i.deferUpdate();
-
-					fieldMode_selectedFieldIndex = message_components.fieldMode_selectMenu.options.findIndex(
-						option => option.data.value === i.values[0]
-					);
-
-					return;
 			}
 		});
 
@@ -518,7 +613,12 @@ async function showModal(interaction, modal, collector) {
 /** Update the message with the new embed
  * @param {BetterEmbed} embed @param {Message} message */
 async function refreshEmbed(message, embed, template) {
-	// prettier-ignore
 	// Edit the message with the updated embed
-	try { await message.edit({ content: template.messageContent, embeds: [embed] }); } catch { }
+	try {
+		await message.edit({
+			content: template.messageContent,
+			embeds: [embed],
+			components: message.components || []
+		});
+	} catch {}
 }
