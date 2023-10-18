@@ -23,24 +23,28 @@ module.exports = {
         .setDescription("Make a custom embed")
     
         .addStringOption(option => option.setName("template").setDescription("Choose a template to start with")
-            .addChoices(...config.templates.filter(temp => temp.meta?.name && temp.meta?.value).map(temp => ({ name: temp.meta.name, value: temp.meta.value })))
+			.addChoices( ...config.templates
+				.filter(tmp => tmp?.meta?.name && tmp?.meta?.name)
+				.map(tmp => tmp.meta)
+			)
         ),
 
 	/** @param {Client} client @param {CommandInteraction} interaction */
 	execute: async (client, interaction) => {
 		/* - - - - - { Configure the Template } - - - - - */
-		let template_name = interaction.options.getString("template") || "";
+		let templateName = interaction.options.getString("template") || "";
 
 		/// Parse the template
 		let template = config.init;
 		let templateUsed = false;
+		let fieldMode_selectedFieldIndex = null;
 
 		// Get the template data if the user selected one
-		if (template_name) {
-			let _temp = config.templates[template_name];
+		if (templateName) {
+			let _temp = config.templates.find(tmp => tmp?.meta?.value === templateName) || {};
 
 			if (_temp) {
-				template = { ...template, ...(config.templates[template_name] || {}) };
+				template = { ...template, ..._temp };
 				templateUsed = true;
 			}
 		}
@@ -48,61 +52,7 @@ module.exports = {
 		// Apply formatting to the template
 		formatTemplate(template, interaction.member);
 
-		/* - - - - - { Configure the Embed } - - - - - */
-		// Create the base embed :: { CUSTOM EMBED }
-		let embed = new BetterEmbed({ interaction });
-
-		// Apply the template to the embed
-		applyEmbedTemplate(embed, templateUsed ? template : formatTemplate(config.template_default, interaction.member));
-
-		/* - - - - - { Configure Message Components } - - - - - */
-		// prettier-ignore
-		// Create the messages components
-		let message_components = {
-			/// Edit
-			message: new ButtonBuilder().setLabel("Message").setStyle(ButtonStyle.Secondary).setCustomId("btn_message"),
-			embedContent: new ButtonBuilder().setLabel("Content").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedContent"),
-			embedDetails: new ButtonBuilder().setLabel("Details").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedDetails"),
-			fieldMode_toggle: new ButtonBuilder().setLabel("Fields").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_toggle"),
-			timestamp: new ButtonBuilder().setLabel("Timestamp").setStyle(ButtonStyle.Primary).setCustomId("btn_timestamp"),
-
-			/// Field Edit Mode
-			fieldMode_selectMenu: new StringSelectMenuBuilder().setOptions({label: "deez nuts", value: "defr"}).setPlaceholder("Select a field to edit...").setCustomId("ssm_fieldSelect"),
-
-			fieldMode_back: new ButtonBuilder().setLabel("Back").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_back"),
-			fieldMode_add: new ButtonBuilder().setLabel("Add").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_add"),
-			fieldMode_remove: new ButtonBuilder().setLabel("Remove").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_remove"),
-			fieldMode_edit: new ButtonBuilder().setLabel("Edit").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_edit"),
-
-			/// Submit
-			confirm: new ButtonBuilder().setLabel("Confirm").setStyle(ButtonStyle.Success).setCustomId("btn_confirm"),
-			cancel: new ButtonBuilder().setLabel("Cancel").setStyle(ButtonStyle.Danger).setCustomId("btn_cancel")
-		};
-
-		// Create the embed's ActionRow
-		let message_actionRow = {
-			buttons_edit: new ActionRowBuilder().addComponents(
-				message_components.message,
-				message_components.embedContent,
-				message_components.embedDetails,
-				message_components.fieldMode_toggle,
-				message_components.timestamp
-			),
-
-			buttons_fieldMode: new ActionRowBuilder().addComponents(
-				message_components.fieldMode_back,
-				message_components.fieldMode_add,
-				message_components.fieldMode_remove,
-				message_components.fieldMode_edit
-			),
-
-			buttons_submit: new ActionRowBuilder().addComponents(message_components.confirm, message_components.cancel),
-
-			selectMenu_fieldMode: new ActionRowBuilder().addComponents(message_components.fieldMode_selectMenu)
-		};
-
 		/* - - - - - { Configure the Modal } - - - - - */
-
 		// Create the modal
 		let modal_embedMaker = new ModalBuilder().setCustomId("modal_embedMaker").setTitle("Embed Maker");
 
@@ -172,6 +122,24 @@ module.exports = {
 					.setStyle(TextInputStyle.Short)
 					.setValue((templateUsed ? template : config.init).color || "")
 					.setRequired(false)
+			],
+
+			fieldEdit: [
+				new TextInputBuilder()
+					.setCustomId("mti_fieldName")
+					.setLabel("Title:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).author?.text || "")
+					.setMaxLength(256)
+					.setRequired(false),
+
+				new TextInputBuilder()
+					.setCustomId("mti_fieldValue")
+					.setLabel("Content:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).title?.text || "")
+					.setMaxLength(1024)
+					.setRequired(false)
 			]
 		};
 
@@ -179,20 +147,74 @@ module.exports = {
 		let modal_actionRows = {
 			message: modal_components.message.map(comp => new ActionRowBuilder().addComponents(comp)),
 			embedContent: modal_components.embedContent.map(comp => new ActionRowBuilder().addComponents(comp)),
-			embedDetails: modal_components.embedDetails.map(comp => new ActionRowBuilder().addComponents(comp))
+			embedDetails: modal_components.embedDetails.map(comp => new ActionRowBuilder().addComponents(comp)),
+			fieldEdit: modal_components.fieldEdit.map(comp => new ActionRowBuilder().addComponents(comp))
 		};
 
-		// let modal_actionRow = modal_components..map(component => new ActionRowBuilder().addComponents(component));
+		/* - - - - - { Configure Message Components } - - - - - */
+		// prettier-ignore
+		// Create the messages components
+		let message_components = {
+			/// Edit
+			message: new ButtonBuilder().setLabel("Message").setStyle(ButtonStyle.Secondary).setCustomId("btn_message"),
+			embedContent: new ButtonBuilder().setLabel("Content").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedContent"),
+			embedDetails: new ButtonBuilder().setLabel("Details").setStyle(ButtonStyle.Secondary).setCustomId("btn_embedDetails"),
+			fieldMode_toggle: new ButtonBuilder().setLabel("Fields").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_toggle"),
+			timestamp: new ButtonBuilder().setLabel("Timestamp").setStyle(ButtonStyle.Primary).setCustomId("btn_timestamp"),
 
-		// Send the base embed
+			/// Field Edit Mode
+			fieldMode_selectMenu: new StringSelectMenuBuilder().setPlaceholder("Select a field to edit...").setCustomId("ssm_fieldSelect"),
+
+			fieldMode_back: new ButtonBuilder().setLabel("Back").setStyle(ButtonStyle.Primary).setCustomId("btn_fieldMode_back"),
+			fieldMode_add: new ButtonBuilder().setLabel("Add").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_add"),
+			fieldMode_remove: new ButtonBuilder().setLabel("Remove").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_remove"),
+			fieldMode_edit: new ButtonBuilder().setLabel("Edit").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_edit"),
+			fieldMode_inline: new ButtonBuilder().setLabel("Inline").setStyle(ButtonStyle.Secondary).setCustomId("btn_fieldMode_Inline"),
+
+			/// Submit
+			confirm: new ButtonBuilder().setLabel("Confirm").setStyle(ButtonStyle.Success).setCustomId("btn_confirm"),
+			cancel: new ButtonBuilder().setLabel("Cancel").setStyle(ButtonStyle.Danger).setCustomId("btn_cancel")
+		};
+
+		// Create the embed's ActionRow
+		let message_actionRow = {
+			buttons_edit: new ActionRowBuilder().addComponents(
+				message_components.message,
+				message_components.embedContent,
+				message_components.embedDetails,
+				message_components.fieldMode_toggle,
+				message_components.timestamp
+			),
+
+			buttons_fieldMode: new ActionRowBuilder().addComponents(
+				message_components.fieldMode_back,
+				message_components.fieldMode_add,
+				message_components.fieldMode_remove,
+				message_components.fieldMode_edit,
+				message_components.fieldMode_inline
+			),
+
+			buttons_submit: new ActionRowBuilder().addComponents(message_components.confirm, message_components.cancel),
+
+			selectMenu_fieldMode: new ActionRowBuilder().addComponents(message_components.fieldMode_selectMenu)
+		};
+
+		/* - - - - - { Configure the Embed } - - - - - */
+		// Create the embed :: { CUSTOM EMBED }
+		let embed = new BetterEmbed({ interaction });
+
+		// Apply the template to the embed
+		applyEmbedTemplate(embed, templateUsed ? template : formatTemplate(config.template_default, interaction.member));
+
+		// Send the embed
 		let message = await embed.send({
 			components: [message_actionRow.buttons_edit, message_actionRow.buttons_submit]
 		});
 
-		/* - - - - - { Collect Button Interactions } - - - - - */
+		/* - - - - - { Collect Interactions } - - - - - */
 		// Create a filter to look for only button interactions from the user that ran this command
 		let filter = i => {
-			let passed = i.componentType === ComponentType.Button && i.user.id === interaction.user.id;
+			let passed = i.user.id === interaction.user.id;
 
 			// prettier-ignore
 			// Allow the button to know it was submitted and tell the user they can't use it
@@ -209,7 +231,7 @@ module.exports = {
 		// Create a collector to catch interactions | timeout after 10 minutes
 		let collector = message.createMessageComponentCollector({ filter, time: timeouts.base });
 
-		// Fires whenever a button is pressed on the connected message
+		// Fires whenever an interaction is sent from the connected message
 		collector.on("collect", async i => {
 			// Reset the collector's timer
 			collector.resetTimer();
@@ -231,7 +253,7 @@ module.exports = {
 					// Update the modal's text fields to reflect the updated information
 					modal_components.message[0].setValue(template.messageContent);
 
-					applyEmbedTemplate(embed, template);
+					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_embedContent":
@@ -255,7 +277,7 @@ module.exports = {
 					modal_components.embedContent[2].setValue(template.description);
 					modal_components.embedContent[3].setValue(template.imageURL);
 
-					applyEmbedTemplate(embed, template);
+					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_embedDetails":
@@ -277,7 +299,7 @@ module.exports = {
 					modal_components.embedDetails[1].setValue(template.title.linkURL);
 					modal_components.embedDetails[2].setValue(template.color);
 
-					applyEmbedTemplate(embed, template);
+					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_timestamp":
@@ -290,9 +312,18 @@ module.exports = {
 
 				case "btn_fieldMode_toggle":
 					await i.deferUpdate();
-					return await message.edit({
-						components: [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
-					});
+
+					/// Configure field select menu
+					let showSelectMenu = false;
+					if (template.fields && template.fields.length) showSelectMenu = true;
+
+					// Configre the respective message components
+					let _components_fieldModeToggle = showSelectMenu
+						? [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
+						: [message_actionRow.buttons_fieldMode];
+
+					// Edit the message
+					return await message.edit({ components: _components_fieldModeToggle });
 
 				case "btn_fieldMode_back":
 					await i.deferUpdate();
@@ -300,9 +331,73 @@ module.exports = {
 						components: [message_actionRow.buttons_edit, message_actionRow.buttons_submit]
 					});
 
+				case "btn_fieldMode_add":
+					// Configure the components being used
+					modal_components.fieldEdit[0].setValue("");
+					modal_components.fieldEdit[1].setValue("");
+
+					// Set the modal's components
+					modal_embedMaker.setComponents(...modal_actionRows.fieldEdit);
+
+					// Show the modal and await submit
+					let modalData_fieldMode_add = await showModal(i, modal_embedMaker, collector);
+					if (!modalData_fieldMode_add) return;
+
+					/* - - - - - { Parse Modal Data } - - - - - */
+					template.fields ||= [];
+					template.fields.push({
+						name: modalData_fieldMode_add.fields.getTextInputValue("mti_fieldName") || "",
+						value: modalData_fieldMode_add.fields.getTextInputValue("mti_fieldValue") || "",
+						inline: false
+					});
+
+					// Apply changes
+					formatTemplate(template, interaction.member);
+					applyEmbedTemplate(embed, message_components, template);
+
+					// Add the field to the select menu
+					message_components.fieldMode_selectMenu.addOptions({
+						label: `Field ${message_components.fieldMode_selectMenu.options.length + 1}`,
+						value: `field_${message_components.fieldMode_selectMenu.options.length + 1}`
+					});
+
+					// Add the field select menu to the message
+					await message.edit({
+						components: [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
+					});
+
+					return await refreshEmbed(message, embed, template);
+
+				case "btn_fieldMode_remove":
+					// prettier-ignore
+					if (fieldMode_selectedFieldIndex === null) return await i.reply({
+						content: "No field was selected to remove", ephemeral: true
+					});
+
+					// prettier-ignore
+					if (!template.fields[fieldMode_selectedFieldIndex]) return await i.reply({
+						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be removed`, ephemeral: true
+					});
+
+					await i.deferUpdate();
+
+					delete template.fields[fieldMode_selectedFieldIndex];
+					applyEmbedTemplate(embed, message_components, template);
+
+					return await refreshEmbed(message, embed, template);
+
 				case "btn_cancel":
 					await i.deferUpdate();
 					return collector.stop();
+
+				case "ssm_fieldSelect":
+					await i.deferUpdate();
+
+					fieldMode_selectedFieldIndex = message_components.fieldMode_selectMenu.options.findIndex(
+						option => option.data.value === i.values[0]
+					);
+
+					return;
 			}
 		});
 
@@ -335,10 +430,30 @@ function formatTemplate(template, user) {
 	if (template.description) template.description = parse(template.description);
 	if (template.footer) template.footer = parse(template.footer);
 
+	// Fields
+	if (template.fields) {
+		template.fields = template.fields.filter(f => f.name);
+
+		template.fields.forEach((f, idx) => {
+			template.fields[idx].name = parse(f.name);
+			template.fields[idx].value = parse(f.value);
+			template.fields[idx].inline ? (template.fields[idx].inline = true) : (template.fields[idx].inline = false);
+		});
+	}
+
 	return template;
 }
 
-function applyEmbedTemplate(embed, template) {
+function applyEmbedTemplate(embed, messageComponents, template) {
+	// Set field select menu options
+	messageComponents.fieldMode_selectMenu.setOptions(
+		template.fields.map((f, idx) => ({
+			label: `Field ${idx + 1}`,
+			value: `field_${idx + 1}`,
+			description: `${f.name.substring(0, 16)}...`
+		}))
+	);
+
 	// Author
 	embed.setAuthor({ text: template.author?.text || null, iconURL: template.author?.iconURL || null });
 
@@ -360,7 +475,10 @@ function applyEmbedTemplate(embed, template) {
 	// Color
 	embed.setColor(template.color || null);
 
-	// Prevents crashing as embeds cannot be empty
+	// Fields
+	if (template.fields) embed.setFields(...template.fields.filter(f => f.name));
+
+	// Prevents crashing as embeds can't be empty
 	if (!template.author?.text && !template.title?.text && !template.description && !template.imageURL)
 		embed.setDescription("Embeds can't be empty!");
 
