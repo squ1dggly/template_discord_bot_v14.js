@@ -251,9 +251,9 @@ module.exports = {
 				case "ssm_fieldSelect":
 					await i.deferUpdate();
 
-					fieldMode_selectedFieldIndex = message_components.fieldMode_selectMenu.options.findIndex(
-						option => option.data.value === i.values[0]
-					);
+					if (!template?.fields || !template.fields?.length) fieldMode_selectedFieldIndex = null;
+
+					fieldMode_selectedFieldIndex = template.fields.findIndex(option => option.meta === i.values[0]);
 
 					return;
 
@@ -381,9 +381,7 @@ module.exports = {
 					applyEmbedTemplate(embed, message_components, template);
 
 					// Add the field select menu to the message
-					await message.edit({
-						components: [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode]
-					});
+					message.components = [message_actionRow.selectMenu_fieldMode, message_actionRow.buttons_fieldMode];
 
 					return await refreshEmbed(message, embed, template);
 
@@ -395,14 +393,17 @@ module.exports = {
 
 					// prettier-ignore
 					if (!template.fields[fieldMode_selectedFieldIndex]) return await i.reply({
-						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be removed`, ephemeral: true
+						content: `\`Field ${fieldMode_selectedFieldIndex || 1}\` doesn't exist and can't be removed`, ephemeral: true
 					});
 
 					await i.deferUpdate();
 
-					delete template.fields[fieldMode_selectedFieldIndex];
-					applyEmbedTemplate(embed, message_components, template);
+					template.fields.splice(fieldMode_selectedFieldIndex, 1);
 
+					if (!template?.fields || !template.fields?.length)
+						message.components = [message_actionRow.buttons_fieldMode];
+
+					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
 
 				case "btn_fieldMode_edit":
@@ -415,7 +416,7 @@ module.exports = {
 
 					// prettier-ignore
 					if (!_field_edit) return await i.reply({
-						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be edited`, ephemeral: true
+						content: `\`Field ${fieldMode_selectedFieldIndex || 1}\` doesn't exist and can't be edited`, ephemeral: true
 					});
 
 					/// Configure the components being used
@@ -449,7 +450,7 @@ module.exports = {
 
 					// prettier-ignore
 					if (!_field_toggleInline) return await i.reply({
-						content: `\`Field ${fieldMode_selectedFieldIndex + 1}\` doesn't exist and can't be edited`, ephemeral: true
+						content: `\`Field ${fieldMode_selectedFieldIndex || 1}\` doesn't exist and can't be edited`, ephemeral: true
 					});
 
 					await i.deferUpdate();
@@ -487,6 +488,7 @@ module.exports = {
 					if (_templateJSON.color === "") delete _templateJSON.color;
 
 					if (!_templateJSON.fields.length) delete _templateJSON.fields;
+					if (_templateJSON.fields?.length) _templateJSON.fields.forEach(f => delete f?.meta);
 
 					// Add meta values
 					_templateJSON = { meta: { name: "Untitled Template", value: "untitled_template" }, ..._templateJSON };
@@ -602,6 +604,7 @@ function formatTemplate(template, user) {
 		template.fields = template.fields.filter(f => f.name);
 
 		template.fields.forEach((f, idx) => {
+			template.fields[idx].meta = `field_${idx}`;
 			template.fields[idx].name = parse(f.name);
 			template.fields[idx].value = parse(f.value);
 			template.fields[idx].inline ? (template.fields[idx].inline = true) : (template.fields[idx].inline = false);
@@ -617,7 +620,7 @@ function applyEmbedTemplate(embed, messageComponents, template) {
 		messageComponents.fieldMode_selectMenu.setOptions(
 			template.fields.map((f, idx) => ({
 				label: `Field ${idx + 1}`,
-				value: `field_${idx + 1}`,
+				value: f.meta || `field_${idx + 1}`,
 				description: `${f.name.substring(0, 16)}...`
 			}))
 		);
@@ -693,5 +696,7 @@ async function refreshEmbed(message, embed, template) {
 			embeds: [embed],
 			components: message.components || []
 		});
-	} catch {}
+	} catch (err) {
+		console.error(err);
+	}
 }

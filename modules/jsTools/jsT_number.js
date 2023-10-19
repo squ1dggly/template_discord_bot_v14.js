@@ -77,7 +77,7 @@ function clamp(num, options = {}) {
  * format(1000) --> "1,000"
  * format(1000, false) --> "1.000" */
 function format(num, comma = true) {
-	num = +num; if (isNaN(num)) throw new TypeError("You must provide a valid number");
+	num = `${num}`; if (isNaN(num)) throw new TypeError("You must provide a valid number");
 	return num.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, comma ? "," : ".");
 }
 
