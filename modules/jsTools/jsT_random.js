@@ -22,7 +22,7 @@ function randomNumber(min, max, round = true) {
 
 	let sum = min + (max - min) * Math.random();
 	
-	return round ? Math.round(sum) : sum
+	return round ? Math.round(sum) : sum;
 }
 
 /** Create a psuedo-random string of numbers (0-9)
