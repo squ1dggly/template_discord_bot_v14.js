@@ -1,4 +1,3 @@
-const _nT = require("./jsT_number");
 const _aT = require("./jsT_array");
 
 // prettier-ignore
@@ -20,12 +19,10 @@ const alphabet = [
 function randomNumber(min, max, round = true) {
 	min = +min; if (isNaN(min)) throw new TypeError(`\`${min}\` must be a valid number`);
 	max = +max; if (isNaN(max)) throw new TypeError(`\`${max}\` must be a valid number`);
-	
-	let sum = _nT.clamp(Math.random() * max, { min, max });
 
-	return round
-		? Math.round(sum)
-		: sum;
+	let sum = min + (max - min) * Math.random();
+	
+	return round ? Math.round(sum) : sum
 }
 
 /** Create a psuedo-random string of numbers (0-9)
