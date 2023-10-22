@@ -79,6 +79,11 @@ class BetterEmbed extends EmbedBuilder {
 		this.#_configure();
 	}
 
+	/** Return a new BetterEmbed with the same configuration @param {bE_options} options*/
+	copy(options) {
+		return new BetterEmbed({...this.options, ...options});
+	}
+
 	/** Set this embed's author @param {bE_author} author */
 	setAuthor(author) {
 		let _author = { user: null, text: null, iconURL: null, linkURL: null };
