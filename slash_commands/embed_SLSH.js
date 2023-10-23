@@ -3,7 +3,7 @@ const {
 	Client, Message, CommandInteraction, InteractionCollector,
 	SlashCommandBuilder, ModalBuilder, TextInputBuilder,
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
-	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder,
+	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder, EmbedBuilder,
 } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools/_dsT");
@@ -66,6 +66,13 @@ module.exports = {
 					.setStyle(TextInputStyle.Paragraph)
 					.setValue((templateUsed ? template : config.init).messageContent || "")
 					.setMaxLength(2000)
+					.setRequired(false),
+
+				new TextInputBuilder()
+					.setCustomId("mti_color")
+					.setLabel("Embed color:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).color || "")
 					.setRequired(false)
 			],
 
@@ -95,6 +102,14 @@ module.exports = {
 					.setRequired(false),
 
 				new TextInputBuilder()
+					.setCustomId("mti_footerText")
+					.setLabel("Footer:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).footer?.text || "")
+					.setMaxLength(2048)
+					.setRequired(false),
+
+				new TextInputBuilder()
 					.setCustomId("mti_imageURL")
 					.setLabel("Image URL:")
 					.setStyle(TextInputStyle.Short)
@@ -111,17 +126,31 @@ module.exports = {
 					.setRequired(false),
 
 				new TextInputBuilder()
-					.setCustomId("mti_titleLinkURL")
-					.setLabel("Title URL (this makes the title into a link):")
+					.setCustomId("mti_footerIconURL")
+					.setLabel("Footer icon URL:")
 					.setStyle(TextInputStyle.Short)
-					.setValue((templateUsed ? template : config.init).title?.url || "")
+					.setValue((templateUsed ? template : config.init).title?.iconURL || "")
 					.setRequired(false),
 
 				new TextInputBuilder()
-					.setCustomId("mti_color")
-					.setLabel("Color:")
+					.setCustomId("mti_authorLinkURL")
+					.setLabel("Author Link URL:")
 					.setStyle(TextInputStyle.Short)
-					.setValue((templateUsed ? template : config.init).color || "")
+					.setValue((templateUsed ? template : config.init).author?.linkURL || "")
+					.setRequired(false),
+
+				new TextInputBuilder()
+					.setCustomId("mti_titleLinkURL")
+					.setLabel("Title Link URL:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).title?.linkURL || "")
+					.setRequired(false),
+
+				new TextInputBuilder()
+					.setCustomId("mti_thumbnailURL")
+					.setLabel("Thumbnail URL:")
+					.setStyle(TextInputStyle.Short)
+					.setValue((templateUsed ? template : config.init).thumbnailURL || "")
 					.setRequired(false)
 			],
 
@@ -261,16 +290,18 @@ module.exports = {
 					// Set the modal's components
 					modal_embedMaker.setComponents(...modal_actionRows.message);
 
+					// Update the modal's text fields to the current template
+					modal_components.message[0].setValue(template.messageContent || "");
+					modal_components.embedDetails[1].setValue(template.color || "");
+
 					// Show the modal and await submit
 					let modalData_message = await showModal(i, modal_embedMaker, collector);
 					if (!modalData_message) return;
 
 					/* - - - - - { Parse Modal Data } - - - - - */
 					template.messageContent = modalData_message.fields.getTextInputValue("mti_messageContent") || "";
+					template.color = modalData_message.fields.getTextInputValue("mti_color") || "";
 					formatTemplate(template, interaction.member);
-
-					// Update the modal's text fields to reflect the updated information
-					modal_components.message[0].setValue(template.messageContent);
 
 					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
@@ -279,6 +310,13 @@ module.exports = {
 					// Set the modal's components
 					modal_embedMaker.setComponents(...modal_actionRows.embedContent);
 
+					// Update the modal's text fields to the current template
+					modal_components.embedContent[0].setValue(template.author.text || "");
+					modal_components.embedContent[1].setValue(template.title.text || "");
+					modal_components.embedContent[2].setValue(template.footer.text || "");
+					modal_components.embedContent[3].setValue(template.description || "");
+					modal_components.embedContent[4].setValue(template.imageURL || "");
+
 					// Show the modal and await submit
 					let modalData_embedContent = await showModal(i, modal_embedMaker, collector);
 					if (!modalData_embedContent) return;
@@ -286,15 +324,10 @@ module.exports = {
 					/* - - - - - { Parse Modal Data } - - - - - */
 					template.author.text = modalData_embedContent.fields.getTextInputValue("mti_authorText") || "";
 					template.title.text = modalData_embedContent.fields.getTextInputValue("mti_titleText") || "";
+					template.footer.text = modalData_embedContent.fields.getTextInputValue("mti_footerText") || "";
 					template.description = modalData_embedContent.fields.getTextInputValue("mti_description") || "";
 					template.imageURL = modalData_embedContent.fields.getTextInputValue("mti_imageURL") || "";
 					formatTemplate(template, interaction.member);
-
-					// Update the modal's text fields to reflect the updated information
-					modal_components.embedContent[0].setValue(template.author.text);
-					modal_components.embedContent[1].setValue(template.title.text);
-					modal_components.embedContent[2].setValue(template.description);
-					modal_components.embedContent[3].setValue(template.imageURL);
 
 					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
@@ -303,20 +336,24 @@ module.exports = {
 					// Set the modal's components
 					modal_embedMaker.setComponents(...modal_actionRows.embedDetails);
 
+					// Update the modal's text fields to the current template
+					modal_components.embedDetails[0].setValue(template.author.iconURL || "");
+					modal_components.embedDetails[1].setValue(template.footer.iconURL || "");
+					modal_components.embedDetails[2].setValue(template.author.linkURL || "");
+					modal_components.embedDetails[3].setValue(template.title.linkURL || "");
+					modal_components.embedDetails[4].setValue(template.thumbnailURL || "");
+
 					// Show the modal and await submit
 					let modalData_embedDetails = await showModal(i, modal_embedMaker, collector);
 					if (!modalData_embedDetails) return;
 
 					/* - - - - - { Parse Modal Data } - - - - - */
 					template.author.iconURL = modalData_embedDetails.fields.getTextInputValue("mti_authorIconURL") || "";
+					template.footer.iconURL = modalData_embedDetails.fields.getTextInputValue("mti_footerIconURL") || "";
+					template.author.linkURL = modalData_embedDetails.fields.getTextInputValue("mti_authorLinkURL") || "";
 					template.title.linkURL = modalData_embedDetails.fields.getTextInputValue("mti_titleLinkURL") || "";
-					template.color = modalData_embedDetails.fields.getTextInputValue("mti_color") || "";
+					template.thumbnailURL = modalData_embedDetails.fields.getTextInputValue("mti_thumbnailURL") || "";
 					formatTemplate(template, interaction.member);
-
-					// Update the modal's text fields to reflect the updated information
-					modal_components.embedDetails[0].setValue(template.author.iconURL);
-					modal_components.embedDetails[1].setValue(template.title.linkURL);
-					modal_components.embedDetails[2].setValue(template.color);
 
 					applyEmbedTemplate(embed, message_components, template);
 					return await refreshEmbed(message, embed, template);
@@ -570,6 +607,10 @@ module.exports = {
 function formatTemplate(template, user) {
 	if (Array.isArray(template.description)) template.description = template.description.join("\n");
 
+	if (typeof template.author === "string") template.author = { text: template.author, iconURL: "", linkURL: "" };
+	if (typeof template.title === "string") template.title = { text: template.title, linkURL: "" };
+	if (typeof template.footer === "string") template.footer = { text: template.footer, iconURL: "" };
+
 	// prettier-ignore
 	// Uses negative lookbehind for "\" to allow escaping
 	const parse = str => `${str}`
@@ -596,8 +637,8 @@ function formatTemplate(template, user) {
 	if (template.messageContent) template.messageContent = parse(template.messageContent);
 	if (template.author?.text) template.author.text = parse(template.author.text);
 	if (template.title?.text) template.title.text = parse(template.title.text);
+	if (template.footer?.text) template.footer.text = parse(template.footer.text);
 	if (template.description) template.description = parse(template.description);
-	if (template.footer) template.footer = parse(template.footer);
 
 	// Fields
 	if (template.fields) {
@@ -606,7 +647,11 @@ function formatTemplate(template, user) {
 		template.fields.forEach((f, idx) => {
 			template.fields[idx].meta = `field_${idx}`;
 			template.fields[idx].name = parse(f.name);
+
+			// prettier-ignore
+			if (Array.isArray(template.fields[idx].value)) template.fields[idx].value = template.fields[idx].value.join("\n")
 			template.fields[idx].value = parse(f.value);
+
 			template.fields[idx].inline ? (template.fields[idx].inline = true) : (template.fields[idx].inline = false);
 		});
 	}
@@ -626,16 +671,23 @@ function applyEmbedTemplate(embed, messageComponents, template) {
 		);
 
 	// Author
-	embed.setAuthor({ text: template.author?.text || null, iconURL: template.author?.iconURL || null });
+	embed.setAuthor({
+		text: template.author?.text || null,
+		iconURL: template.author?.iconURL || null,
+		linkURL: template.author?.linkURL || null
+	});
 
 	// Title
 	embed.setTitle({ text: template.title?.text || null, linkURL: template.title?.linkURL || null });
+
+	// Thumbnail
+	embed.setThumbnail(template.thumbnailURL || null);
 
 	// Description
 	embed.setDescription(template.description || null);
 
 	// Footer
-	embed.setFooter(template.footer || null);
+	embed.setFooter({ text: template.footer?.text || null, iconURL: template.footer?.iconURL || null });
 
 	// Image URL
 	embed.setImage(template.imageURL || null);
@@ -649,8 +701,9 @@ function applyEmbedTemplate(embed, messageComponents, template) {
 	// Fields
 	if (template.fields) embed.setFields(...template.fields.filter(f => f.name));
 
+	// prettier-ignore
 	// Prevents crashing as embeds can't be empty
-	if (!template.author?.text && !template.title?.text && !template.description && !template.imageURL)
+	if (!template.author?.text && !template.title?.text && !template.description && !template.imageURL && !template?.fields[0]?.name)
 		embed.setDescription("Embeds can't be empty!");
 
 	return embed;
