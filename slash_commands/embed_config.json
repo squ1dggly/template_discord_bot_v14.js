@@ -1,39 +1,60 @@
 {
-	"DATE_FORMAT": "yyyy-mm-dd",
-	"TIMEOUT": "1m",
+	"timeouts": {
+		"BASE": "2m",
+		"CHANNEL_SELECT": "1m"
+	},
 
 	"init": {
 		"messageContent": "",
-		"author": { "text": "", "iconURL": "" },
+		"author": { "text": "", "iconURL": "", "linkURL": "" },
 		"title": { "text": "", "linkURL": "" },
 		"description": "",
-		"footer": "",
-		"color": "",
+		"footer": { "text": "", "iconURL": "" },
+		"thumbnailURL": "",
 		"imageURL": "",
+		"color": "",
 		"timestamp": false,
 		"fields": [{ "name": "", "value": "", "inline": false }]
 	},
 
 	"template_default": {
-		"title": { "text": "Embed Maker" },
+		"title": "Embed maker",
 		"description": [
-			"# Welcome to the embed maker!",
-			"> Here's some useful tricks to get you started:",
-			"",
-			"- Prefixing a **`channel ID`** with `#` will mention that channel",
-			"- Prefixing a **`user ID`** with `@` will mention that user",
-			"- Prefixing **`USER`** with `$` will mention yourself",
-			"- Prefixing **`USERNAME`** with `$` will be replaced with your user/display name"
+			"# Welcome to embed maker!",
+			"*error messages when a link or color is invalid don't show currently*",
+			"## Here's some useful tricks to get you started:"
 		],
 		"footer": "🔻 Use the buttons down below to get started 🔻",
-		"color": "Random"
+		"thumbnailURL": "https://media.tenor.com/Ur82SQUKdpUAAAAi/pencil-objects.gif",
+		"color": "Random",
+		"fields": [
+			{
+				"name": "# Discord",
+				"value": [
+					"- **`\\#channel ID`** will mention that channel",
+					"- **`\\@user ID`** will mention that user",
+					"- **`\\$USER`** will mention yourself",
+					"- **`\\$USERNAME`** will be replaced with your user/display name"
+				],
+				"inline": true
+			},
+			{
+				"name": "# Calendar",
+				"value": [
+					"- **`\\$YEAR`** or **`\\$year`** will be replaced with the current year",
+					"- **`\\$MONTH`** or **`\\$month`** will be replaced with the current month",
+					"- **`\\$DAY`** or **`\\$day`** will be replaced with the current day"
+				],
+				"inline": true
+			}
+		]
 	},
 
 	"templates": [
 		{
 			"meta": { "name": "test", "value": "template_test" },
 			"title": { "text": "Test Template" },
-			"description": "This is a template made to test Embed Maker's capabilities",
+			"description": "This is a template made to test `Embed Maker's` capabilities\nYYYY: $YEAR\nMM: $MONTH | M: $month\nDD: $DAY | D: $day",
 			"imageURL": "https://media.tenor.com/wlYJtPbFQ1oAAAAC/whatever-blow-hair.gif",
 			"footer": "why hello there 🍌",
 			"timestamp": true,
