@@ -9,11 +9,7 @@
 			"const _jsT = require(\"../modules/jsTools/_jsT\");\n",
 
 			"module.exports = {",
-			"    // prettier-ignore",
-			"    options: {",
-			"        icon: \"🍪\", deferReply: false",
-			"        // botAdminOnly: true // guildAdminOnly: true",
-			"    },\n",
+			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
 
 			"    // prettier-ignore",
 			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
