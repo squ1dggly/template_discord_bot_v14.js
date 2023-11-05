@@ -268,7 +268,7 @@ class BetterEmbed extends EmbedBuilder {
 		try {
 			// prettier-ignore
 			if (this.options.footer.iconURL)
-				super.setFooter({ iconURL: this.options.footer.iconURL });
+				super.setFooter({ text: this.options.footer.text, iconURL: this.options.footer.iconURL });
 			else
 				this.data.footer.icon_url = undefined;
 		} catch {
