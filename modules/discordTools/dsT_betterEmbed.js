@@ -93,13 +93,13 @@ class BetterEmbed extends EmbedBuilder {
 			this.options.author = _author;
 
 		else if (typeof author === "string")
-			this.options.author = { ..._author, user: this.options.author.user, text: author };
+			this.options.author = { ...this.options.author, text: author };
 
 		else
-			this.options.author = { ..._author, ...author };
+			this.options.author = { ...this.options.author, ...author };
 
 		this.options.author.text = this.#_formatMarkdown(this.options.author.text);
-
+		
 		this.#_setAuthor();
 		return this;
 	}
