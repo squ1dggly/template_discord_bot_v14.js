@@ -81,7 +81,7 @@ class BetterEmbed extends EmbedBuilder {
 
 	/** Return a new BetterEmbed with the same configuration @param {bE_options} options*/
 	copy(options) {
-		return new BetterEmbed({...this.options, ...options});
+		return new BetterEmbed({ ...this.options, ...options });
 	}
 
 	/** Set this embed's author @param {bE_author} author */
@@ -339,6 +339,11 @@ class BetterEmbed extends EmbedBuilder {
 		// Add the interaction's member as the author's user if needed
 		if (!this.options.author.user && this.options.interaction)
 			this.options.author.user = this.options.interaction.member;
+
+		// prettier-ignore
+		// Add the interaction's channel as the default send channel if needed
+		if (!this.options.channel && this.options.interaction)
+			this.options.channel = this.options.interaction.channel;
 
 		/* - - - - - { Formatting } - - - - - */
 		this.options.author.text = this.#_formatMarkdown(this.options.author.text);
