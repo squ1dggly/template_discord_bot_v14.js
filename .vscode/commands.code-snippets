@@ -1,4 +1,38 @@
 {
+	"Prefix Command": {
+		"scope": "javascript",
+		"prefix": "cmd",
+		"body": [
+			"const { Client, Message } = require(\"discord.js\");\n",
+
+			"const { BetterEmbed } = require(\"../modules/discordTools\");",
+			"const _jsT = require(\"../modules/jsTools\");\n",
+
+			"module.exports = {",
+			"    name: \"cookie\",",
+			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
+
+			"    /** @param {Client} client @param {Message} message */",
+			"    execute: async (client, message) => {",
+			"        // prettier-ignore",
+			"        let choices = [",
+			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\",",
+			"        ];\n",
+
+			"        // prettier-ignore",
+			"        let embed_cookie = new BetterEmbed({",
+			"            channel: message.channel, author: { user: message.author, iconURL: true },",
+			"            description: _jsT.choice(choices), timestamp: true",
+			"        });\n",
+
+			"        return await embed_cookie.send();$0",
+			"    }",
+			"};",
+			""
+		]
+	},
+
 	"Slash Command": {
 		"scope": "javascript",
 		"prefix": "slash",
