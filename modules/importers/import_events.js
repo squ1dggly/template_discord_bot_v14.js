@@ -1,7 +1,5 @@
 /** @file Import events and bind them to their appropriate client event trigger @author xsqu1znt */
 
-const fs = require("fs");
-
 const { Client } = require("discord.js");
 const logger = require("../logger");
 const _jsT = require("../jsTools");
@@ -10,6 +8,23 @@ const _jsT = require("../jsTools");
 const config = { client: require("../../configs/config_client.json") };
 const hostMode = config.client.MODE === "HOST" ? true : false;
 const pathPrefix = hostMode ? "." : "../..";
+
+function importEvents(path) {
+	let files = _jsT.readDir(path).filter(fn => fn.endsWith(".js"));
+	let events = [];
+
+	for (let fn in files) events.push(require(hostMode ? `../.${path}/${fn}` : `${path}/${fn}`));
+
+	return events;
+}
+
+function executeEvent(foo, ...args) {
+	try {
+		foo.execute.apply(null, args);
+	} catch (err) {
+		logger.error("Failed to execute event function", `\"${foo.name}\" on event \"${foo.event}\"`, err);
+	}
+}
 
 module.exports = {
 	/** @param {Client} client */
@@ -33,7 +48,7 @@ module.exports = {
 			}
 		};
 
-		/* - - - - - { Bind the Functions } - - - - - */
+		/* - - - - - { Ready } - - - - - */
 		// prettier-ignore
 		if (events.ready.length) client.on("ready", async () => {
 			events.ready.forEach(foo => executeEvent(foo, client));
@@ -79,22 +94,3 @@ module.exports = {
 		});
 	}
 };
-
-// ! Helper Functions
-function importEvents(dir) {
-	let files = fs.readdirSync(`.${dir}`).filter(fn => fn.endsWith(".js"));
-	// let files = fs.readdirSync(`${dir}`).filter(fn => fn.endsWith('.js')); // Use instead when uploaded to a host
-	let funcs = [];
-
-	files.forEach(fn => funcs.push(require(`${dir}/${fn}`)));
-	// files.forEach(fn => funcs.push(require(`../.${dir}/${fn}`))); // Use instead when uploaded to a host
-	return funcs;
-}
-
-function executeEvent(foo, ...args) {
-	try {
-		foo.execute.apply(null, args);
-	} catch (err) {
-		logger.error("Failed to execute event function", `\"${foo.name}\" on event \"${foo.event}\"`, err);
-	}
-}
