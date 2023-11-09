@@ -5,6 +5,7 @@ const randomTools = require("./jsT_random");
 const objectTools = require("./jsT_object");
 const dateTools = require("./jsT_date");
 const asyncTools = require("./jsT_async");
+const fileTools = require("./jsT_file");
 
 module.exports = {
 	...arrayTools,
@@ -13,5 +14,6 @@ module.exports = {
 	...randomTools,
 	...objectTools,
 	...dateTools,
-	...asyncTools
+	...asyncTools,
+	...fileTools
 };

@@ -1,81 +1,79 @@
-/* Imports our event scripts and binds them to their intended event triggers. */
+/** @file Import events and bind them to their appropriate client event trigger @author xsqu1znt */
 
 const fs = require("fs");
 
 const { Client } = require("discord.js");
 const logger = require("../logger");
-// const mongo = require("../mongo');
+const _jsT = require("../jsTools");
+// const mongo = require("../mongo");
+
+const config = { client: require("../../configs/config_client.json") };
+const hostMode = config.client.MODE === "HOST" ? true : false;
+const pathPrefix = hostMode ? "." : "../..";
 
 module.exports = {
 	/** @param {Client} client */
 	init: client => {
 		let events = {
-			ready: importEvents("../../events/ready"),
-			// ready: importEvents('./events/ready'), // Use instead when uploaded to a host
+			ready: importEvents(`${pathPrefix}/events/ready`),
 
 			guild: {
-				// create: importEvents('../../events/guild/create'),
-				// create: importEvents('./events/guild/create'), // Use instead when uploaded to a host
-				// delete: importEvents('../../events/guild/delete')
-				// delete: importEvents('./events/guild/delete') // Use instead when uploaded to a host
+				create: importEvents(`${pathPrefix}/events/guild/create`),
+				delete: importEvents(`${pathPrefix}/events/guild/delete`)
 			},
 
 			message: {
-				// create: importEvents('../../events/message/create'),
-				// create: importEvents('./events/message/create'), // Use instead when uploaded to a host
-				// update: importEvents('../../events/message/update'),
-				// update: importEvents('./events/message/update'), // Use instead when uploaded to a host
-				// delete: importEvents('../../events/message/delete')
-				// delete: importEvents('./events/message/delete') // Use instead when uploaded to a host
+				create: importEvents(`${pathPrefix}/events/message/create`),
+				update: importEvents(`${pathPrefix}/events/message/update`),
+				delete: importEvents(`${pathPrefix}/events/message/delete`)
 			},
 
 			interaction: {
-				create: importEvents("../../events/interaction/create")
-				// create: importEvents('./events/interaction/create') // Use instead when uploaded to a host
+				create: importEvents(`${pathPrefix}/events/interaction/create`)
 			}
 		};
 
-		// Bind the functions
-		// * Ready
-		client.on("ready", async () => {
+		/* - - - - - { Bind the Functions } - - - - - */
+		// prettier-ignore
+		if (events.ready.length) client.on("ready", async () => {
 			events.ready.forEach(foo => executeEvent(foo, client));
 		});
 
-		// * Guild
-		// Guild -> Create
-		/* client.on("guildCreate", async (guild) => {
+		/* - - - - - { Guild } - - - - - */
+		// prettier-ignore
+		if (events.guild.create.length) client.on("guildCreate", async (guild) => {
             let args = { guild };
             events.guild.create.forEach(foo => executeEvent(foo, client, args));
-        }); */
+		});
 
-		// Guild -> Delete
-		/* client.on("guildDelete", async (guild) => {
+		// prettier-ignore
+		if (events.guild.delete.length) client.on("guildDelete", async (guild) => {
             let args = { guild };
             events.guild.delete.forEach(foo => executeEvent(foo, client, args));
-        }); */
+		});
 
-		// * Message
-		// Message -> Create
-		/* client.on("messageCreate", async (message) => {
+		/* - - - - - { Message } - - - - - */
+		// prettier-ignore
+		if (events.message.create.length) client.on("messageCreate", async (message) => {
             let args = { message };
             events.message.create.forEach(foo => executeEvent(foo, client, args));
-        }); */
+		});
 
-		// Message -> Update
-		/* client.on("messageUpdate", async (before, after) => {
-            let args = { message: { before, after };
-            events.message.update.forEach(foo => executeEvent(foo, client, args }));
-        }); */
-
-		// Message -> Delete
-		/* client.on("messageDelete", async (message) => {
+		// prettier-ignore
+		if (events.message.delete.length) client.on("messageDelete", async (message) => {
             let args = { message };
             events.message.delete.forEach(foo => executeEvent(foo, client, args));
-        }); */
+        });
 
-		// * Interaction
-		// Interaction -> Create
-		client.on("interactionCreate", async interaction => {
+		// prettier-ignore
+		if (events.message.update.length) client.on("messageUpdate", async (before, after) => {
+			let args = { message: { before, after } };
+            events.message.update.forEach(foo => executeEvent(foo, client, args ));
+        });
+
+		/* - - - - - { Interaction } - - - - - */
+		// prettier-ignore
+		if (events.interaction.create.length) client.on("interactionCreate", async interaction => {
 			let args = { interaction };
 			events.interaction.create.forEach(foo => executeEvent(foo, client, args));
 		});

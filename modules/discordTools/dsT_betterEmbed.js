@@ -37,11 +37,11 @@
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const dynaSend = require("./dsT_dynaSend");
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 const logger = require("../logger");
 
 class BetterEmbed extends EmbedBuilder {

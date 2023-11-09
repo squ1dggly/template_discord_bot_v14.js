@@ -27,7 +27,7 @@
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {boolean} deleteAfter */
 
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 // prettier-ignore
 const {
@@ -39,7 +39,7 @@ const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
 const dynaSend = require("./dsT_dynaSend");
 
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 const logger = require("../logger");
 
 /// Global Variables

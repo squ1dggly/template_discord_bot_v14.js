@@ -8,7 +8,7 @@
  * @property {ansi_colors_bg} bg_color
  * @property {boolean} codeblock add the returned text into a message-ready ansi codeblock*/
 
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 const ansi_format_keys = Object.keys(config.ansi.formats);
 const ansi_colors_text_keys = Object.keys(config.ansi.colors.text);

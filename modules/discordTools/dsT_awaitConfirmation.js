@@ -14,11 +14,11 @@
  * @property {boolean} deleteOnConfirmation
  * @property {number} timeout */
 
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 const { CommandInteraction, Embed, ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 
 /** Send a confirmation message and await the user's response
  * @param {ac_options} options */

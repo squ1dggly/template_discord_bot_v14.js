@@ -1,12 +1,12 @@
-/* Initializes the bot and gets everything up and running. */
+/** @file Initialize the bot and get everything up and functional @author xsqu1znt */
 
 require("dotenv").config();
-const fs = require("fs");
 
 const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
 const slashCommandManager = require("./modules/slashCommandManager");
 const mongo = require("./modules/mongo/index");
 const logger = require("./modules/logger");
+const _jsT = require("./modules/jsTools");
 
 const TOKEN = process.env.TOKEN || require("./configs/config_client.json").TOKEN;
 
@@ -23,16 +23,17 @@ const client = new Client({
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.DirectMessageReactions, // Allows bot to see reactions in DMs
 		GatewayIntentBits.DirectMessages // Allows bot to read DMs
-	]
+	],
 
-	// partials: [Partials.Channel] // Allows bot to use non-guild channels
+	partials: [Partials.Channel] // Allows bot to use non-guild channels
 });
 
-// Collections that hold valuable information for the client
+/// Collections that hold valuable information for the client
 client.slashCommands = new Collection();
+client.prefixCommands = new Collection();
 
 // Run importers
-let importers_dir = fs.readdirSync("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
+let importers_dir = _jsT.readDir("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
 
 // prettier-ignore
 importers_dir.forEach(fn => {

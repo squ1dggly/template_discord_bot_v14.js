@@ -1,7 +1,7 @@
 const { Message } = require("discord.js");
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 /** Delete a message after a given amount of time
  * @param {Message} message message object that was sent

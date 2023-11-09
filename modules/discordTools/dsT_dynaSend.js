@@ -15,7 +15,7 @@ const { CommandInteraction, TextChannel, ActionRowBuilder, EmbedBuilder } = requ
 const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
 
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 const logger = require("../logger");
 
 /** @param {dS_sendOptions} options  */

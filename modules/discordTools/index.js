@@ -1,4 +1,4 @@
-const config = require("./_dsT_config.json");
+const config = require("./dsT_config.json");
 
 const BetterEmbed = require("./dsT_betterEmbed");
 const EmbedNavigator = require("./dsT_embedNavigator");
@@ -6,9 +6,9 @@ const EmbedNavigator = require("./dsT_embedNavigator");
 const deleteMessageAfter = require("./dsT_deleteMessageAfter");
 const awaitConfirmation = require("./dsT_awaitConfirmation");
 const dynaSend = require("./dsT_dynaSend");
-const ansi = require("./_dsT_ansi");
+const ansi = require("./dsT_ansi");
 
-const _jsT = require("../jsTools/_jsT");
+const _jsT = require("../jsTools");
 
 /* Check config file for errors */
 // prettier-ignore
