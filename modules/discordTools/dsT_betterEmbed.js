@@ -99,7 +99,7 @@ class BetterEmbed extends EmbedBuilder {
 			this.options.author = { ...this.options.author, ...author };
 
 		this.options.author.text = this.#_formatMarkdown(this.options.author.text);
-		
+
 		this.#_setAuthor();
 		return this;
 	}
@@ -392,6 +392,9 @@ class BetterEmbed extends EmbedBuilder {
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
 			...this.options, ...options
 		};
+
+		// Send method fallback
+		if (!options.interaction && options.channel) options.sendMethod = "channel";
 
 		this.#_configure(options);
 		options.messageContent = this.#_formatMarkdown(options.messageContent);

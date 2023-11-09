@@ -5,8 +5,8 @@
 		"body": [
 			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");\n",
 
-			"const { BetterEmbed } = require(\"../modules/discordTools/_dsT\");",
-			"const _jsT = require(\"../modules/jsTools/_jsT\");\n",
+			"const { BetterEmbed } = require(\"../modules/discordTools\");",
+			"const _jsT = require(\"../modules/jsTools\");\n",
 
 			"module.exports = {",
 			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
