@@ -9,7 +9,7 @@ module.exports = {
 	options: { icon: "🍪", botAdminOnly: false, guildAdminOnly: false },
 
 	/** @param {Client} client @param {Message} message */
-	execute: async (client, message) => {
+	execute: async (client, { message, cleanContent, commandName }) => {
 		// prettier-ignore
 		let choices = [
             "What's up, **$USERNAME**! Have a cookie! :cookie:",
@@ -22,6 +22,6 @@ module.exports = {
             description: _jsT.choice(choices)
         });
 
-		return await embed_cookie.reply({ message });
+		return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });
 	}
 };

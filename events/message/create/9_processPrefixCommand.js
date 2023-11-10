@@ -71,8 +71,9 @@ module.exports = {
 			);
 		}
 
+		// prettier-ignore
 		// Execute the prefix command's function
-		return await prefixCommand.execute(client, args.message, { cleanContent, commandName }).then(async message => {
+		return await prefixCommand.execute(client, { message: args.message, cleanContent, commandName }).then(async message => {
 			// TODO: run code here after the command is finished
 		});
 	}

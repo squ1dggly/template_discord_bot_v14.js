@@ -31,15 +31,28 @@
  * @property {string} imageURL
  * @property {string|{text:string, iconURL:string}} footer
  * @property {string|string[]} color
- * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
+ * @property {"replyTo"|"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {boolean} ephemeral
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
+/** @typedef bE_replyOptions
+ * @property {string} messageContent
+ * @property {bE_author} author
+ * @property {string|{text:string, linkURL:string}} title
+ * @property {string} thumbnailURL
+ * @property {string} description
+ * @property {string} imageURL
+ * @property {string|{text:string, iconURL:string}} footer
+ * @property {string|string[]} color
+ * @property {ActionRowBuilder|ActionRowBuilder[]} components
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions
+ * @property {number|string} deleteAfter amount of time to wait in milliseconds */
+
 const config = require("./dsT_config.json");
 
-const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder } = require("discord.js");
+const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder, Message } = require("discord.js");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools");
 const logger = require("../logger");
@@ -405,6 +418,33 @@ class BetterEmbed extends EmbedBuilder {
 
 		// Send the message
 		return await dynaSend({ embeds: [this], ...options });
+	}
+
+	/** Send the embed as a reply to a given message
+	 *
+	 * - **`$USER`** :: *author's mention*
+	 *
+	 * - **`$USERNAME`** :: *author's display/user name*
+	 * @param {Message} message
+	 * @param {bE_replyOptions} options */
+	async reply(message, options) {
+		// prettier-ignore
+		options = {
+			message,
+			messageContent: "", components: [], allowedMentions: {},
+			sendMethod: "replyTo", deleteAfter: 0,
+			...this.options, ...options
+		};
+
+		this.#_configure(options);
+		options.messageContent = this.#_formatMarkdown(options.messageContent);
+		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+
+		// If a single component was given, convert it into an array
+		options.components = _jsT.isArray(options.components);
+
+		// Send the message
+		return await dynaSend({ embeds: [this], sendMethod: "replyTo", ...options });
 	}
 }
 

@@ -1,8 +1,9 @@
-/** @typedef {"reply"|"editReply"|"followUp"|"channel"} dS_sendMethod */
+/** @typedef {"replyTo"|"reply"|"editReply"|"followUp"|"channel"} dS_sendMethod */
 
 /** @typedef dS_sendOptions
  * @property {CommandInteraction} interaction
  * @property {TextChannel} channel
+ * @property {Message} message
  * @property {string} messageContent
  * @property {EmbedBuilder|BetterEmbed|Array<EmbedBuilder|BetterEmbed>} embeds
  * @property {dS_sendMethod} sendMethod if "reply" fails it will use "editReply" | "reply" is default
@@ -11,7 +12,7 @@
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
-const { CommandInteraction, TextChannel, ActionRowBuilder, EmbedBuilder } = require("discord.js");
+const { CommandInteraction, TextChannel, ActionRowBuilder, EmbedBuilder, Message } = require("discord.js");
 const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
 const BetterEmbed = require("./dsT_betterEmbed");
 
@@ -22,18 +23,28 @@ const logger = require("../logger");
 async function dynaSend(options) {
 	// prettier-ignore
 	options = {
-			interaction: null, channel: null, embeds: [],
+			interaction: null, channel: null, message: null, embeds: [],
 			messageContent: "", components: [], allowedMentions: {},
 			sendMethod: "reply", ephemeral: false, deleteAfter: 0,
 			...options
     };
 
-    options.deleteAfter = _jsT.parseTime(options.deleteAfter);
-    
+	options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+
 	let message = null;
 
 	try {
 		switch (options.sendMethod) {
+			// prettier-ignore
+			case "replyTo":
+                if (!options.message)
+                    throw new Error("sendMethod \`replyTo\` not allowed; Message not provided");
+                
+                message = await options.message.reply({
+                    content: options.messageContent, components: options.components,
+                    embeds: options.embeds, fetchReply: true, allowedMentions: options.allowedMentions
+                }); break;
+
 			// prettier-ignore
 			case "reply":
                 if (!options.interaction)

@@ -14,7 +14,7 @@
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
 			"    /** @param {Client} client @param {Message} message */",
-			"    execute: async (client, message) => {",
+			"    execute: async (client, { message, cleanContent, commandName }) => {",
 			"        // prettier-ignore",
 			"        let choices = [",
 			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
@@ -27,7 +27,7 @@
 			"            description: _jsT.choice(choices)",
 			"        });\n",
 
-			"        return await embed_cookie.send();$0",
+			"        return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });$0",
 			"    }",
 			"};",
 			""
