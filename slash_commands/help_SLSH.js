@@ -11,7 +11,7 @@ module.exports = {
 
 	/** @param {Client} client @param {CommandInteraction} interaction */
 	execute: async (client, interaction) => {
-		let embed_help = new BetterEmbed({ interaction, showTimestamp: true });
+		let embed_help = new BetterEmbed({ interaction, timestamp: true });
 
 		// Create an array out of the slash commands that have icons
 		let slashCommands = [...client.slashCommands.values()].filter(slsh => slsh?.options?.icon);
@@ -28,12 +28,11 @@ module.exports = {
 				.replace("$DESCRIPTION", _slsh.builder.description)
 		);
 
+		// prettier-ignore
 		// Send the embed with the command list, if available
-		if (embed_help_description.length)
-			return await embed_help.send({
-				description: embed_help_description.join("\n"),
-				footer: `${slashCommands.length} ${slashCommands.length === 1 ? "cmd" : "cmds"}`
-			});
+		if (embed_help_description.length) return await embed_help.send({
+			description: embed_help_description.join("\n"),
+		});
 
 		// Send the embed with an error
 		return await embed_help.send({ description: "**There aren't any commands available**" });

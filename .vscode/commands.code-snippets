@@ -14,7 +14,7 @@
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
 			"    /** @param {Client} client @param {Message} message */",
-			"    execute: async (client, { message, cleanContent, commandName }) => {",
+			"    execute: async (client, message, { cleanContent, cmdName, prefix }) => {",
 			"        // prettier-ignore",
 			"        let choices = [",
 			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",

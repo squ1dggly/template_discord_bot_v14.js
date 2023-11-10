@@ -6,10 +6,10 @@ const _jsT = require("../modules/jsTools");
 module.exports = {
 	name: "cookie",
 	description: "Get a cookie or a glass of milk",
-	options: { icon: "🍪", botAdminOnly: false, guildAdminOnly: false },
+	options: { icon: "🍪" },
 
 	/** @param {Client} client @param {Message} message */
-	execute: async (client, { message, cleanContent, commandName }) => {
+	execute: async (client, message) => {
 		// prettier-ignore
 		let choices = [
             "What's up, **$USERNAME**! Have a cookie! :cookie:",
