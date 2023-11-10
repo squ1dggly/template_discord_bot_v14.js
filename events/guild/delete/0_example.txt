@@ -1,4 +1,4 @@
-/* An example of an event function. */
+/** @file An example of an event function @author xsqu1znt */
 
 const { Client, Guild } = require("discord.js');
 const logger = require("../../../modules/logger');

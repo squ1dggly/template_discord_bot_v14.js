@@ -10,7 +10,7 @@
 
 			"module.exports = {",
 			"    name: \"cookie\",",
-			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
+			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
 			"    /** @param {Client} client @param {Message} message */",
 			"    execute: async (client, message) => {",

@@ -1,14 +1,14 @@
-/* Executes commands requested by a command interaction. */
+/** @file Execute commands requested by a command interaction @author xsqu1znt */
 
-const { Client, Message, PermissionsBitField, userMention } = require("discord.js");
-
-const { OWNER_ID, ADMIN_IDS, admin_bypass_ids } = require("../../../configs/config_client.json");
+const { Client, PermissionsBitField, BaseInteraction } = require("discord.js");
 const logger = require("../../../modules/logger");
 
 const config = { client: require("../../../configs/config_client.json") };
 
 function userIsBotAdminOrBypass(interaction) {
-	return [OWNER_ID, ...ADMIN_IDS, ...(admin_bypass_ids[interaction.commandName] || [])].includes(interaction.user.id);
+	// prettier-ignore
+	return [config.client.OWNER_ID, ...config.client.ADMIN_IDS, ...(config.client.admin_bypass_ids[interaction.commandName] || [])]
+		.includes(interaction.user.id);
 }
 
 function userIsGuildAdminOrBypass(interaction) {
@@ -19,17 +19,13 @@ function userIsGuildAdminOrBypass(interaction) {
 }
 
 module.exports = {
-	name: "process_prefixCommand",
-	event: "message_create",
+	name: "process_slashCommand",
+	event: "interaction_create",
 
-	/** @param {Client} client @param {{message:Message}} args */
-    execute: async (client, args) => {
-        // prettier-ignore
-        let commandPrefix = config.client.PREFIX
-            .replace("$MENTION", userMention(args.message.guild.members.me.id));
-
-		// Filter out non-guild and non-command message
-		if (!args.message.guild || !args.message.content.startsWith(commandPrefix)) return;
+	/** @param {Client} client @param {{interaction:BaseInteraction}} args */
+	execute: async (client, args) => {
+		// Filter out non-guild and non-command interactions
+		if (!args.interaction.guild || !args.interaction.isCommand()) return;
 
 		// Get the slash command function from the client if it exists
 		let slashCommand = client.slashCommands.get(args.interaction.commandName) || null;
