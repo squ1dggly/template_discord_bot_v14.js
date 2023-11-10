@@ -8,7 +8,7 @@ module.exports = {
 
 	// prettier-ignore
 	builder: new SlashCommandBuilder().setName("cookie")
-		.setDescription("Get a cookie, or a glass of milk"),
+		.setDescription("Get a cookie or a glass of milk"),
 
 	/** @param {Client} client @param {CommandInteraction} interaction */
 	execute: async (client, interaction) => {

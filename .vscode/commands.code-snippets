@@ -10,6 +10,7 @@
 
 			"module.exports = {",
 			"    name: \"cookie\",",
+			"    description: \"Get a cookie or a glass of milk\",",
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
 			"    /** @param {Client} client @param {Message} message */",
@@ -47,7 +48,7 @@
 
 			"    // prettier-ignore",
 			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
-			"        .setDescription(\"${2:Get a cookie, or a glass of milk}\"),\n",
+			"        .setDescription(\"${2:Get a cookie or a glass of milk}\"),\n",
 
 			"    /** @param {Client} client @param {CommandInteraction} interaction */",
 			"    execute: async (client, interaction) => {",

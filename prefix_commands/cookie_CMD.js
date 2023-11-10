@@ -4,7 +4,8 @@ const { BetterEmbed } = require("../modules/discordTools");
 const _jsT = require("../modules/jsTools");
 
 module.exports = {
-	name: "cookie",
+    name: "cookie",
+    description: "Get a cookie or a glass of milk",
 	options: { icon: "🍪", botAdminOnly: false, guildAdminOnly: false },
 
 	/** @param {Client} client @param {Message} message */
