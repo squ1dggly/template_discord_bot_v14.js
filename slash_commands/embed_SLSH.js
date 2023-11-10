@@ -6,8 +6,8 @@ const {
 	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder, EmbedBuilder,
 } = require("discord.js");
 
-const { BetterEmbed } = require("../modules/discordTools/_dsT");
-const _jsT = require("../modules/jsTools/_jsT");
+const { BetterEmbed } = require("../modules/discordTools");
+const _jsT = require("../modules/jsTools");
 
 const config = require("./embed_config.json");
 

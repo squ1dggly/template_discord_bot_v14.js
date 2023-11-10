@@ -3,20 +3,15 @@
 const { Client, ActivityType } = require("discord.js");
 const { MODE, client_presence } = require("../../configs/config_client.json");
 
+const config = { client: require("../../configs/config_client.json") };
+
 module.exports = {
 	name: "SET_PRESENCE",
 	event: "ready",
 
 	/** @param {Client} client  */
 	execute: async client => {
-		let presence;
-
-		// prettier-ignore
-		switch (MODE) {
-			case "HOST": precense = client_presence.host; break;
-			case "PROD": precense = client_presence.production; break;
-			case "DEV": precense = client_presence.dev;  break;
-		}
+		let presence = config.client.client_presence[MODE.toLowerCase()];
 
 		// prettier-ignore
 		// Replace presence.avtivity.TYPE with the proper ActivityType enum

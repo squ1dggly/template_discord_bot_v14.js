@@ -1,7 +1,7 @@
 {
 	"TOKEN": "",
 	"MONGO_URI": "",
-	"MODE": "HOST",
+	"MODE": "DEV",
 	"PREFIX": "$MENTION ",
 
 	"OWNER_ID": "",

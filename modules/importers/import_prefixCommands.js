@@ -12,7 +12,7 @@ function importCommands(path, recursive = false) {
 	let commands = [];
 
 	for (let entry of dirEntries) {
-		let _path = hostMode ? `../.${path}/${entry}` : `${path}/${entry}`;
+		let _path = hostMode ? `${path}/${entry}` : `../.${path}/${entry}`;
 
 		// prettier-ignore
 		if (entry.endsWith("CMD.js")) try {
@@ -28,7 +28,7 @@ function importCommands(path, recursive = false) {
 module.exports = {
 	/** @param {Client} client */
 	init: client => {
-		let _path = hostMode ? "./prefix_commands" : "../../prefix_commands";
+		let _path = hostMode ? "../../prefix_commands" : "./prefix_commands";
 		let commands = importCommands(_path, false);
 
 		// prettier-ignore
