@@ -4,8 +4,8 @@ const { BetterEmbed } = require("../modules/discordTools");
 const _jsT = require("../modules/jsTools");
 
 module.exports = {
-    name: "cookie",
-    description: "Get a cookie or a glass of milk",
+	name: "cookie",
+	description: "Get a cookie or a glass of milk",
 	options: { icon: "🍪", botAdminOnly: false, guildAdminOnly: false },
 
 	/** @param {Client} client @param {Message} message */
@@ -18,10 +18,10 @@ module.exports = {
 
 		// prettier-ignore
 		let embed_cookie = new BetterEmbed({
-            channel: message.channel, author: { user: message.author, iconURL: true },
-            description: _jsT.choice(choices), timestamp: true
+            channel: message.channel, author: { user: message.member },
+            description: _jsT.choice(choices)
         });
 
-		return await embed_cookie.send();
+		return await embed_cookie.reply({ message });
 	}
 };

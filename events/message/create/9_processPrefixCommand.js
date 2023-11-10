@@ -30,12 +30,13 @@ module.exports = {
 
 		// prettier-ignore
 		// Filter out non-guild and non-command message
-		if (!args.message.guild || !args.message.author.bot || !(args.message.content || "").startsWith(commandPrefix)) return;
+		if (!args.message.guild || args.message.author.bot || !(args.message.content || "").startsWith(commandPrefix)) return;
 
 		/// Parse the message
 		let cleanContent = args.message.content.replace(commandPrefix, "");
 		let commandName = cleanContent.split(" ")[0];
 		if (!commandName) return;
+
 
 		// Get the prefix command function from the client, if it exists
 		let prefixCommand = client.prefixCommands.get(commandName) || null;

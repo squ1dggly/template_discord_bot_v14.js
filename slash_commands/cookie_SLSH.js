@@ -21,7 +21,7 @@ module.exports = {
 		// prettier-ignore
 		let embed_cookie = new BetterEmbed({
 			interaction, author: { user: interaction.member },
-			description: _jsT.choice(choices), showTimestamp: true
+			description: _jsT.choice(choices)
 		});
 
 		return await embed_cookie.send();

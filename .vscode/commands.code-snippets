@@ -23,8 +23,8 @@
 
 			"        // prettier-ignore",
 			"        let embed_cookie = new BetterEmbed({",
-			"            channel: message.channel, author: { user: message.author, iconURL: true },",
-			"            description: _jsT.choice(choices), timestamp: true",
+			"            channel: message.channel, author: { user: message.author },",
+			"            description: _jsT.choice(choices)",
 			"        });\n",
 
 			"        return await embed_cookie.send();$0",
@@ -60,8 +60,7 @@
 
 			"        // prettier-ignore",
 			"        let embed_cookie = new BetterEmbed({",
-			"            interaction, author: { iconURL: true },",
-			"            description: _jsT.choice(choices), timestamp: true",
+			"            interaction, description: _jsT.choice(choices)",
 			"        });\n",
 
 			"        return await embed_cookie.send();$0",
