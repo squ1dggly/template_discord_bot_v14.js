@@ -14,7 +14,7 @@
 			"    description: \"Get a cookie or a glass of milk\",",
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
-			"    /** @param {Client} client @param {Message} message */",
+			"    /** @param {Client} client @param {Message} message @param {{cleanContent:string, cmdName:string, prefix:string}} extra */",
 			"    execute: async (client, message, { cleanContent, cmdName, prefix }) => {",
 			"        // prettier-ignore",
 			"        let choices = [",
