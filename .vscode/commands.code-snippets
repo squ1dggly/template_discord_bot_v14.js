@@ -3,6 +3,11 @@
 		"scope": "javascript",
 		"prefix": "cmd",
 		"body": [
+			"/** @typedef extra",
+			" * @property {string} cleanContent message content without the command name",
+			" * @property {string} cmdName command name",
+			" * @property {string} prefix prefix used */\n",
+
 			"const { Client, Message } = require(\"discord.js\");\n",
 
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
@@ -14,7 +19,7 @@
 			"    description: \"Get a cookie or a glass of milk\",",
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
-			"    /** @param {Client} client @param {Message} message @param {{cleanContent:string,cmdName:string,prefix:string}} extra */",
+			"    /** @param {Client} client @param {Message} message @param {extra} extra */",
 			"    execute: async (client, message, { cleanContent, cmdName, prefix }) => {",
 			"        // prettier-ignore",
 			"        let choices = [",

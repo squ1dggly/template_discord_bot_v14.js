@@ -1,3 +1,8 @@
+/** @typedef extra
+ * @property {string} cleanContent message content without the command name
+ * @property {string} cmdName command name
+ * @property {string} prefix prefix used */
+
 const { Client, Message } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools");
@@ -6,7 +11,7 @@ module.exports = {
 	name: "help",
 	description: "View a list of my commands",
 
-	/** @param {Client} client @param {Message} message */
+	/** @param {Client} client @param {Message} message @param {extra} extra */
 	execute: async (client, message, { prefix }) => {
 		let embed_help = new BetterEmbed();
 
