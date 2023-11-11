@@ -52,7 +52,15 @@
 
 const config = require("./dsT_config.json");
 
-const { CommandInteraction, TextChannel, GuildMember, User, EmbedBuilder, ActionRowBuilder, Message } = require("discord.js");
+const {
+	CommandInteraction,
+	TextChannel,
+	GuildMember,
+	User,
+	EmbedBuilder,
+	ActionRowBuilder,
+	Message
+} = require("discord.js");
 const dynaSend = require("./dsT_dynaSend");
 const _jsT = require("../jsTools");
 const logger = require("../logger");
@@ -382,6 +390,7 @@ class BetterEmbed extends EmbedBuilder {
 			let _prev = structuredClone(this.options);
 
 			this.options = { ...this.options, ...options };
+			this.#_parseOptions();
 			execute();
 			this.options = _prev;
 			return;
