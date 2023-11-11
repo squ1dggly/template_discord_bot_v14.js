@@ -37,6 +37,8 @@ module.exports = {
 		let cmdName = cleanContent.split(" ")[0];
 		if (!cmdName) return;
 
+		cleanContent = cleanContent.replace(cmdName, "");
+
 		// Get the prefix command function from the client, if it exists
 		let prefixCommand = client.prefixCommands.get(cmdName) || null;
 		if (!prefixCommand) return;
