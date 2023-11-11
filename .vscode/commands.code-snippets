@@ -3,7 +3,8 @@
 		"scope": "javascript",
 		"prefix": "cmd",
 		"body": [
-			"const { Client, Message } = require(\"discord.js\");",
+			"const { Client, Message } = require(\"discord.js\");\n",
+
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const _jsT = require(\"../modules/jsTools\");\n",
 
@@ -38,7 +39,8 @@
 		"scope": "javascript",
 		"prefix": "slash",
 		"body": [
-			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
+			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");\n",
+
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const _jsT = require(\"../modules/jsTools\");\n",
 

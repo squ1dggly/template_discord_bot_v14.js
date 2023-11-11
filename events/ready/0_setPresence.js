@@ -1,7 +1,6 @@
 /** @file Executed as soon as the bot's connected to Discord @author xsqu1znt */
 
 const { Client, ActivityType } = require("discord.js");
-const { MODE, client_presence } = require("../../configs/config_client.json");
 
 const config = { client: require("../../configs/config_client.json") };
 
@@ -11,7 +10,7 @@ module.exports = {
 
 	/** @param {Client} client  */
 	execute: async client => {
-		let presence = config.client.client_presence[MODE.toLowerCase()];
+		let presence = config.client.client_presence[config.client.MODE.toLowerCase()];
 
 		// prettier-ignore
 		// Replace presence.avtivity.TYPE with the proper ActivityType enum
