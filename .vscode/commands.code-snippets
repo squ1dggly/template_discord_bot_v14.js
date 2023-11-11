@@ -3,13 +3,13 @@
 		"scope": "javascript",
 		"prefix": "cmd",
 		"body": [
-			"const { Client, Message } = require(\"discord.js\");\n",
-
+			"const { Client, Message } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const _jsT = require(\"../modules/jsTools\");\n",
 
 			"module.exports = {",
 			"    name: \"cookie\",",
+			"    aliases: [],",
 			"    description: \"Get a cookie or a glass of milk\",",
 			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
 
@@ -38,8 +38,7 @@
 		"scope": "javascript",
 		"prefix": "slash",
 		"body": [
-			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");\n",
-
+			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const _jsT = require(\"../modules/jsTools\");\n",
 

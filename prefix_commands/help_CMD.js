@@ -1,8 +1,5 @@
 const { Client, Message } = require("discord.js");
-
 const { BetterEmbed } = require("../modules/discordTools");
-
-const config = { client: require("../configs/config_client.json") };
 
 module.exports = {
 	name: "help",

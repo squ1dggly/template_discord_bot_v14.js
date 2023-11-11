@@ -31,8 +31,13 @@ module.exports = {
 		let _path = hostMode ? "../../prefix_commands" : "./prefix_commands";
 		let commands = importCommands(_path, false);
 
-		// prettier-ignore
-		for (let command of commands)
+		for (let command of commands) {
 			client.prefixCommands.set(command.name, command);
+
+			// prettier-ignore
+			if (command?.aliases?.length)
+				for (let alias of command.aliases)
+					client.prefixCommands.set(alias, command);
+		}
 	}
 };

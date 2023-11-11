@@ -1,5 +1,4 @@
 const { Client, Message } = require("discord.js");
-
 const { BetterEmbed } = require("../modules/discordTools");
 const _jsT = require("../modules/jsTools");
 
