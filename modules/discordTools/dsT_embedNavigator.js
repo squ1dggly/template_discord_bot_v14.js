@@ -403,7 +403,9 @@ class EmbedNavigator {
 			// Collector :: { END }
 			collector.on("end", async () => {
 				this.data.collectors.component = null;
-				await this.#_messageComponents_remove();
+				try {
+					await this.#_messageComponents_remove();
+				} catch {}
 
 				return resolve(true);
 			});
