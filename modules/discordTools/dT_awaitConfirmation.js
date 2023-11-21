@@ -14,7 +14,7 @@
  * @property {boolean} deleteOnConfirmation
  * @property {number} timeout */
 
-const config = require("./dsT_config.json");
+const config = require("./dT_config.json");
 
 const { CommandInteraction, Embed, ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");

@@ -27,7 +27,7 @@
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {boolean} deleteAfter */
 
-const config = require("./dsT_config.json");
+const config = require("./dT_config.json");
 
 // prettier-ignore
 const {
@@ -418,7 +418,7 @@ class EmbedNavigator {
 
 		if (label.TEXT) _button.setLabel(label.TEXT);
 		else if (label.emoji.ID) _button.setEmoji(label.emoji.ID);
-		else throw new Error("You must provide text or an emoji ID for this navigator button in '_dsT_config.json'");
+		else throw new Error("You must provide text or an emoji ID for this navigator button in '_dT_config.json'");
 
 		return _button;
 	}
@@ -432,11 +432,11 @@ class EmbedNavigator {
 			// prettier-ignore
 			for (let [key, val] of Object.entries(config.navigator.buttons)) {
 				if (!val.emoji.ID) throw new Error(
-					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'_dsT_config.json\'`
+					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'_dT_config.json\'`
 				);
 			
 				if (!val.emoji.NAME) throw new Error(
-					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'_dsT_config.json\'`
+					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'_dT_config.json\'`
 				);
 			}
 

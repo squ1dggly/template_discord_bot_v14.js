@@ -50,7 +50,7 @@
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
-const config = require("./dsT_config.json");
+const config = require("./dT_config.json");
 
 const {
 	CommandInteraction,
