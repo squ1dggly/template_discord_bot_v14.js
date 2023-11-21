@@ -51,7 +51,7 @@ module.exports = {
 		}
 
 		// Apply formatting to the template
-		formatTemplate(template, interaction.member);
+		template = formatTemplate(template, interaction.member);
 
 		/* - - - - - { Configure the Modal } - - - - - */
 		// Create the modal
@@ -313,8 +313,8 @@ module.exports = {
 					// Update the modal's text fields to the current template
 					modal_components.embedContent[0].setValue(template.author.text || "");
 					modal_components.embedContent[1].setValue(template.title.text || "");
-					modal_components.embedContent[2].setValue(template.footer.text || "");
-					modal_components.embedContent[3].setValue(template.description || "");
+					modal_components.embedContent[2].setValue(template.description || "");
+					modal_components.embedContent[3].setValue(template.footer.text || "");
 					modal_components.embedContent[4].setValue(template.imageURL || "");
 
 					// Show the modal and await submit
@@ -734,7 +734,8 @@ async function showModal(interaction, modal, collector) {
 
 		// Return the modal interaction
 		return modalSubmit;
-	} catch {
+	} catch (err) {
+		console.error(err);
 		return null;
 	}
 }
