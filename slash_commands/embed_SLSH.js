@@ -3,7 +3,7 @@ const {
 	Client, Message, CommandInteraction, InteractionCollector,
 	SlashCommandBuilder, ModalBuilder, TextInputBuilder,
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
-	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder, EmbedBuilder,
+	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder
 } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools");
