@@ -17,7 +17,7 @@
 const config = require("./dT_config.json");
 
 const { CommandInteraction, Embed, ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType } = require("discord.js");
-const BetterEmbed = require("./dsT_betterEmbed");
+const BetterEmbed = require("./dT_betterEmbed");
 const jt = require("../jsTools");
 
 /** Send a confirmation message and await the user's response
