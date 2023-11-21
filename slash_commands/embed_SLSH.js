@@ -7,13 +7,13 @@ const {
 } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools");
-const _jsT = require("../modules/jsTools");
+const jt = require("../modules/jsTools");
 
 const config = require("./embed_config.json");
 
 const timeouts = {
-	base: _jsT.parseTime(config.timeouts.BASE),
-	channelSelect: _jsT.parseTime(config.timeouts.CHANNEL_SELECT)
+	base: jt.parseTime(config.timeouts.BASE),
+	channelSelect: jt.parseTime(config.timeouts.CHANNEL_SELECT)
 };
 
 module.exports = {

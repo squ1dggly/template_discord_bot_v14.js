@@ -14,7 +14,7 @@
  * @param {Map} mapNew new map being constructed
  * @param {Array} arrayOriginal original array being processed */
 
-const _o = require("./jsT_object");
+const _o = require("./jT_object");
 
 /** Split an array into smaller arrays that don't exceed a given size
  * @param {array} arr array to split

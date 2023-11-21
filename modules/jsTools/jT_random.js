@@ -1,4 +1,4 @@
-const _aT = require("./jsT_array");
+const _aT = require("./jT_array");
 
 // prettier-ignore
 const alphabet = [

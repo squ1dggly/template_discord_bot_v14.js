@@ -13,10 +13,10 @@
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
 const { CommandInteraction, TextChannel, ActionRowBuilder, EmbedBuilder, Message } = require("discord.js");
-const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
-const BetterEmbed = require("./dsT_betterEmbed");
+const deleteMesssageAfter = require("./dT_deleteMessageAfter");
+const BetterEmbed = require("./dT_betterEmbed");
 
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 const logger = require("../logger");
 
 /** @param {dS_sendOptions} options  */
@@ -29,7 +29,7 @@ async function dynaSend(options) {
 			...options
     };
 
-	options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+	options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 	let message = null;
 

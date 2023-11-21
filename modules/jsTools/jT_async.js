@@ -1,4 +1,4 @@
-const _dT = require("./jsT_date");
+const _dT = require("./jT_date");
 
 /** A promise based implementation of setTimeout()
  * @param {number|string} ms wait time in milliseconds  */

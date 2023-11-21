@@ -1,4 +1,4 @@
-const _oT = require("./jsT_object");
+const _oT = require("./jT_object");
 
 // prettier-ignore
 /** Get the sum of an array of numbers, negative values are subtracted from the sum

@@ -11,7 +11,7 @@
 			"const { Client, Message } = require(\"discord.js\");\n",
 
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const _jsT = require(\"../modules/jsTools\");\n",
+			"const jt = require(\"../modules/jsTools\");\n",
 
 			"module.exports = {",
 			"    name: \"cookie\",",
@@ -30,7 +30,7 @@
 			"        // prettier-ignore",
 			"        let embed_cookie = new BetterEmbed({",
 			"            channel: message.channel, author: { user: message.author },",
-			"            description: _jsT.choice(choices)",
+			"            description: jt.choice(choices)",
 			"        });\n",
 
 			"        return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });$0",
@@ -47,7 +47,7 @@
 			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");\n",
 
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const _jsT = require(\"../modules/jsTools\");\n",
+			"const jt = require(\"../modules/jsTools\");\n",
 
 			"module.exports = {",
 			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
@@ -66,7 +66,7 @@
 
 			"        // prettier-ignore",
 			"        let embed_cookie = new BetterEmbed({",
-			"            interaction, description: _jsT.choice(choices)",
+			"            interaction, description: jt.choice(choices)",
 			"        });\n",
 
 			"        return await embed_cookie.send();$0",

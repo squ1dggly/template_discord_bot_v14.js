@@ -35,11 +35,11 @@ const {
     Message, InteractionCollector, ReactionCollector, ComponentType,
     EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle
 } = require("discord.js");
-const deleteMesssageAfter = require("./dsT_deleteMessageAfter");
-const BetterEmbed = require("./dsT_betterEmbed");
-const dynaSend = require("./dsT_dynaSend");
+const deleteMesssageAfter = require("./dT_deleteMessageAfter");
+const BetterEmbed = require("./dT_betterEmbed");
+const dynaSend = require("./dT_dynaSend");
 
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 const logger = require("../logger");
 
 /// Global Variables
@@ -52,12 +52,12 @@ class EmbedNavigator {
 	#_updatePage() {
 		/// Clamp page index :: { CURRENT }
 		if (this.data.pages.idx.current < 0)
-			this.data.pages.idx.current = _jsT.clamp(this.options.embeds.length - 1, { min: 0 });
+			this.data.pages.idx.current = jt.clamp(this.options.embeds.length - 1, { min: 0 });
 		if (this.data.pages.idx.current > this.options.embeds.length - 1) this.data.pages.idx.current = 0;
 
 		/// Clamp page index :: { NESTED }
 		if (this.data.pages.idx.nested < 0)
-			this.data.pages.idx.nested = _jsT.clamp(this.data.pages.nested_length - 1, { min: 0 });
+			this.data.pages.idx.nested = jt.clamp(this.data.pages.nested_length - 1, { min: 0 });
 		if (this.data.pages.idx.nested > this.data.pages.nested_length - 1) this.data.pages.idx.nested = 0;
 
 		let _page = this.options.embeds[this.data.pages.idx.current];
@@ -134,12 +134,12 @@ class EmbedNavigator {
 		if (this.options.pagination.useReactions)
 			// Using reactions
 			this.data.pagination.reactions = _buttonStringArray.map(type =>
-				_jsT.getProp(config.navigator.buttons, `${type}.emoji`)
+				jt.getProp(config.navigator.buttons, `${type}.emoji`)
 			);
 		else
 			// Not using reactions
 			this.data.actionRows.pagination.setComponents(
-				..._buttonStringArray.map(type => _jsT.getProp(this.data.components.pagination, type))
+				..._buttonStringArray.map(type => jt.getProp(this.data.components.pagination, type))
 			);
 	}
 
@@ -202,8 +202,8 @@ class EmbedNavigator {
 
 		/// Create a message collector to await the user's next message
 		let _timeouts = {
-			confirm: _jsT.parseTime(config.timeouts.CONFIRMATION),
-			error: _jsT.parseTime(config.timeouts.ERROR_MESSAGE)
+			confirm: jt.parseTime(config.timeouts.CONFIRMATION),
+			error: jt.parseTime(config.timeouts.ERROR_MESSAGE)
 		};
 		let filter = msg => msg.author.id === user.id;
 
@@ -455,7 +455,7 @@ class EmbedNavigator {
 
 		if (!Array.isArray(this.options.users) && this.options.users) this.options.users = [this.options.users];
 		if (!Array.isArray(this.options.embeds) && this.options.embeds) this.options.embeds = [this.options.embeds];
-		this.options.timeout = _jsT.parseTime(this.options.timeout);
+		this.options.timeout = jt.parseTime(this.options.timeout);
 
 		/// Configure data & variables
 		// prettier-ignore

@@ -2,7 +2,7 @@
 
 const { Client } = require("discord.js");
 const logger = require("../logger");
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 // const mongo = require("../mongo");
 
 const config = { client: require("../../configs/config_client.json") };
@@ -10,7 +10,7 @@ const hostMode = config.client.MODE === "HOST" ? true : false;
 const pathPrefix = hostMode ? "../.." : ".";
 
 function importEvents(path) {
-	let files = _jsT.readDir(path).filter(fn => fn.endsWith(".js"));
+	let files = jt.readDir(path).filter(fn => fn.endsWith(".js"));
 	let events = [];
 
 	for (let fn of files) events.push(require(hostMode ? `${path}/${fn}` : `../.${path}/${fn}`));

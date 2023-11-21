@@ -1,5 +1,5 @@
 const { Message } = require("discord.js");
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 
 const config = require("./dsT_config.json");
 
@@ -7,10 +7,10 @@ const config = require("./dsT_config.json");
  * @param {Message} message message object that was sent
  * @param {number|string} time amount of time to wait in milliseconds */
 async function deleteMesssageAfter(message, time = config.timeouts.ERROR_MESSAGE) {
-	time = _jsT.parseTime(time);
+	time = jt.parseTime(time);
 
 	// Wait until the given time has passed
-	await _jsT.wait(time);
+	await jt.wait(time);
 
 	// prettier-ignore
 	try { return await message.delete(); } catch { return null; }

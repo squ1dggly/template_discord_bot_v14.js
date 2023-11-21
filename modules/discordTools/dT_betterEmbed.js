@@ -61,8 +61,8 @@ const {
 	ActionRowBuilder,
 	Message
 } = require("discord.js");
-const dynaSend = require("./dsT_dynaSend");
-const _jsT = require("../jsTools");
+const dynaSend = require("./dT_dynaSend");
+const jt = require("../jsTools");
 const logger = require("../logger");
 
 class BetterEmbed extends EmbedBuilder {
@@ -313,7 +313,7 @@ class BetterEmbed extends EmbedBuilder {
 	}
 
 	#_setColor() {
-		let color = Array.isArray(this.options.color) ? _jsT.choice(this.options.color) : this.options.color;
+		let color = Array.isArray(this.options.color) ? jt.choice(this.options.color) : this.options.color;
 
 		try {
 			super.setColor(color);
@@ -420,10 +420,10 @@ class BetterEmbed extends EmbedBuilder {
 
 		this.#_configure(options);
 		options.messageContent = this.#_formatMarkdown(options.messageContent);
-		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+		options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 		// If a single component was given, convert it into an array
-		options.components = _jsT.isArray(options.components);
+		options.components = jt.isArray(options.components);
 
 		// Send the message
 		return await dynaSend({ embeds: [this], ...options });
@@ -447,10 +447,10 @@ class BetterEmbed extends EmbedBuilder {
 
 		this.#_configure(options);
 		options.messageContent = this.#_formatMarkdown(options.messageContent);
-		options.deleteAfter = _jsT.parseTime(options.deleteAfter);
+		options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 		// If a single component was given, convert it into an array
-		options.components = _jsT.isArray(options.components);
+		options.components = jt.isArray(options.components);
 
 		// Send the message
 		return await dynaSend({ embeds: [this], sendMethod: "replyTo", ...options });

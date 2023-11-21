@@ -5,8 +5,8 @@ require("dotenv").config();
 const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
 const slashCommandManager = require("./modules/slashCommandManager");
 const logger = require("./modules/logger");
-const _jsT = require("./modules/jsTools");
 const mongo = require("./modules/mongo");
+const jt = require("./modules/jsTools");
 
 const TOKEN = process.env.TOKEN || require("./configs/config_client.json").TOKEN;
 
@@ -33,7 +33,7 @@ client.slashCommands = new Collection();
 client.prefixCommands = new Collection();
 
 // Run importers
-let importers_dir = _jsT.readDir("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
+let importers_dir = jt.readDir("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
 
 // prettier-ignore
 importers_dir.forEach(fn => {

@@ -1,18 +1,18 @@
-const config = require("./dsT_config.json");
+const config = require("./dT_config.json");
 
-const BetterEmbed = require("./dsT_betterEmbed");
-const EmbedNavigator = require("./dsT_embedNavigator");
+const BetterEmbed = require("./dT_betterEmbed");
+const EmbedNavigator = require("./dT_embedNavigator");
 
-const deleteMessageAfter = require("./dsT_deleteMessageAfter");
-const awaitConfirmation = require("./dsT_awaitConfirmation");
-const dynaSend = require("./dsT_dynaSend");
-const ansi = require("./dsT_ansi");
+const deleteMessageAfter = require("./dT_deleteMessageAfter");
+const awaitConfirmation = require("./dT_awaitConfirmation");
+const dynaSend = require("./dT_dynaSend");
+const ansi = require("./dT_ansi");
 
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 
 /* Check config file for errors */
 // prettier-ignore
-if (isNaN(_jsT.parseTime(config.timeouts.PAGINATION)))
+if (isNaN(jt.parseTime(config.timeouts.PAGINATION)))
 	throw new Error("You must provide a valid time string/number for \`timeouts.PAGINATION\`. Fix this in '_dsT_config.json'");
 // prettier-ignore
 if (!config.timeouts.CONFIRMATION)

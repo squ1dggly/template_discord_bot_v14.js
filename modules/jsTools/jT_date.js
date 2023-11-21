@@ -1,4 +1,4 @@
-const _nT = require("./jsT_number");
+const _nT = require("./jT_number");
 
 // prettier-ignore
 /** @typedef parse_options

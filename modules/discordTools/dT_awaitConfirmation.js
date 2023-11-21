@@ -18,7 +18,7 @@ const config = require("./dsT_config.json");
 
 const { CommandInteraction, Embed, ButtonBuilder, ButtonStyle, ActionRowBuilder, ComponentType } = require("discord.js");
 const BetterEmbed = require("./dsT_betterEmbed");
-const _jsT = require("../jsTools");
+const jt = require("../jsTools");
 
 /** Send a confirmation message and await the user's response
  * @param {ac_options} options */
@@ -29,7 +29,7 @@ async function awaitConfirmation(options) {
 		title: config.CONFIRMATION_TITLE, description: "", footer: "",
 		sendMethod: "followUp",
 		showAuthorIcon: false, deleteOnConfirmation: true,
-		timeout: _jsT.parseTime(config.timeouts.CONFIRMATION), ...options
+		timeout: jt.parseTime(config.timeouts.CONFIRMATION), ...options
 	};
 
 	/// Error Handeling

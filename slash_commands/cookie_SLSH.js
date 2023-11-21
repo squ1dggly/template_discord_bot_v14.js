@@ -1,7 +1,7 @@
 const { Client, CommandInteraction, SlashCommandBuilder } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools");
-const _jsT = require("../modules/jsTools");
+const jt = require("../modules/jsTools");
 
 module.exports = {
 	options: { icon: "🍪", deferReply: false },
@@ -21,7 +21,7 @@ module.exports = {
 		// prettier-ignore
 		let embed_cookie = new BetterEmbed({
 			interaction, author: { user: interaction.member },
-			description: _jsT.choice(choices)
+			description: jt.choice(choices)
 		});
 
 		return await embed_cookie.send();

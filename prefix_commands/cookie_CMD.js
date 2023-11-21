@@ -6,7 +6,7 @@
 const { Client, Message } = require("discord.js");
 
 const { BetterEmbed } = require("../modules/discordTools");
-const _jsT = require("../modules/jsTools");
+const jt = require("../modules/jsTools");
 
 module.exports = {
 	name: "cookie",
@@ -25,7 +25,7 @@ module.exports = {
 		// prettier-ignore
 		let embed_cookie = new BetterEmbed({
 			channel: message.channel, author: { user: message.author },
-			description: _jsT.choice(choices)
+			description: jt.choice(choices)
 		});
 
 		return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });

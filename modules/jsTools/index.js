@@ -1,11 +1,11 @@
-const arrayTools = require("./jsT_array");
-const stringTools = require("./jsT_string");
-const numberTools = require("./jsT_number");
-const randomTools = require("./jsT_random");
-const objectTools = require("./jsT_object");
-const dateTools = require("./jsT_date");
-const asyncTools = require("./jsT_async");
-const fileTools = require("./jsT_file");
+const arrayTools = require("./jT_array");
+const stringTools = require("./jT_string");
+const numberTools = require("./jT_number");
+const randomTools = require("./jT_random");
+const objectTools = require("./jT_object");
+const dateTools = require("./jT_date");
+const asyncTools = require("./jT_async");
+const fileTools = require("./jT_file");
 
 module.exports = {
 	...arrayTools,
