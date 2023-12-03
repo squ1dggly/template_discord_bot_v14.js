@@ -37,7 +37,6 @@ async function awaitConfirmation(options) {
 
 	/// Create the confirmation embed
 	// prettier-ignore
-	/** @type {Embed} */
 	let embed = new BetterEmbed({
 		interaction: options.interaction,
 		author: { text: options.title, iconURL: options.showAuthorIcon ? "" : false },
@@ -61,7 +60,7 @@ async function awaitConfirmation(options) {
 	let actionRow = new ActionRowBuilder().addComponents(...Object.values(buttons));
 
 	// Send the confirmation embed
-	let message = await embed.send({ method: options.sendMethod, components: actionRow });
+	let message = await embed.send({ sendMethod: options.sendMethod, components: actionRow });
 
 	// Wait for the user's decision, or timeout
 	return new Promise(resolve => {
