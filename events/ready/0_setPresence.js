@@ -13,7 +13,7 @@ module.exports = {
 		let presence = config.client.client_presence[config.client.MODE.toLowerCase()];
 
 		// prettier-ignore
-		// Replace presence.avtivity.TYPE with the proper ActivityType enum
+		// Replace presence.activity.TYPE with the proper ActivityType enum
 		switch (presence.activity.TYPE.toLowerCase()) {
             case "playing": presence.activity.TYPE = ActivityType.Playing; break;
             case "streaming": presence.activity.TYPE = ActivityType.Streaming; break;
