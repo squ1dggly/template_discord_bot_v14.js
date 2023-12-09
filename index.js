@@ -15,12 +15,11 @@ logger.log("initializing...");
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.GuildMessageReactions,
-		GatewayIntentBits.GuildMembers,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildPresences, // Requires Presence intent in the dev portal
+		GatewayIntentBits.MessageContent, // Requires Message Content intent in the dev portal
 		GatewayIntentBits.DirectMessageReactions, // Allows bot to see reactions in DMs
 		GatewayIntentBits.DirectMessages // Allows bot to read DMs
 	],
