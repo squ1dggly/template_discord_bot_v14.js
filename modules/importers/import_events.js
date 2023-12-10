@@ -1,5 +1,7 @@
 /** @file Import events and bind them to their appropriate client event trigger @author xsqu1znt */
 
+const fs = require("fs");
+
 const { Client } = require("discord.js");
 const logger = require("../logger");
 const jt = require("../jsTools");
@@ -10,6 +12,9 @@ const hostMode = config.client.MODE === "HOST" ? true : false;
 const pathPrefix = hostMode ? "../.." : ".";
 
 function importEvents(path) {
+	// Check if the file path exists first
+	if (!fs.existsSync(path)) return [];
+
 	let files = jt.readDir(path).filter(fn => fn.endsWith(".js"));
 	let events = [];
 
