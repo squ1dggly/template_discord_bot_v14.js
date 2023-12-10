@@ -58,3 +58,8 @@ client.login(TOKEN).then(async () => {
 
 	// await mongo.connect();
 });
+
+// Quick & dirty extra error handling
+client.on("error", err => {
+	return logger.error("Client error caught", "", err);
+});
