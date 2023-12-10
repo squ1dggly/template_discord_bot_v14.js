@@ -2,13 +2,13 @@
 
 const { Client } = require("discord.js");
 const logger = require("../logger");
-const jsT = require("../jsTools");
+const jt = require("../jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
 const hostMode = config.client.MODE === "HOST" ? true : false;
 
 function importCommands(path, recursive = false) {
-	let dirEntries = jsT.readDir(path, { recursive });
+	let dirEntries = jt.readDir(path, { recursive });
 	let commands = [];
 
 	for (let entry of dirEntries) {
