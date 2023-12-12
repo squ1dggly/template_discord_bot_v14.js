@@ -1,16 +1,13 @@
 /* Connects us to our Mongo database so we can save and retrieve data. */
 
+const mongoose = require("mongoose");
 const logger = require("../logger");
 
-// Models
+const MONGO_URI = process.env.MONGO_URI || require("../../configs/config_client.json").MONGO_URI;
 const models = {
 	// user: require("../models/userModel').model
 };
 
-const mongoose = require("mongoose");
-const MONGO_URI = process.env.MONGO_URI || require("../../configs/config_client.json").MONGO_URI;
-
-//! Database Operations
 
 module.exports = {
 	/** Connect to MongoDB */
@@ -23,10 +20,10 @@ module.exports = {
 				.catch(err => reject(err));
 		});
 
-		// Log the success if successful
+		// Log the success if connected
 		if (connection) return logger.success("Successfully connected to MongoDB");
 
-		// Log the error if unsuccessful
+		// Log the error if the connection failed
 		logger.error("Failed to connect to MongoDB", null, connection);
 	}
 };
