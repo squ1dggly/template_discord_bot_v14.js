@@ -183,3 +183,5 @@ async function awaitConfirm(options) {
             });
 	});
 }
+
+module.exports = awaitConfirm;
