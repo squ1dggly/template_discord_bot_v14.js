@@ -75,10 +75,9 @@ async function awaitConfirm(options) {
 	/* - - - - - { Parse Options } - - - - - */
 	options.timeout = jt.parseTime(options.timeout);
 
-	/// Pre-determine the SendMethod
-	if (options.interaction) options.sendMethod ||= "reply";
-	else if (options.channel) options.sendMethod ||= "channel";
-	else if (options.message) options.sendMethod ||= "replyTo";
+	// Pre-determine the SendMethod
+	if (options.message) options.sendMethod ||= "replyTo";
+	else options.sendMethod ||= "reply";
 
 	/* - - - - - { Error Checking } - - - - - */
 	if (!options.interaction && !options.channel && options.message)
@@ -103,15 +102,25 @@ async function awaitConfirm(options) {
 	if (options.timeout < 1000) logger.debug("dT_awaitConfirm timeout is less than 1 second; Is this intentional?");
 
 	/* - - - - - { Create the Confirmation Message } - - - - - */
+	// Create the buttons
+	let buttons = {
+		confirm: new ButtonBuilder({ label: "Confirm", style: ButtonStyle.Success, custom_id: "btn_confirm" }),
+		cancel: new ButtonBuilder({ label: "Cancel", style: ButtonStyle.Danger, custom_id: "btn_cancel" })
+	};
+
+	// Create the action row
+	let actionRow = new ActionRowBuilder().addComponents(...Object.values(buttons));
+
 	/** @type {Message|null} */
 	let message = null;
 
 	if (options.dontEmbed) {
 		// prettier-ignore
-		message = dynaSend({
+		message = await dynaSend({
             interaction: options.interaction, channel: options.channel, message: options.message,
-            messageContent: config.CONFIRMATION_TITLE || options.messageContent,
-            components: [actionRow, ...options.components],
+            messageContent: options.messageContent || config.CONFIRMATION_TITLE,
+			components: [actionRow, ...options.components],
+			sendMethod: options.sendMethod,
             ephemeral: options.ephemeral
         });
 	} else {
@@ -123,22 +132,14 @@ async function awaitConfirm(options) {
 		// Create the embed :: { CONFIRM }
 		let embed_confirm = new BetterEmbed({ ..._title, ...options });
 
-		// Create the buttons
-		let buttons = {
-			confirm: new ButtonBuilder({ label: "Confirm", style: ButtonStyle.Success, custom_id: "btn_confirm" }),
-			cancel: new ButtonBuilder({ label: "Cancel", style: ButtonStyle.Danger, custom_id: "btn_cancel" })
-		};
-
-		// Create the action row
-		let actionRow = new ActionRowBuilder().addComponents(...Object.values(buttons));
-
-		// prettier-ignore
 		// Send the confirmation message
 		message = await embed_confirm.send({
-            messageContent: options.messageContent,
-            sendMethod: options.sendMethod, allowedMentions: options.allowedMentions, ephemeral: options.ephemeral,
-            components: [actionRow, ...options.components]
-        });
+			messageContent: options.messageContent,
+			sendMethod: options.sendMethod,
+			allowedMentions: options.allowedMentions,
+			components: [actionRow, ...options.components],
+			ephemeral: options.ephemeral
+		});
 	}
 
 	// Wait for the user's decision, or timeout
@@ -167,7 +168,7 @@ async function awaitConfirm(options) {
 
 			if (i.user.id !== (options.interaction?.user?.id || options.user?.id)) return false;
 			if (i.componentType !== ComponentType.Button) return false;
-			if (!["btn_confirm", "btn_cancel"].includes(i.customId)) return false;
+			if (![buttons.confirm.data.custom_id, buttons.cancel.data.custom_id].includes(i.customId)) return false;
 			return true;
 		};
 
@@ -176,7 +177,7 @@ async function awaitConfirm(options) {
             .then(async i => {
                 await cleanUp();
                 // Return whether the user pressed the confirm button
-				resolve(i.customId === "btn_confirm");
+				resolve(i.customId === buttons.confirm.data.custom_id);
             })
             .catch(async i => {
                 await cleanUp();
