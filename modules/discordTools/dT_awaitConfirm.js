@@ -21,7 +21,8 @@
 
  * @property {boolean} dontEmbed send a message instead of an embed
  * @property {boolean} useAuthorForTitle use `setAuthor()` instead of `setTitle()` **|** *this only applies if a `title` or `author` isn't provided*
- * @property {boolean} deleteAfter delete the message after the `confirm` or `cancel` button is pressed
+ * @property {boolean} deleteOnConfirm delete the message after the `confirm` button is pressed
+ * @property {boolean} deleteOnCancel delete the message after the `cancel` button is pressed
  * @property {string|number} timeout */
 
 // prettier-ignore
@@ -67,7 +68,8 @@ async function awaitConfirm(options) {
 
 		dontEmbed: false,
 		useAuthorForTitle: false,
-		deleteAfter: true,
+		deleteOnConfirm: false,
+		deleteOnCancel: true,
 		timeout: jt.parseTime(config.timeouts.CONFIRMATION),
 		...options
 	};
@@ -144,21 +146,34 @@ async function awaitConfirm(options) {
 
 	// Wait for the user's decision, or timeout
 	return new Promise(async resolve => {
-		const cleanUp = async () => {
-			// Delete the confirmation message
-			if (options.deleteAfter && message.deletable) return await message.delete().catch(() => null);
-			// Edit the confirmation message
-			else if (!options.deleteAfter && message.editable) {
+		const cleanUp = async confirmed => {
+			const _edit = async () => {
 				// Remove the confirmation action row from the message
 				message.components.splice(1);
 
 				// prettier-ignore
 				// Edit the confirmation message
 				return await message.edit({
-                    // Clears content if dontEmbed was used, or if content was provided
+					// clears content if dontEmbed was used, or if messageContent was provided
 					content: options.dontEmbed ? "" : options.content ? "" : message.content,
 					components: message.components
 				}).catch(() => null);
+			};
+
+			switch (confirmed) {
+				case true:
+					// Delete the confirmation message
+					if (options.deleteOnConfirm && message.deletable) return await message.delete().catch(() => null);
+					// Edit the confirmation message
+					if (!options.deleteOnConfirm && !message.editable) return await _edit();
+					return;
+
+				case false:
+					// Delete the confirmation message
+					if (options.deleteOnCancel && message.deletable) return await message.delete().catch(() => null);
+					// Edit the confirmation message
+					if (!options.deleteOnCancel && !message.editable) return await _edit();
+					return;
 			}
 		};
 
