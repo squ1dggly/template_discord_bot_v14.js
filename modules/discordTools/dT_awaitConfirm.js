@@ -99,7 +99,7 @@ async function awaitConfirm(options) {
 	if (options.sendMethod === ("replyTo" || "channel") && options.ephemeral)
 		logger.debug("Ephemeral can only be used with interaction based SendMethods (except 'editReply')");
 
-	if (options.timeout > 1000) logger.debug("dT_awaitConfirm timeout is less than 1 second; Is this intentional?");
+	if (options.timeout < 1000) logger.debug("dT_awaitConfirm timeout is less than 1 second; Is this intentional?");
 
 	/* - - - - - { Create the Confirmation Message } - - - - - */
 	/** @type {Message|null} */
@@ -164,9 +164,9 @@ async function awaitConfirm(options) {
 		const filter = async i => {
 			await i.deferUpdate().catch(() => null);
 
-			if (!i.user.id === (options.interaction?.user?.id || options.user?.id)) return false;
-			if (!i.componentType === ComponentType.Button) return false;
-			if (!i.customId !== ("btn_confirm" || "btn_cancel")) return false;
+			if (i.user.id !== (options.interaction?.user?.id || options.user?.id)) return false;
+			if (i.componentType !== ComponentType.Button) return false;
+			if (!["btn_confirm", "btn_cancel"].includes(i.customId)) return false;
 			return true;
 		};
 
