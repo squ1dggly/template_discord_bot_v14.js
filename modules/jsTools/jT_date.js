@@ -14,6 +14,7 @@ const _nT = require("./jT_number");
  * parse("-1m", "s") --> -60 */
 function parseTime(str, options) {
 	options = { type: "ms", fromNow: false, ...options };
+	if (!isNaN(str)) return str;
 	if (!isNaN(+str)) return +str; else str = `${str}`;
 	
     let isNegative = str.at(0) === "-";

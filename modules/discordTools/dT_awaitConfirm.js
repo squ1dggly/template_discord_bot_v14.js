@@ -13,7 +13,7 @@
  * @property {import("./dT_betterEmbed").bE_timestamp} timestamp
  * @property {boolean} disableFormatting
 
- * @property {string} content either is sent with the embed, or is the confirmation message itself
+ * @property {string} messageContent either is sent with the embed, or is the confirmation message itself
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
  * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
@@ -59,7 +59,7 @@ async function awaitConfirm(options) {
 		timestamp: null,
 		disableFormatting: false,
 
-		content: "",
+		messageContent: "",
 		components: [],
 		allowedMentions: {},
 		sendMethod: "reply",
@@ -67,7 +67,7 @@ async function awaitConfirm(options) {
 
 		dontEmbed: false,
 		useAuthorForTitle: false,
-		deleteAfter: false,
+		deleteAfter: true,
 		timeout: jt.parseTime(config.timeouts.CONFIRMATION),
 		...options
 	};
@@ -109,7 +109,7 @@ async function awaitConfirm(options) {
 		// prettier-ignore
 		message = dynaSend({
             interaction: options.interaction, channel: options.channel, message: options.message,
-            messageContent: config.CONFIRMATION_TITLE || options.content,
+            messageContent: config.CONFIRMATION_TITLE || options.messageContent,
             components: [actionRow, ...options.components],
             ephemeral: options.ephemeral
         });
@@ -134,7 +134,7 @@ async function awaitConfirm(options) {
 		// prettier-ignore
 		// Send the confirmation message
 		message = await embed_confirm.send({
-            messageContent: options.content,
+            messageContent: options.messageContent,
             sendMethod: options.sendMethod, allowedMentions: options.allowedMentions, ephemeral: options.ephemeral,
             components: [actionRow, ...options.components]
         });
