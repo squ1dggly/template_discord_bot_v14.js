@@ -31,11 +31,11 @@
  * @property {string} imageURL
  * @property {string|{text:string, iconURL:string}} footer
  * @property {string|string[]} color
- * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used | `reply` is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
- * @property {boolean} ephemeral
  * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
- * @property {number|string} deleteAfter amount of time to wait in milliseconds */
+ * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used | `reply` is default
+ * @property {number|string} deleteAfter amount of time to wait in milliseconds
+ * @property {boolean} ephemeral */
 
 /** @typedef bE_replyOptions
  * @property {string} messageContent
