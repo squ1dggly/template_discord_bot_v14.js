@@ -62,7 +62,7 @@ async function awaitConfirm(options) {
 		messageContent: "",
 		components: [],
 		allowedMentions: {},
-		sendMethod: "reply",
+		sendMethod: "",
 		ephemeral: false,
 
 		dontEmbed: false,
@@ -81,7 +81,8 @@ async function awaitConfirm(options) {
 	else if (options.message) options.sendMethod ||= "replyTo";
 
 	/* - - - - - { Error Checking } - - - - - */
-	if (!options.interaction && !options.channel) throw new Error("You must provide either a CommandInteraction or Channel");
+	if (!options.interaction && !options.channel && options.message)
+		throw new Error("You must provide either a CommandInteraction, Channel, or Message");
 
 	// prettier-ignore
 	if (!options.user && (options.channel || options.message)) 
