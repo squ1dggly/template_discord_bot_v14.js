@@ -13,6 +13,7 @@
  * @property {import("./dT_betterEmbed").bE_timestamp} timestamp
  * @property {boolean} disableFormatting
 
+ * @property {string} content either is sent with the embed, or is the confirmation message itself
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
  * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
@@ -58,6 +59,7 @@ async function awaitConfirm(options) {
 		timestamp: null,
 		disableFormatting: false,
 
+		content: "",
 		components: [],
 		allowedMentions: {},
 		sendMethod: "reply",
@@ -107,7 +109,7 @@ async function awaitConfirm(options) {
 		// prettier-ignore
 		message = dynaSend({
             interaction: options.interaction, channel: options.channel, message: options.message,
-            messageContent: config.CONFIRMATION_TITLE || options.title || options.author,
+            messageContent: config.CONFIRMATION_TITLE || options.content,
             components: [actionRow, ...options.components],
             ephemeral: options.ephemeral
         });
@@ -132,6 +134,7 @@ async function awaitConfirm(options) {
 		// prettier-ignore
 		// Send the confirmation message
 		message = await embed_confirm.send({
+            messageContent: options.content,
             sendMethod: options.sendMethod, allowedMentions: options.allowedMentions, ephemeral: options.ephemeral,
             components: [actionRow, ...options.components]
         });
@@ -139,8 +142,26 @@ async function awaitConfirm(options) {
 
 	// Wait for the user's decision, or timeout
 	return new Promise(async resolve => {
+		const cleanUp = async () => {
+			// Delete the confirmation message
+			if (options.deleteAfter && message.deletable) return await message.delete().catch(() => null);
+			// Edit the confirmation message
+			else if (!options.deleteAfter && message.editable) {
+				// Remove the confirmation action row from the message
+				message.components.splice(1);
+
+				// prettier-ignore
+				// Edit the confirmation message
+				return await message.edit({
+                    // Clears content if dontEmbed was used, or if content was provided
+					content: options.dontEmbed ? "" : options.content ? "" : message.content,
+					components: message.components
+				}).catch(() => null);
+			}
+		};
+
 		// Create the component filter
-		let filter = async i => {
+		const filter = async i => {
 			await i.deferUpdate().catch(() => null);
 
 			if (!i.user.id === (options.interaction?.user?.id || options.user?.id)) return false;
@@ -151,22 +172,14 @@ async function awaitConfirm(options) {
 
 		// prettier-ignore
 		message.awaitMessageComponent({ filter, time: options.timeout })
-			.then(async i => {})
+            .then(async i => {
+                await cleanUp();
+                // Return whether the user pressed the confirm button
+				resolve(i.customId === "btn_confirm");
+            })
             .catch(async i => {
-                // Delete the confirmation message
-                if (options.deleteAfter && message.deletable) await message.delete().catch(() => null);
-                else if (!options.deleteAfter && message.editable) {
-                    
-
-                    // Edit the confirmation message
-                    await message.edit({});
-                }
-
-                // prettier-ignore
-				// Delete/edit the confirmation embed
-				if (options.deleteOnConfirmation) try { return await message.delete() } catch { }
-				// else try { return await message.edit({components: []}) } catch { }
-				return resolve(false);
+                await cleanUp();
+                return resolve(false);
             });
 	});
 }
