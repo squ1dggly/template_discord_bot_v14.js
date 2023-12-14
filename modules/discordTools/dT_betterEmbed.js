@@ -8,8 +8,8 @@
 /** @typedef {number|Date|boolean|null} bE_timestamp */
 
 /** @typedef bE_options
- * @property {CommandInteraction | null} interaction
- * @property {TextChannel | null} channel
+ * @property {CommandInteraction} interaction
+ * @property {TextChannel} channel
  * @property {bE_author} author
  * @property {bE_title} title
  * @property {bE_thumbnailURL} thumbnailURL
@@ -31,10 +31,10 @@
  * @property {string} imageURL
  * @property {string|{text:string, iconURL:string}} footer
  * @property {string|string[]} color
- * @property {"replyTo"|"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
+ * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used | `reply` is default
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {boolean} ephemeral
- * @property {import("discord.js").MessageMentionOptions} allowedMentions
+ * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
  * @property {number|string} deleteAfter amount of time to wait in milliseconds */
 
 /** @typedef bE_replyOptions
