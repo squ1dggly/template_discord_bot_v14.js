@@ -8,6 +8,10 @@ const fs = require("fs");
  * @param {readDir_options} options options */
 function readDir(path, options) {
 	options = { recursive: false, ...options };
+
+	// Check if the file path exists first
+	if (!fs.existsSync(path)) return [];
+
 	if (!options.recursive) return fs.readdirSync(path);
 
 	const walk = _dir => {

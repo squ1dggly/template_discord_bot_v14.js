@@ -6,9 +6,11 @@ const logger = require("../../../modules/logger");
 const config = { client: require("../../../configs/config_client.json") };
 
 function userIsBotAdminOrBypass(message, commandName) {
-	// prettier-ignore
-	return [config.client.OWNER_ID, ...config.client.ADMIN_IDS, ...(config.client.admin_bypass_ids[commandName] || [])]
-		.includes(message.author.id);
+	return [
+		config.client.OWNER_ID,
+		...config.client.ADMIN_IDS,
+		...(config.client.admin_bypass_ids[commandName] || [])
+	].includes(message.author.id);
 }
 
 function userIsGuildAdminOrBypass(message, commandName) {
@@ -52,16 +54,14 @@ module.exports = {
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot
-				if (_botAdminOnly && !userIsBotAdminOrBypass(args.message, cmdName)) return await embed_error.send({
-					channel: args.message.channel, description: "Only bot staff can use this command",
-					ephemeral: true
+				if (_botAdminOnly && !userIsBotAdminOrBypass(args.message, cmdName)) return await args.message.reply({
+					content: "Only admins of this bot can use that command"
 				});
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
-				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.message, cmdName)) return await embed_error.send({
-					channel: args.message.channel, description: "You need admin to use this command",
-					ephemeral: true
+				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.message, cmdName)) return await args.message.reply({
+					content: "You need admin to use that command"
 				});
 			}
 		} catch (err) {

@@ -6,9 +6,11 @@ const logger = require("../../../modules/logger");
 const config = { client: require("../../../configs/config_client.json") };
 
 function userIsBotAdminOrBypass(interaction) {
-	// prettier-ignore
-	return [config.client.OWNER_ID, ...config.client.ADMIN_IDS, ...(config.client.admin_bypass_ids[interaction.commandName] || [])]
-		.includes(interaction.user.id);
+	return [
+		config.client.OWNER_ID,
+		...config.client.ADMIN_IDS,
+		...(config.client.admin_bypass_ids[interaction.commandName] || [])
+	].includes(interaction.user.id);
 }
 
 function userIsGuildAdminOrBypass(interaction) {
@@ -43,13 +45,13 @@ module.exports = {
 
 				// Check if the command requires the user to be an admin for the bot
 				// prettier-ignore
-				if (_botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await embed_error.send({
+				if (_botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await args.interaction.reply({
 					description: "Only bot staff can use this command", ephemeral: true
 				});
 
 				// Check if the command requires the user to have admin in the current guild
 				// prettier-ignore
-				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await embed_error.send({
+				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await args.interaction.reply({
 					description: "You need admin to use this command", ephemeral: true
 				});
 			}
