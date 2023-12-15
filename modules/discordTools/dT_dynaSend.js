@@ -59,9 +59,10 @@ async function dynaSend(options) {
 	if (options.sendMethod === ("replyTo" || "channel") && options.ephemeral)
 		logger.debug("Ephemeral can only be used with interaction based SendMethods (except 'editReply')");
 
-	if (options.components.length > 5) throw new Error("You cannot send more than 5 components per message");
+	if (options.deleteAfter && options.deleteAfter < 1000)
+		logger.debug("dT_dynaSend deleteAfter is less than 1 second; Is this intentional?");
 
-	if (options.deleteAfter < 1000) logger.debug("dT_dynaSend deleteAfter is less than 1 second; Is this intentional?");
+	if (options.components.length > 5) throw new Error("You cannot send more than 5 components per message");
 
 	/* - - - - - { SendMethod Fallback } - - - - - */
 	if (options.sendMethod === "reply" && (options.interaction.replied || options.interaction.deferred))
