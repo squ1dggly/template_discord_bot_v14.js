@@ -12,8 +12,8 @@ async function deleteMesssageAfter(message, time = config.timeouts.ERROR_MESSAGE
 	// Wait until the given time has passed
 	await jt.wait(time);
 
-	// prettier-ignore
-	try { return await message.delete(); } catch { return null; }
+	if (!message.deletable) return null;
+	return await message.delete().catch(() => null);
 }
 
 module.exports = deleteMesssageAfter;

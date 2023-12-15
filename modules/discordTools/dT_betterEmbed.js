@@ -33,7 +33,7 @@
  * @property {string|string[]} color
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
- * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
+ * @property {import("./dT_dynaSend").SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
  * @property {number|string} deleteAfter amount of time to wait in milliseconds
  * @property {boolean} ephemeral */
 

@@ -16,7 +16,7 @@
  * @property {string} messageContent either is sent with the embed, or is the confirmation message itself
  * @property {ActionRowBuilder|ActionRowBuilder[]} components
  * @property {import("discord.js/typings").MessageMentionOptions} allowedMentions
- * @property {"reply"|"editReply"|"followUp"|"channel"|"replyTo"} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
+ * @property {import("./dT_dynaSend").SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
  * @property {boolean} ephemeral
 
  * @property {boolean} dontEmbed send a message instead of an embed
@@ -82,24 +82,8 @@ async function awaitConfirm(options) {
 	else options.sendMethod ||= "reply";
 
 	/* - - - - - { Error Checking } - - - - - */
-	if (!options.interaction && !options.channel && options.message)
-		throw new Error("You must provide either a CommandInteraction, Channel, or Message");
-
-	// prettier-ignore
-	if (!options.user && (options.channel || options.message)) 
-		throw new Error( "You must provide the user to collect button interactions since a CommandInteraction wasn't provided");
-
-	if (options.sendMethod === ("reply" || "editReply" || "followUp") && options.channel)
-		throw new Error("The chosen SendMethod cannot be used when a Channel is provided");
-
-	if (options.sendMethod !== "replyTo" && options.message)
-		throw new Error("The chosen SendMethod cannot be used when a Message is provided");
-
-	if (options.sendMethod === "replyTo" && !options.message)
-		throw new Error("You must provide a Message to use the 'replyTo' SendMethod");
-
-	if (options.sendMethod === ("replyTo" || "channel") && options.ephemeral)
-		logger.debug("Ephemeral can only be used with interaction based SendMethods (except 'editReply')");
+	if (!options.user && (options.channel || options.message))
+		throw new Error("You must provide a User for collecting interactions if a CommandInteraction isn't provided");
 
 	if (options.timeout < 1000) logger.debug("dT_awaitConfirm timeout is less than 1 second; Is this intentional?");
 

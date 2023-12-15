@@ -1,7 +1,7 @@
-/** @typedef {"short"|"shortJump"|"long"|"longJump"} eN_paginationType */
+/** @typedef {"short"|"shortJump"|"long"|"longJump"} PaginationType */
 
 /** @typedef eN_paginationOptions
- * @property {eN_paginationType} type
+ * @property {PaginationType} type
  * @property {boolean} useReactions
  * @property {boolean} dynamic */
 
@@ -22,10 +22,10 @@
  * @property {string} isDefault */
 
 /** @typedef eN_sendOptions
- * @property {"reply"|"editReply"|"followUp"|"channel"} sendMethod if `reply` fails, `editReply` will be used :: `reply` is default
- * @property {boolean} ephemeral
+ * @property {import("./dT_dynaSend").SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
- * @property {boolean} deleteAfter */
+ * @property {boolean} deleteAfter
+ * @property {boolean} ephemeral */
 
 const config = require("./dT_config.json");
 
@@ -555,7 +555,7 @@ class EmbedNavigator {
 		await this.refresh(); return;
 	}
 
-	/** @param {eN_paginationType} type */
+	/** @param {PaginationType} type */
 	// prettier-ignore
 	async setPaginationType(type) {
 		this.options.pagination.type = type;
