@@ -41,7 +41,7 @@ async function dynaSend(options) {
 	options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 	/* - - - - - { Error Checking } - - - - - */
-	if (!options.interaction && !options.channel && options.message)
+	if (!options.interaction && !options.channel && !options.message)
 		throw new Error("You must provide either a CommandInteraction, Channel, or Message");
 
 	if (options.sendMethod === ("reply" || "editReply" || "followUp") && options.channel)
