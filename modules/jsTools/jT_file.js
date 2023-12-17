@@ -14,7 +14,7 @@ function readDir(path, options) {
 
 	if (!options.recursive) return fs.readdirSync(path);
 
-	const walk = _dir => {
+	const walk = (_dir, _dn) => {
 		/** @type {string[]} */
 		let results = [];
 
@@ -24,8 +24,8 @@ function readDir(path, options) {
 		let files = directory.filter((fn, idx) => file_stats[idx].isFile());
 		let dirs = directory.filter((fn, idx) => file_stats[idx].isDirectory());
 
-		for (let fn of files) results.push(`${_dir}/${fn}`);
-		for (let dn of dirs) results.push(...walk(`${_dir}/${dn}`));
+		for (let fn of files) results.push(`${_dn ? `${_dn}/` : ""}${fn}`);
+		for (let dn of dirs) results.push(...walk(`${_dir}/${dn}`, dn));
 
 		return results;
 	};
