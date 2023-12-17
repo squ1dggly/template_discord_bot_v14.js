@@ -149,14 +149,14 @@ async function awaitConfirm(options) {
 					// Delete the confirmation message
 					if (options.deleteOnConfirm && message.deletable) return await message.delete().catch(() => null);
 					// Edit the confirmation message
-					if (!options.deleteOnConfirm && !message.editable) return await _edit();
+					if (!options.deleteOnConfirm && message.editable) return await _edit();
 					return;
 
 				case false:
 					// Delete the confirmation message
 					if (options.deleteOnCancel && message.deletable) return await message.delete().catch(() => null);
 					// Edit the confirmation message
-					if (!options.deleteOnCancel && !message.editable) return await _edit();
+					if (!options.deleteOnCancel && message.editable) return await _edit();
 					return;
 			}
 		};
@@ -174,12 +174,12 @@ async function awaitConfirm(options) {
 		// prettier-ignore
 		message.awaitMessageComponent({ filter, time: options.timeout })
             .then(async i => {
-                await cleanUp();
+                await cleanUp(i.customId === buttons.confirm.data.custom_id);
                 // Return whether the user pressed the confirm button
 				resolve(i.customId === buttons.confirm.data.custom_id);
             })
             .catch(async i => {
-                await cleanUp();
+                await cleanUp(false);
                 return resolve(false);
             });
 	});
