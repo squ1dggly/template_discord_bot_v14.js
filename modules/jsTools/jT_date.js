@@ -47,7 +47,8 @@ function parseTime(str, options) {
 
 /** @typedef eta_options
  * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
- * @property {boolean} ignorePast returns `null` if `end` is before `start`
+ * @property {boolean} ignorePast leaves out "ago" if the result is in the past
+ * @property {boolean} nullIfPast returns `null` if `end` is before `start`
  * @property {number} decimalLimit limits the number of digits after the decimal point **|** `0` is default
  */
 
@@ -62,11 +63,11 @@ function eta(unix, options) {
 	unix = +unix;
 	if (isNaN(unix)) throw new Error("unix must be a number or string");
 
-	options = { since: Date.now(), ignorePast: false, decimalLimit: 0, ...options };
+	options = { since: Date.now(), ignorePast: false, nullIfPast: false, decimalLimit: 0, ...options };
 
 	/// Get the difference between the 2 times
 	let isPast = unix - options.since < 0;
-	if (options.ignorePast) return null;
+	if (options.nullIfPast) return null;
 
 	let difference = Math.abs(unix - options.since);
 	// Return if there's no difference
@@ -92,7 +93,7 @@ function eta(unix, options) {
 	// Grammar adjustment
 	if (+difference === 1) result.name = result.name.slice(0, -1);
 
-	return `${difference} ${result.name}${isPast ? " ago" : ""}`;
+	return `${difference} ${result.name}${isPast && !options.ignorePast ? " ago" : ""}`;
 }
 
 module.exports = { parseTime, eta };
