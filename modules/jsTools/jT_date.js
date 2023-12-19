@@ -70,7 +70,8 @@ function eta(unix, options) {
 	if (options.nullIfPast) return null;
 
 	let difference = Math.abs(unix - options.since);
-	// Return if there's no difference
+	/// Return if there's no difference
+	if (!difference && options.nullIfPast) return null;
 	if (!difference) return "now";
 
 	let divisions = [
