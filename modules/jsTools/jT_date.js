@@ -58,7 +58,7 @@ function parseTime(str, options) {
  *
  * @example
  * eta(1703001733955) // returns "1 hour" (from now)
- * eta(1702994533936, { ignorePast: true }) // returns null */
+ * eta(1702994533936, { nullIfPast: true }) // returns null */
 function eta(unix, options) {
 	unix = +unix;
 	if (isNaN(unix)) throw new Error("unix must be a number or string");
