@@ -56,26 +56,26 @@ module.exports = {
 
 		/* - - - - - { Guild } - - - - - */
 		// prettier-ignore
-		if (events.guild.create.length) client.on("guildCreate", async (guild) => {
+		if (events.guild.create.length) client.on("guildCreate", async guild => {
             let args = { guild };
             events.guild.create.forEach(foo => executeEvent(foo, client, args));
 		});
 
 		// prettier-ignore
-		if (events.guild.delete.length) client.on("guildDelete", async (guild) => {
+		if (events.guild.delete.length) client.on("guildDelete", async guild => {
             let args = { guild };
             events.guild.delete.forEach(foo => executeEvent(foo, client, args));
 		});
 
 		/* - - - - - { Message } - - - - - */
 		// prettier-ignore
-		if (events.message.create.length) client.on("messageCreate", async (message) => {
+		if (events.message.create.length) client.on("messageCreate", async message => {
             let args = { message };
             events.message.create.forEach(foo => executeEvent(foo, client, args));
 		});
 
 		// prettier-ignore
-		if (events.message.delete.length) client.on("messageDelete", async (message) => {
+		if (events.message.delete.length) client.on("messageDelete", async message => {
             let args = { message };
             events.message.delete.forEach(foo => executeEvent(foo, client, args));
         });
