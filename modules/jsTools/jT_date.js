@@ -46,55 +46,58 @@ function parseTime(str, options) {
 }
 
 /** @typedef eta_options
- * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
- * @property {boolean} ignorePast leaves out "ago" if the result is in the past
- * @property {boolean} nullIfPast returns `null` if `end` is before `start`
- * @property {number} decimalLimit limits the number of digits after the decimal point **|** `0` is default
+ * @property {number|string} now unix time in milliseconds, defaults to Date.now()
+ * @property {number|string} then unix time in milliseconds or parsable string
+ * @property {boolean} ignorePast return null if "then" is in the past
  */
 
-/** Parse the time difference between 2 unix timestamps into a human-readable string
- * @param {number|string} unix
+/** Get the time between then and now and parse it into a human-readable string
  * @param {eta_options} options
  *
  * @example
- * eta(1703001733955) // returns "1 hour" (from now)
- * eta(1702994533936, { nullIfPast: true }) // returns null */
-function eta(unix, options) {
-	unix = +unix;
-	if (isNaN(unix)) throw new Error("unix must be a number or string");
+ * eta({ then: "1h" }) // returns "in 1 hour"
+ * eta({ now: 1689769804, then: 1689766204 }) // returns "1 hour ago"
+ * eta({ now: 1689769804, then: 1689766204, ignorePast: true }) // returns null */
+function eta(options) {
+	options = { now: Date.now(), then: null, ignorePast: false, ...options };
 
-	options = { since: Date.now(), ignorePast: false, nullIfPast: false, decimalLimit: 0, ...options };
+	/// Error handling
+	options.now = +options.now;
+	if (isNaN(options.now)) throw new Error(`\'${options.now}\' is not a valid unix time`);
 
-	/// Get the difference between the 2 times
-	let isPast = unix - options.since < 0;
-	if (options.nullIfPast) return null;
+	if (isNaN(options.then)) options.then = Date.now() + parseTime(options.then.trim(), "ms");
+	else options.then = +options.then;
 
-	let difference = Math.abs(unix - options.since);
-	/// Return if there's no difference
-	if (!difference && options.nullIfPast) return null;
-	if (!difference) return "now";
+	if (typeof options.then !== ("number" || "string")) throw new Error(`\'${options.then}\' is not a valid time/number`);
 
+	// Get the resulting time between the 2 times
+	let timeDifference = _nT.msToSec(options.then - options.now);
+
+	// Return null if the difference is negative
+	if (options.ignorePast && timeDifference < 0) return null;
+
+	// Create a new Intl formatter
+	let formatter = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+
+	// Define a number for each time division
 	let divisions = [
-		{ name: "milliseconds", amount: 1000 },
-		{ name: "seconds", amount: 60 },
-		{ name: "minutes", amount: 60 },
-		{ name: "hours", amount: 24 },
-		{ name: "days", amount: 168 },
-		{ name: "weeks", amount: 4 },
-		{ name: "months", amount: 12 },
-		{ name: "years", amount: Number.POSITIVE_INFINITY }
+		{ amount: 60, name: "seconds" },
+		{ amount: 60, name: "minutes" },
+		{ amount: 24, name: "hours" },
+		{ amount: 7, name: "days" },
+		{ amount: 4.34524, name: "weeks" },
+		{ amount: 12, name: "months" },
+		{ amount: Number.POSITIVE_INFINITY, name: "years" }
 	];
 
-	// Divide the difference until we reach a result
-	let result = divisions.find(div => {
-		if (difference < div.amount) return div;
-		difference = Math.abs(difference / div.amount).toFixed(options.decimalLimit);
+	// Find which time division our difference falls in
+	let div = divisions.find(d => {
+		if (Math.abs(timeDifference) < d.amount) return d;
+		timeDifference /= d.amount;
 	});
 
-	// Grammar adjustment
-	if (+difference === 1) result.name = result.name.slice(0, -1);
-
-	return `${difference} ${result.name}${isPast && !options.ignorePast ? " ago" : ""}`;
+	// Return the difference as a formatted string
+	return formatter.format(timeDifference.toFixed(), div.name);
 }
 
 module.exports = { parseTime, eta };
