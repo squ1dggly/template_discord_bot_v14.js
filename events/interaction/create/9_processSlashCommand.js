@@ -60,20 +60,20 @@ module.exports = {
 				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await args.interaction.reply({
 					content: "You need admin to use that command.", ephemeral: true
 				});
+
+				// prettier-ignore
+				if (slashCommand.options?.deferReply)
+					await args.interaction.deferReply().catch(() => null);
 			}
 
 			/* - - - - - { Execute } - - - - - */
-			// prettier-ignore
-			if (slashCommand?.options?.deferReply)
-            	try { await args.interaction.deferReply(); } catch {}
-
 			// prettier-ignore
 			return await slashCommand.execute(client, args.interaction).then(async message => {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
 			return logger.error(
-				"Could not execute command",
+				"Failed to execute command",
 				`SLSH_CMD: /${args.interaction.commandName} | guildID: ${args.message.guildId} | userID: ${args.message.author.id}`,
 				err
 			);
