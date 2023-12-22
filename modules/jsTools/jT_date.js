@@ -14,13 +14,12 @@ const _nT = require("./jT_number");
  * parse("-1m", "s") --> -60 */
 function parseTime(str, options) {
 	options = { type: "ms", fromNow: false, ...options };
-	if (!isNaN(str)) return str;
-	if (!isNaN(+str)) return +str; else str = `${str}`;
+	if (!isNaN(+str)) return +str;
 	
     let isNegative = str.at(0) === "-";
-    let time = str.match(/[a-zA-Z]+|[0-9]+/g); if (isNaN(+time[0]))
-		return new TypeError(`\'${str}\' must be a valid time string`);
-    
+	let time = str.match(/[0-9]+|[a-zA-Z]+/g);
+	if (isNaN(+time[0])) throw new TypeError(`\'${str}\' must be a valid time string`);
+
 	let parsed = 0;
 
     switch (time[1]) {
