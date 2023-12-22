@@ -21,61 +21,77 @@ function userIsGuildAdminOrBypass(message, commandName) {
 }
 
 module.exports = {
-	name: "process_prefixCommand",
+	name: "processPrefixCommand",
 	event: "message_create",
 
 	/** @param {Client} client @param {{message:Message}} args */
 	execute: async (client, args) => {
-		// prettier-ignore
-		let prefix = config.client.PREFIX
-			.replace("$MENTION", userMention(args.message.guild.members.me.id));
+		// Filter out non-guild, non-user, and non-command messages
+		if (!args.message?.guild || !args.message?.author || !args.message?.content) return;
 
-		// prettier-ignore
-		// Filter out non-guild and non-command message
-		if (!args.message.guild || args.message.author.bot || !(args.message.content || "").startsWith(prefix)) return;
+		// Check if we have permission to send messages in this channel
+		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
-		/// Parse the message
+		/* - - - - - { Check for Prefix } - - - - - */
+		let prefix = config.client.PREFIX || null;
+
+		// Check if the message started with the prefix
+		let prefixWasUsed = args.message.content.startsWith(prefix);
+
+		// If that failed, check if the message started with a mention to the client
+		if (!prefixWasUsed) {
+			prefixWasUsed = args.message.content.startsWith(`${userMention(client.user.id)} `);
+			// Change the prefix to the client mention
+			prefix = `${userMention(client.user.id)} `;
+
+			// Return if no valid prefixes were used
+			if (!prefixWasUsed) return;
+		}
+
+		/* - - - - - { Parse the Message } - - - - - */
 		let cleanContent = args.message.content.replace(prefix, "");
-		let cmdName = cleanContent.split(" ")[0];
-		if (!cmdName) return;
+		let commandName = cleanContent.split(" ")[0];
+		if (!commandName) return;
 
-		cleanContent = cleanContent.replace(cmdName, "").trim();
+		cleanContent = cleanContent.replace(commandName, "").trim();
 
 		// Get the prefix command function from the client, if it exists
-		let prefixCommand = client.prefixCommands.get(cmdName) || null;
+		let prefixCommand = client.prefixCommands.get(commandName) || null;
 		if (!prefixCommand) return;
 
-		// Execute the command
+		/* - - - - - { Parse Prefix Command } - - - - - */
 		try {
-			// Parse slash command options
+			// Check for command options
 			if (prefixCommand?.options) {
 				let _botAdminOnly = prefixCommand.options?.botAdminOnly;
 				let _guildAdminOnly = prefixCommand.options?.guildAdminOnly;
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot
-				if (_botAdminOnly && !userIsBotAdminOrBypass(args.message, cmdName)) return await args.message.reply({
-					content: "Only admins of this bot can use that command"
+				if (_botAdminOnly && !userIsBotAdminOrBypass(args.message, commandName)) return await args.message.reply({
+					content: "Only admins of this bot can use that command."
 				});
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
-				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.message, cmdName)) return await args.message.reply({
-					content: "You need admin to use that command"
+				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.message, commandName)) return await args.message.reply({
+					content: "You need admin to use that command."
 				});
 			}
+
+			/* - - - - - { Execute } - - - - - */
+			let _args = { cleanContent, cmdName: commandName, prefix };
+
+			// prettier-ignore
+			return await prefixCommand.execute(client, args.message, _args).then(async message => {
+				// TODO: run code here after the command is finished
+			});
 		} catch (err) {
-			logger.error(
-				"An error occurred: PRFX_CMD",
-				`cmd: /${cmdName} | guildID: ${args.message.guildId} | userID: ${args.message.author.id}`,
+			return logger.error(
+				"Could not execute command",
+				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guildId} | userID: ${args.message.author.id}`,
 				err
 			);
 		}
-
-		// prettier-ignore
-		// Execute the prefix command's function
-		return await prefixCommand.execute(client, args.message, { cleanContent, cmdName, prefix }).then(async message => {
-			// TODO: run code here after the command is finished
-		});
 	}
 };

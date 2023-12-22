@@ -21,55 +21,62 @@ function userIsGuildAdminOrBypass(interaction) {
 }
 
 module.exports = {
-	name: "process_slashCommand",
+	name: "processSlashCommand",
 	event: "interaction_create",
 
 	/** @param {Client} client @param {{interaction:BaseInteraction}} args */
 	execute: async (client, args) => {
+		// prettier-ignore
+		// Filter out DM interactions
+		if (!args.interaction.guildId) return args.interaction.reply({
+			content: "Commands cannot be used in DMs.", ephemeral: true
+		});
+
 		// Filter out non-guild and non-command interactions
 		if (!args.interaction.guild || !args.interaction.isCommand()) return;
 
 		// Get the slash command function from the client if it exists
 		let slashCommand = client.slashCommands.get(args.interaction.commandName) || null;
 		// prettier-ignore
-		if (!slashCommand) return await embed_error.send({
-			description: `\`/${args.interaction.commandName}\` is not a command`
+		if (!slashCommand) return await args.interaction.reply({
+			content: `\`/${args.interaction.commandName}\` is not a command.`
         });
 
-		// Execute the command
+		/* - - - - - { Parse Prefix Command } - - - - - */
 		try {
-			// Parse slash command options
+			// Check for command options
 			if (slashCommand?.options) {
 				let _botAdminOnly = slashCommand.options?.botAdminOnly;
 				let _guildAdminOnly = slashCommand.options?.guildAdminOnly;
 
-				// Check if the command requires the user to be an admin for the bot
 				// prettier-ignore
+				// Check if the command requires the user to be an admin for the bot
 				if (_botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await args.interaction.reply({
-					description: "Only bot staff can use this command", ephemeral: true
+					content: "Only admins of this bot can use that command.", ephemeral: true
 				});
 
-				// Check if the command requires the user to have admin in the current guild
 				// prettier-ignore
+				// Check if the command requires the user to have admin in the current guild
 				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await args.interaction.reply({
-					description: "You need admin to use this command", ephemeral: true
+					content: "You need admin to use that command.", ephemeral: true
 				});
 			}
+
+			/* - - - - - { Execute } - - - - - */
+			// prettier-ignore
+			if (slashCommand?.options?.deferReply)
+            	try { await args.interaction.deferReply(); } catch {}
+
+			// prettier-ignore
+			return await slashCommand.execute(client, args.interaction).then(async message => {
+				// TODO: run code here after the command is finished
+			});
 		} catch (err) {
-			logger.error(
-				"An error occurred: SLSH_CMD",
-				`cmd: /${args.interaction.commandName} | guildID: ${args.interaction.guild.id} | userID: ${args.interaction.user.id}`,
+			return logger.error(
+				"Could not execute command",
+				`SLSH_CMD: /${args.interaction.commandName} | guildID: ${args.message.guildId} | userID: ${args.message.author.id}`,
 				err
 			);
 		}
-
-		// prettier-ignore
-		if (slashCommand?.options?.deferReply)
-            try { await args.interaction.deferReply(); } catch {}
-
-		// Execute the slash command's function
-		return await slashCommand.execute(client, args.interaction).then(async message => {
-			// TODO: run code here after the command is finished
-		});
 	}
 };
