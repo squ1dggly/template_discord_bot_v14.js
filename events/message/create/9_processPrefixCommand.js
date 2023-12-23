@@ -33,10 +33,10 @@ module.exports = {
 		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
 		/* - - - - - { Check for Prefix } - - - - - */
-		let prefix = config.client.PREFIX || null;
+		let prefix = config.client.PREFIX.toLowerCase() || null;
 
 		// Check if the message started with the prefix
-		let prefixWasUsed = args.message.content.startsWith(prefix);
+		let prefixWasUsed = args.message.content.toLowerCase().startsWith(prefix);
 
 		// If that failed, check if the message started with a mention to the client
 		if (!prefixWasUsed) {
