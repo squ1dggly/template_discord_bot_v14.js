@@ -30,7 +30,7 @@ module.exports = {
 		if (!args.message?.guild || !args.message?.author || !args.message?.content) return;
 
 		// Check if we have permission to send messages in this channel
-		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionFlagsBits.SendMessages)) return;
+		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionsBitField.Flags.SendMessages)) return;
 
 		/* - - - - - { Check for Prefix } - - - - - */
 		let prefix = config.client.PREFIX.toLowerCase() || null;
@@ -89,7 +89,7 @@ module.exports = {
 		} catch (err) {
 			return logger.error(
 				"Failed to execute command",
-				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guildId} | userID: ${args.message.author.id}`,
+				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guild.id} | userID: ${args.message.author.id}`,
 				err
 			);
 		}
