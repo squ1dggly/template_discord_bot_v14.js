@@ -615,9 +615,9 @@ function formatTemplate(template, user) {
 	// Uses negative lookbehind for "\" to allow escaping
 	const parse = str => `${str}`
 		// User mentions
-		.replace(/(?<!\\)@[0-9]{18}/g, s => `<@${s.substring(1)}>`)
+		.replace(/(?<!\\|<)@[0-9]{18}(?!>)/g, s => `<@${s.substring(1)}>`)
 		// Channel mentions
-		.replace(/(?<!\\)#[0-9]{19}/g, s => `<#${s.substring(1)}>`)
+		.replace(/(?<!\\|<)#[0-9]{19}(?!>)/g, s => `<#${s.substring(1)}>`)
 
 		// Self mention
 		.replace(/(?<!\\)\$USER\b/g, user.toString())
