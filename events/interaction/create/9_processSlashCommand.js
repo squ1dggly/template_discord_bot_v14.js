@@ -29,7 +29,7 @@ module.exports = {
 		// prettier-ignore
 		// Filter out DM interactions
 		if (!args.interaction.guildId) return args.interaction.reply({
-			content: "Commands can't be used in DMs.", ephemeral: true
+			content: "Commands cannot be used in DMs.", ephemeral: true
 		});
 
 		// Filter out non-guild and non-command interactions

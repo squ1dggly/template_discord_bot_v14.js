@@ -27,8 +27,9 @@ module.exports = {
 	/** @param {Client} client @param {{message:Message}} args */
 	execute: async (client, args) => {
 		// Filter out non-guild, non-user, and non-command messages
-		if (!args.message?.guild || !args.message?.author || !args.message?.content) return;
+		if (!args.message?.guild || !args.message?.author || !args.message?.author?.bot || !args.message?.content) return;
 
+		// prettier-ignore
 		// Check if we have permission to send messages in this channel
 		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionsBitField.Flags.SendMessages)) return;
 
