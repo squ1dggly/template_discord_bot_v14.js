@@ -89,7 +89,7 @@ module.exports = {
 			});
 		} catch (err) {
 			return logger.error(
-				"Failed to execute command",
+				"Could not execute command",
 				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guild.id} | userID: ${args.message.author.id}`,
 				err
 			);

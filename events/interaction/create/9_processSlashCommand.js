@@ -73,7 +73,7 @@ module.exports = {
 			});
 		} catch (err) {
 			return logger.error(
-				"Failed to execute command",
+				"Could not execute command",
 				`SLSH_CMD: /${args.interaction.commandName} | guildID: ${args.interaction.guild.id} | userID: ${args.interaction.user.id}`,
 				err
 			);
