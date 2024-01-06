@@ -88,6 +88,14 @@ module.exports = {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
+			// prettier-ignore
+			// Let the user know an error occurred
+			args.message.reply({
+				content: `❌ **Oh no!** An error occurred while running the **\`${commandName}\`** command.`,
+				allowedMentions: { repliedUser: false }
+			}).catch(() => null);
+
+			// Log the error
 			return logger.error(
 				"Could not execute command",
 				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guild.id} | userID: ${args.message.author.id}`,

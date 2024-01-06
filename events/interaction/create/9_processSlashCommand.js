@@ -72,6 +72,21 @@ module.exports = {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
+			// Create the message data object
+			let _msgData = {
+				content: `❌ **Oh no!** An error occurred while running the **\`/${args.interaction.commandName}\`** command.`,
+				components: [],
+				embeds: []
+			};
+
+			// prettier-ignore
+			// Check if the interaction was deferred
+			if (args.interaction.deferred)
+				await args.interaction.editReply(_msgData).catch(() => null);
+			else
+				await args.interaction.reply(_msgData).catch(() => null);
+
+			// Log the error
 			return logger.error(
 				"Could not execute command",
 				`SLSH_CMD: /${args.interaction.commandName} | guildID: ${args.interaction.guild.id} | userID: ${args.interaction.user.id}`,
