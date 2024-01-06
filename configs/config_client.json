@@ -2,7 +2,7 @@
 	"TOKEN": "",
 	"MONGO_URI": "",
 	"MODE": "DEV",
-	"PREFIX": "$MENTION ",
+	"PREFIX": "!",
 
 	"OWNER_ID": "",
 	"ADMIN_IDS": [""],
