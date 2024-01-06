@@ -1,6 +1,7 @@
 /** @file Execute commands requested by a command interaction @author xsqu1znt */
 
 const { Client, PermissionsBitField, BaseInteraction } = require("discord.js");
+const { BetterEmbed } = require("../../../modules/discordTools");
 const logger = require("../../../modules/logger");
 
 const config = { client: require("../../../configs/config_client.json") };
@@ -72,19 +73,15 @@ module.exports = {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
-			// Create the message data object
-			let _msgData = {
-				content: `❌ **Oh no!** An error occurred while running the **\`/${args.interaction.commandName}\`** command.`,
-				components: [],
-				embeds: []
-			};
+			// Create the embed :: { FATAL ERROR }
+			let embed_fatalError = new BetterEmbed({
+				interaction: args.interaction,
+				title: "⛔ Oh no!",
+				description: `An error occurred while using the **/\`${args.interaction.commandName}\`** command.`
+			});
 
-			// prettier-ignore
-			// Check if the interaction was deferred
-			if (args.interaction.deferred)
-				await args.interaction.editReply(_msgData).catch(() => null);
-			else
-				await args.interaction.reply(_msgData).catch(() => null);
+			// Let the user know an error occurred
+			embed_fatalError.send({ ephemeral: true }).catch(() => null);
 
 			// Log the error
 			return logger.error(

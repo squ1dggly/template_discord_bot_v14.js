@@ -1,6 +1,7 @@
 /** @file Execute commands requested by a user message @author xsqu1znt */
 
 const { Client, PermissionsBitField, Message, userMention } = require("discord.js");
+const { BetterEmbed } = require("../../../modules/discordTools");
 const logger = require("../../../modules/logger");
 
 const config = { client: require("../../../configs/config_client.json") };
@@ -88,12 +89,16 @@ module.exports = {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
-			// prettier-ignore
+			// Create the embed :: { FATAL ERROR }
+			let embed_fatalError = new BetterEmbed({
+				title: "⛔ Oh no!",
+				description: `An error occurred while running the **\`${commandName}\`** command.`
+			});
+
 			// Let the user know an error occurred
-			args.message.reply({
-				content: `❌ **Oh no!** An error occurred while running the **\`${commandName}\`** command.`,
-				allowedMentions: { repliedUser: false }
-			}).catch(() => null);
+			embed_fatalError
+				.reply(args.message, { components: aR_supportServer, allowedMentions: { repliedUser: false } })
+				.catch(() => null);
 
 			// Log the error
 			return logger.error(
