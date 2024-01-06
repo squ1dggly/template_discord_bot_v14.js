@@ -131,32 +131,15 @@ async function awaitConfirm(options) {
 	// Wait for the user's decision, or timeout
 	return new Promise(async resolve => {
 		const cleanUp = async confirmed => {
-			const _edit = async () => {
-				// Remove the confirmation action row from the message
-				message.components.splice(1);
-
-				// prettier-ignore
-				// Edit the confirmation message
-				return await message.edit({
-					// clears content if dontEmbed was used, or if messageContent was provided
-					content: options.dontEmbed ? "" : options.content ? "" : message.content,
-					components: message.components
-				}).catch(() => null);
-			};
-
 			switch (confirmed) {
 				case true:
 					// Delete the confirmation message
 					if (options.deleteOnConfirm && message.deletable) return await message.delete().catch(() => null);
-					// Edit the confirmation message
-					if (!options.deleteOnConfirm && message.editable) return await _edit();
 					return;
 
 				case false:
 					// Delete the confirmation message
 					if (options.deleteOnCancel && message.deletable) return await message.delete().catch(() => null);
-					// Edit the confirmation message
-					if (!options.deleteOnCancel && message.editable) return await _edit();
 					return;
 			}
 		};
