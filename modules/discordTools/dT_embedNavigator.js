@@ -70,16 +70,16 @@ class EmbedNavigator {
 			this.data.pages.current = _page;
 
 		// Count how many nested pages there are currently
-		this.data.pages.nested_length = _page?.length || 0;
+		this.data.pages.nested_length = Array.isArray(_page) ? _page.length : 0;
 
 		// Check if pagination is required
-		this.data.pagination.required = _page?.length >= 2;
+		this.data.pagination.required = Array.isArray(_page) ? _page.length >= 2 : false;
 
 		// Check if long pagination could be used
-		this.data.pagination.requiresLong = _page?.length >= 4;
+		this.data.pagination.requiresLong = Array.isArray(_page) ? _page.length >= 4 : false;
 
 		// Check if jumping could be used
-		this.data.pagination.canJump = _page?.length >= 4;
+		this.data.pagination.canJump = Array.isArray(_page) ? _page.length >= 4 : false;
 	}
 
 	#_configureMessageComponents() {
