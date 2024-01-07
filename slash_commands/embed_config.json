@@ -33,8 +33,11 @@
 				"value": [
 					"- **`\\#channel ID`** will mention that channel",
 					"- **`\\@user ID`** will mention that user",
+					"- **`\\@&role ID`** will mention that role",
 					"- **`\\$USER`** will mention yourself",
-					"- **`\\$USERNAME`** will be replaced with your user/display name"
+					"- **`\\$USERNAME`** will be replaced with your user/display name",
+					"- **`\\$USER_AVATAR`** will be replaced with your avatar's URL",
+					"- **`\\$BOT_AVATAR`** will be replaced with the bot's avatar URL"
 				],
 				"inline": true
 			},
@@ -50,18 +53,5 @@
 		]
 	},
 
-	"templates": [
-		{
-			"meta": { "name": "test", "value": "template_test" },
-			"title": { "text": "Test Template" },
-			"description": "This is a template made to test `Embed Maker's` capabilities\nYYYY: $YEAR\nMM: $MONTH | M: $month\nDD: $DAY | D: $day",
-			"imageURL": "https://media.tenor.com/wlYJtPbFQ1oAAAAC/whatever-blow-hair.gif",
-			"footer": "why hello there 🍌",
-			"timestamp": true,
-			"fields": [
-				{ "name": "Field 1", "value": "lorem ipsum dolor", "inline": true },
-				{ "name": "Field 2", "value": "lorem ipsum dolor", "inline": true }
-			]
-		}
-	]
+	"templates": []
 }
