@@ -66,7 +66,7 @@ function eta(unix, options) {
 
 	/// Get the difference between the 2 times
 	let isPast = unix - options.since < 0;
-	if (options.nullIfPast) return null;
+	if (options.nullIfPast && isPast) return null;
 
 	let difference = Math.abs(unix - options.since);
 	/// Return if there's no difference
