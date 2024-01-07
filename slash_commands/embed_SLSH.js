@@ -1,6 +1,6 @@
 // prettier-ignore
 const {
-	Client, Message, CommandInteraction, InteractionCollector,
+	Client, Message, CommandInteraction, InteractionCollector, AttachmentBuilder,
 	SlashCommandBuilder, ModalBuilder, TextInputBuilder,
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
 	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder
@@ -17,7 +17,7 @@ const timeouts = {
 };
 
 module.exports = {
-	options: { /* icon: "📝", */ deferReply: false, guildAdminOnly: true },
+	options: { deferReply: false, guildAdminOnly: true },
 
 	// prettier-ignore
 	builder: new SlashCommandBuilder().setName("embed")
@@ -530,10 +530,14 @@ module.exports = {
 					// Add meta values
 					_templateJSON = { meta: { name: "Untitled Template", value: "untitled_template" }, ..._templateJSON };
 
-					return await i.reply({
-						content: `\`\`\`json\n${JSON.stringify(_templateJSON, null, 2)}\`\`\``,
-						ephemeral: true
-					});
+					// Convert JSON into an attachment
+					let attachment_json = new AttachmentBuilder(Buffer.from(
+						JSON.stringify(_templateJSON, null, 4)),
+						{ name: "template.json", description: "untitled template" }
+					);
+
+					// Send the attachment
+					return await i.reply({ files: [attachment_json], ephemeral: true });
 
 				case "btn_confirm":
 					await i.deferUpdate();
