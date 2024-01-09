@@ -190,12 +190,10 @@ class EmbedNavigator {
 		// Variables
 		let _message = null;
 
-		try {
-			// Send a message to the channel asking the user to respond with a number
-			_message = await this.data.message.reply({
-				content: `${user} say the number you want to jump to`
-			});
-		} catch { return null; } // prettier-ignore
+		// Send a message to the channel asking the user to respond with a number
+		_message = await this.data.message
+			.reply({ content: `${user} say the number you want to jump to` })
+			.catch(() => null);
 
 		// + Error handling
 		if (!_message) return null;
@@ -205,6 +203,7 @@ class EmbedNavigator {
 			confirm: jt.parseTime(config.timeouts.CONFIRMATION),
 			error: jt.parseTime(config.timeouts.ERROR_MESSAGE)
 		};
+
 		let filter = msg => msg.author.id === user.id;
 
 		return await _message.channel
@@ -218,11 +217,10 @@ class EmbedNavigator {
 
 				// prettier-ignore
 				// Delete the message we sent to ask the user
-				try { _message.delete(); } catch {}
+				if (_message.deletable) _message.delete().catch(() => null);
 
-				// prettier-ignore
 				// Delete the user's response if it was a number
-				if (!isNaN(_number)) try { _message_user.delete(); } catch { }
+				if (!isNaN(_number) && _message_user.deletable) await _message_user.delete().catch(() => null);
 
 				// Check if the response was within our page length
 				if (!_number || _number > this.data.pages.nested_length) {
@@ -240,8 +238,8 @@ class EmbedNavigator {
 				return _number - 1;
 			})
 			.catch(async () => {
-				// prettier-ignore
-				try { await _message.delete(); } catch {}
+				// Delete the message we sent to ask the user
+				if (_message.deletable) _message.delete().catch(() => null);
 				return null;
 			});
 	}
@@ -260,7 +258,7 @@ class EmbedNavigator {
 
 		/// Create the reaction collector
 		const collector = this.data.message.createReactionCollector(
-			this.options.timeout ? { time: this.options.timeout } : {}
+			this.options.timeout ? { idle: this.options.timeout } : {}
 		);
 
 		this.data.collectors.reaction = collector;
@@ -268,8 +266,6 @@ class EmbedNavigator {
 		return new Promise(resolve => {
 			// Collector :: { COLLECT }
 			collector.on("collect", async (_reaction, _user) => {
-				collector.resetTimer();
-
 				// Remove the reaction unless it's from the bot itself
 				if (_user.id !== _reaction.message.guild.members.me.id) await _reaction.users.remove(_user.id);
 
@@ -294,7 +290,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = _jumpIdx;
+								this.data.pages.idx.nested = idx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	
@@ -334,7 +330,7 @@ class EmbedNavigator {
 
 		/// Create the component collector
 		const collector = this.data.message.createMessageComponentCollector(
-			this.options.timeout ? { time: this.options.timeout } : {}
+			this.options.timeout ? { idle: this.options.timeout } : {}
 		);
 
 		this.data.collectors.component = collector;
@@ -348,9 +344,8 @@ class EmbedNavigator {
 				// Filter out users that aren't allowed access
 				if (filter_userIDs.length && !filter_userIDs.includes(_interaction.user.id)) return;
 
-				// prettier-ignore
 				// Defer the interaction & reset the collector's timer
-				{ await _interaction.deferUpdate(); collector.resetTimer }
+				await _interaction.deferUpdate();
 
 				try {
 					// prettier-ignore
@@ -383,7 +378,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_interaction.user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = _jumpIdx;
+								this.data.pages.idx.nested = idx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	

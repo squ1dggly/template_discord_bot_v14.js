@@ -47,9 +47,6 @@ async function dynaSend(options) {
 	if (options.sendMethod === ("reply" || "editReply" || "followUp") && options.channel && !options.interaction)
 		throw new Error(`The '${options.sendMethod}' SendMethod cannot be used when a Channel is provided`);
 
-	if (options.sendMethod !== "replyTo" && options.message)
-		throw new Error("The 'replyTo' SendMethod cannot be used when a Message is provided");
-
 	if (options.sendMethod === "replyTo" && !options.message)
 		throw new Error("You must provide a Message to use the 'replyTo' SendMethod");
 
