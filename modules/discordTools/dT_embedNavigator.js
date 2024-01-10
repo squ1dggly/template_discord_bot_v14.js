@@ -7,6 +7,7 @@
 
 /** @typedef eN_options
  * @property {CommandInteraction} interaction
+ * @property {Message} message
  * @property {TextChannel} channel
  * @property {GuildMember|User|Array<GuildMember|User>} users extra users that are allowed to use the navigator
  * @property {EmbedBuilder|BetterEmbed} embeds can be an array/contain nested arrays
@@ -23,6 +24,11 @@
 
 /** @typedef eN_sendOptions
  * @property {import("./dT_dynaSend").SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions
+ * @property {boolean} deleteAfter
+ * @property {boolean} ephemeral */
+
+/** @typedef eN_replyOptions
  * @property {import("discord.js").MessageMentionOptions} allowedMentions
  * @property {boolean} deleteAfter
  * @property {boolean} ephemeral */
@@ -70,16 +76,16 @@ class EmbedNavigator {
 			this.data.pages.current = _page;
 
 		// Count how many nested pages there are currently
-		this.data.pages.nested_length = Array.isArray(_page) ? _page.length : 0;
+		this.data.pages.nested_length = _page?.length || 0;
 
 		// Check if pagination is required
-		this.data.pagination.required = Array.isArray(_page) ? _page.length >= 2 : false;
+		this.data.pagination.required = _page?.length >= 2;
 
 		// Check if long pagination could be used
-		this.data.pagination.requiresLong = Array.isArray(_page) ? _page.length >= 4 : false;
+		this.data.pagination.requiresLong = _page?.length >= 4;
 
 		// Check if jumping could be used
-		this.data.pagination.canJump = Array.isArray(_page) ? _page.length >= 4 : false;
+		this.data.pagination.canJump = _page?.length >= 4;
 	}
 
 	#_configureMessageComponents() {
@@ -190,10 +196,12 @@ class EmbedNavigator {
 		// Variables
 		let _message = null;
 
-		// Send a message to the channel asking the user to respond with a number
-		_message = await this.data.message
-			.reply({ content: `${user} say the number you want to jump to` })
-			.catch(() => null);
+		try {
+			// Send a message to the channel asking the user to respond with a number
+			_message = await this.data.message.reply({
+				content: `${user} say the number you want to jump to`
+			});
+		} catch { return null; } // prettier-ignore
 
 		// + Error handling
 		if (!_message) return null;
@@ -203,7 +211,6 @@ class EmbedNavigator {
 			confirm: jt.parseTime(config.timeouts.CONFIRMATION),
 			error: jt.parseTime(config.timeouts.ERROR_MESSAGE)
 		};
-
 		let filter = msg => msg.author.id === user.id;
 
 		return await _message.channel
@@ -217,10 +224,11 @@ class EmbedNavigator {
 
 				// prettier-ignore
 				// Delete the message we sent to ask the user
-				if (_message.deletable) _message.delete().catch(() => null);
+				try { _message.delete(); } catch {}
 
+				// prettier-ignore
 				// Delete the user's response if it was a number
-				if (!isNaN(_number) && _message_user.deletable) await _message_user.delete().catch(() => null);
+				if (!isNaN(_number)) try { _message_user.delete(); } catch { }
 
 				// Check if the response was within our page length
 				if (!_number || _number > this.data.pages.nested_length) {
@@ -238,8 +246,8 @@ class EmbedNavigator {
 				return _number - 1;
 			})
 			.catch(async () => {
-				// Delete the message we sent to ask the user
-				if (_message.deletable) _message.delete().catch(() => null);
+				// prettier-ignore
+				try { await _message.delete(); } catch {}
 				return null;
 			});
 	}
@@ -258,7 +266,7 @@ class EmbedNavigator {
 
 		/// Create the reaction collector
 		const collector = this.data.message.createReactionCollector(
-			this.options.timeout ? { idle: this.options.timeout } : {}
+			this.options.timeout ? { time: this.options.timeout } : {}
 		);
 
 		this.data.collectors.reaction = collector;
@@ -266,6 +274,8 @@ class EmbedNavigator {
 		return new Promise(resolve => {
 			// Collector :: { COLLECT }
 			collector.on("collect", async (_reaction, _user) => {
+				collector.resetTimer();
+
 				// Remove the reaction unless it's from the bot itself
 				if (_user.id !== _reaction.message.guild.members.me.id) await _reaction.users.remove(_user.id);
 
@@ -290,7 +300,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = idx;
+								this.data.pages.idx.nested = _jumpIdx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	
@@ -330,7 +340,7 @@ class EmbedNavigator {
 
 		/// Create the component collector
 		const collector = this.data.message.createMessageComponentCollector(
-			this.options.timeout ? { idle: this.options.timeout } : {}
+			this.options.timeout ? { time: this.options.timeout } : {}
 		);
 
 		this.data.collectors.component = collector;
@@ -344,8 +354,9 @@ class EmbedNavigator {
 				// Filter out users that aren't allowed access
 				if (filter_userIDs.length && !filter_userIDs.includes(_interaction.user.id)) return;
 
+				// prettier-ignore
 				// Defer the interaction & reset the collector's timer
-				await _interaction.deferUpdate();
+				{ await _interaction.deferUpdate(); collector.resetTimer }
 
 				try {
 					// prettier-ignore
@@ -378,7 +389,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_interaction.user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = idx;
+								this.data.pages.idx.nested = _jumpIdx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	
@@ -550,14 +561,14 @@ class EmbedNavigator {
 		await this.refresh(); return;
 	}
 
-	/** @param {PaginationType} type */
 	// prettier-ignore
+	/** @param {PaginationType} type */
 	async setPaginationType(type) {
 		this.options.pagination.type = type;
 		await this.refresh(); return;
 	}
 
-	/** @param {eN_sendOptions} options  */
+	/** @param {eN_sendOptions} options */
 	async send(options) {
 		/// Update the configuration
 		this.#_updatePage();
@@ -569,6 +580,39 @@ class EmbedNavigator {
 		this.data.message = await dynaSend({
 			interaction: this.options.interaction, channel: this.options.channel,
 			components: this.data.messageComponents, embeds: [this.data.pages.current],
+			...options
+		});
+
+		// Check if the send failed
+		if (!this.data.message) return null;
+
+		// Add reactions for pagination if enabled
+		// NOTE: this is not awaited since we want to be able to use the reactions while they're being added
+		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_paginationReactions_add();
+
+		/// Start collectors if needed
+		// Collect message reactions
+		if (this.data.pagination.reactions.length) this.#_collect_reactions();
+		// Collect message component interactions
+		if (this.data.messageComponents.length) this.#_collect_components();
+
+		// Return the message
+		return this.data.message;
+	}
+
+	/** @param {Message} message @param {eN_replyOptions} options */
+	async reply(message, options) {
+		/// Update the configuration
+		this.#_updatePage();
+		this.#_configureMessageComponents();
+		this.#_configurePagination();
+
+		// Send the message
+		this.data.message = await dynaSend({
+			message,
+			components: this.data.messageComponents,
+			embeds: [this.data.pages.current],
+			sendMethod: "replyTo",
 			...options
 		});
 

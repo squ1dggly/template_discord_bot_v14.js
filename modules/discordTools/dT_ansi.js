@@ -6,7 +6,7 @@
  * @property {ansi_format} format
  * @property {ansi_colors_text} text_color
  * @property {ansi_colors_bg} bg_color
- * @property {boolean} codeblock add the returned text into a message-ready ansi codeblock*/
+ * @property {boolean} codeblock add the returned text into a message-ready ansi codeblock */
 
 const config = require("./dT_config.json");
 
