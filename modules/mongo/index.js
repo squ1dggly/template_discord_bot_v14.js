@@ -3,15 +3,23 @@
 const mongoose = require("mongoose");
 const logger = require("../logger");
 
-/* const models = {
-	user: require("../models/userModel").model
-}; */
+const models = {
+	guild: require("../../models/guildModel").model
+};
 
-const MONGO_URI = process.env.MONGO_URI || require("../../configs/config_client.json").MONGO_URI;
+const config = { client: require("./configs/config_client.json") };
+
+const MONGO_URI = process.env.MONGO_URI || config.client.MONGO_URI;
+const MONGO_URI_DEV = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
 
 module.exports = {
+	models,
+
+	guildManager: require("./guildManager"),
+	reminderManager: require("./reminderManager"),
+
 	/** Connect to MongoDB */
-	connect: async (uri = MONGO_URI) => {
+	connect: async (uri = DEVMODE ? MONGO_URI_DEV : MONGO_URI) => {
 		// Try to connect to MongoDB
 		let connection = await new Promise((resolve, reject) => {
 			return mongoose
@@ -25,5 +33,16 @@ module.exports = {
 
 		// Log the error if the connection failed
 		logger.error("Failed to connect to MongoDB", null, connection);
+	},
+
+	/** Ping MongoDB */
+	ping: async () => {
+		if (!mongoose.connection) return "n/a";
+
+		let before = Date.now();
+		await mongoose.connection.db.admin().ping();
+		let after = Date.now();
+
+		return after - before;
 	}
 };

@@ -76,16 +76,16 @@ class EmbedNavigator {
 			this.data.pages.current = _page;
 
 		// Count how many nested pages there are currently
-		this.data.pages.nested_length = _page?.length || 0;
+		this.data.pages.nested_length = Array.isArray(_page) ? _page.length : 0;
 
 		// Check if pagination is required
-		this.data.pagination.required = _page?.length >= 2;
+		this.data.pagination.required = Array.isArray(_page) ? _page.length >= 2 : false;
 
 		// Check if long pagination could be used
-		this.data.pagination.requiresLong = _page?.length >= 4;
+		this.data.pagination.requiresLong = Array.isArray(_page) ? _page.length >= 4 : false;
 
 		// Check if jumping could be used
-		this.data.pagination.canJump = _page?.length >= 4;
+		this.data.pagination.canJump = Array.isArray(_page) ? _page.length >= 4 : false;
 	}
 
 	#_configureMessageComponents() {
@@ -196,12 +196,10 @@ class EmbedNavigator {
 		// Variables
 		let _message = null;
 
-		try {
-			// Send a message to the channel asking the user to respond with a number
-			_message = await this.data.message.reply({
-				content: `${user} say the number you want to jump to`
-			});
-		} catch { return null; } // prettier-ignore
+		// Send a message to the channel asking the user to respond with a number
+		_message = await this.data.message
+			.reply({ content: `${user} say the number you want to jump to` })
+			.catch(() => null);
 
 		// + Error handling
 		if (!_message) return null;
@@ -211,6 +209,7 @@ class EmbedNavigator {
 			confirm: jt.parseTime(config.timeouts.CONFIRMATION),
 			error: jt.parseTime(config.timeouts.ERROR_MESSAGE)
 		};
+
 		let filter = msg => msg.author.id === user.id;
 
 		return await _message.channel
@@ -224,11 +223,10 @@ class EmbedNavigator {
 
 				// prettier-ignore
 				// Delete the message we sent to ask the user
-				try { _message.delete(); } catch {}
+				if (_message.deletable) _message.delete().catch(() => null);
 
-				// prettier-ignore
 				// Delete the user's response if it was a number
-				if (!isNaN(_number)) try { _message_user.delete(); } catch { }
+				if (!isNaN(_number) && _message_user.deletable) await _message_user.delete().catch(() => null);
 
 				// Check if the response was within our page length
 				if (!_number || _number > this.data.pages.nested_length) {
@@ -246,8 +244,8 @@ class EmbedNavigator {
 				return _number - 1;
 			})
 			.catch(async () => {
-				// prettier-ignore
-				try { await _message.delete(); } catch {}
+				// Delete the message we sent to ask the user
+				if (_message.deletable) _message.delete().catch(() => null);
 				return null;
 			});
 	}
@@ -300,7 +298,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = _jumpIdx;
+								this.data.pages.idx.nested = idx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	
@@ -389,7 +387,7 @@ class EmbedNavigator {
 							return await this.#_askPageNumber(_interaction.user).then(async idx => {
 								if (isNaN(idx)) return;
 
-								this.data.pages.idx.nested = _jumpIdx;
+								this.data.pages.idx.nested = idx;
 								this.#_updatePage(); return await this.refresh();
 							});
 	

@@ -33,11 +33,8 @@
 				"value": [
 					"- **`\\#channel ID`** will mention that channel",
 					"- **`\\@user ID`** will mention that user",
-					"- **`\\@&role ID`** will mention that role",
 					"- **`\\$USER`** will mention yourself",
-					"- **`\\$USERNAME`** will be replaced with your user/display name",
-					"- **`\\$USER_AVATAR`** will be replaced with your avatar's URL",
-					"- **`\\$BOT_AVATAR`** will be replaced with the bot's avatar URL"
+					"- **`\\$USERNAME`** will be replaced with your user/display name"
 				],
 				"inline": true
 			},

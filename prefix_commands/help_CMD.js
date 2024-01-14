@@ -1,47 +1,120 @@
-/** @typedef extra
- * @property {string} cleanContent message content without the command name
- * @property {string} cmdName command name
- * @property {string} prefix prefix used */
-
 const { Client, Message } = require("discord.js");
+const { BetterEmbed, EmbedNavigator } = require("../modules/discordTools");
+const jt = require("../modules/jsTools");
 
-const { BetterEmbed } = require("../modules/discordTools");
-
+/** @type {import("../configs/typedefs").PrefixCommandExports} */
 module.exports = {
 	name: "help",
 	description: "View a list of my commands",
+	category: "Miscellaneous",
+	usage: "<cmd?>",
 
-	/** @param {Client} client @param {Message} message @param {extra} extra */
+	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message, { prefix }) => {
-		let embed_help = new BetterEmbed();
-
-		// Create an array out of the slash commands that have icons
-		let prefixCommands = [...client.prefixCommands.values()].filter(cmd => cmd?.options?.icon);
-
-		// The description to be added to the embed
-		let embed_help_description = [];
-
-		// prettier-ignore
-		// Iterate through each slash command and append it to a string
-		for (let _cmd of prefixCommands) embed_help_description.push(
-			`- $CMD_ICON | **$PREFIX$CMD_NAME**\n - *$DESCRIPTION*`
-				.replace("$CMD_ICON", _cmd.options.icon)
-				.replace("$PREFIX", prefix)
-				.replace("$CMD_NAME", _cmd.name)
-				.replace("$DESCRIPTION", _cmd.description)
+		// Get the current prefix commands and filter out ones that are set to be hidden
+		// also filters out un-unique commands to prevent double when commands have aliases
+		let commands = jt.unique(
+			[...client.prefixCommands.values()].filter(cmd => !cmd?.options?.hidden),
+			"name"
 		);
 
-		// prettier-ignore
-		// Send the embed with the command list, if available
-		if (embed_help_description.length) return await embed_help.reply(message, {
-			description: embed_help_description.join("\n"),
-            allowedMentions: { repliedUser: false }
+		// Check if there's available commands
+		if (!commands.length) return await new BetterEmbed({ title: "There aren't any commands available." }).reply(message);
+
+		// Get the available categories
+		let command_categories = jt.unique(
+			commands.map(cmd => ({ name: cmd.category || "Miscellaneous", icon: cmd.categoryIcon || null })),
+			"name"
+		);
+
+		// Sort the categories alphabetically
+		command_categories.sort((a, b) => a.name - b.name);
+
+		// Parse prefix commands into a readable format
+		let commands_f = [];
+
+		// Iterate through each prefix command
+		for (let cmd of commands) {
+			// the main line
+			let _f = "- $ICON**$PREFIX$COMMAND**"
+				.replace("$ICON", cmd?.options?.icon ? `${cmd.options.icon} | ` : "")
+				.replace("$PREFIX", prefix)
+				.replace("$COMMAND", cmd.name)
+				.replace("$DESCRIPTION", cmd.description);
+
+			/* - - - - - { Extra Command Options } - - - - - */
+			let _extra = [];
+
+			// prettier-ignore
+			if (cmd?.description)
+				_extra.push(` - *${cmd.description}*`);
+
+			// prettier-ignore
+			if (cmd?.aliases?.length)
+				_extra.push(` - aliases: ${cmd.aliases.map(a => `\`${a}\``).join(", ")}`);
+
+			// prettier-ignore
+			if (cmd?.usage)
+				_extra.push(` - usage: \`${cmd.usage}\``);
+
+			// Append the extra options to the main line
+			if (_extra.length) _f += `\n${_extra.join("\n")}`;
+
+			// Push the formatted command to the main array
+			commands_f.push({ str: _f, name: cmd.name, category: cmd.category || "Miscellaneous" });
+		}
+
+		// Create an array to store each group of embeds for each command category
+		let embeds_categories = [];
+
+		// Iterate through the command categories and create the appropriate command pages
+		for (let category of command_categories) {
+			// Get all the commands for the current category
+			let _cmds = commands_f.filter(cmd => cmd.category === category.name);
+			// Skip empty categories
+			if (!_cmds.length) continue;
+
+			// Sort commands by alphabetical order
+			_cmds.sort((a, b) => a.name - b.name);
+
+			// Make it a max of 10 command per page
+			let _cmds_split = jt.chunk(_cmds, 10);
+
+			// Create an array to store each "page" for the current category
+			let _embeds = [];
+
+			// Create an embed for each page
+			for (let i = 0; i < _cmds_split.length; i++) {
+				let group = _cmds_split[i];
+
+				// Create the embed :: { COMMANDS (PAGE) }
+				let _embed = new BetterEmbed({
+					title: `Help - ${category.name} #${_cmds.length}`,
+					description: group.map(g => g.str).join("\n"),
+					footer: `Page ${i + 1} of ${_cmds_split.length}`,
+					timestamp: true
+				});
+
+				// Push the embed to the array
+				_embeds.push(_embed);
+			}
+
+			// Push the embed array to the main command category array
+			if (_embeds.length) embeds_categories.push(_embeds);
+		}
+
+		// Setup page navigation
+		let embedNav = new EmbedNavigator({
+			channel: message.channel,
+			embeds: embeds_categories,
+			pagination: { type: "short", dynamic: false },
+			selectMenuEnabled: true
 		});
 
-		// Send the embed with an error
-		return await embed_help.reply(message, {
-			description: "**There aren't any commands available**",
-			allowedMentions: { repliedUser: false }
-		});
+		// Configure select menu options
+		embedNav.addSelectMenuOptions(...command_categories.map(cat => ({ emoji: cat.icon, label: cat.name })));
+
+		// Send the navigator
+		return await embedNav.reply(message, { allowedMentions: { repliedUser: false } });
 	}
 };

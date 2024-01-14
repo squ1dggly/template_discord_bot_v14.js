@@ -4,6 +4,7 @@ const BetterEmbed = require("./dT_betterEmbed");
 const EmbedNavigator = require("./dT_embedNavigator");
 
 const deleteMessageAfter = require("./dT_deleteMessageAfter");
+const messageToArray = require("./dT_messageToArray");
 const awaitConfirm = require("./dT_awaitConfirm");
 const dynaSend = require("./dT_dynaSend");
 const ansi = require("./dT_ansi");
@@ -31,6 +32,7 @@ module.exports = {
 	EmbedNavigator,
 
 	deleteMessageAfter,
+	messageToArray,
 	awaitConfirm,
 	dynaSend,
 

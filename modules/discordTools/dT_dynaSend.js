@@ -36,8 +36,8 @@ async function dynaSend(options) {
 	};
 
 	/* - - - - - { Parse Options } - - - - - */
-	options.embeds = jt.isArray(options.embeds);
-	options.components = jt.isArray(options.components);
+	// options.embeds = jt.isArray(options.embeds);
+	// options.components = jt.isArray(options.components);
 	options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 	/* - - - - - { Error Checking } - - - - - */
@@ -46,9 +46,6 @@ async function dynaSend(options) {
 
 	if (options.sendMethod === ("reply" || "editReply" || "followUp") && options.channel && !options.interaction)
 		throw new Error(`The '${options.sendMethod}' SendMethod cannot be used when a Channel is provided`);
-
-	if (options.sendMethod !== "replyTo" && options.message)
-		throw new Error("The 'replyTo' SendMethod cannot be used when a Message is provided");
 
 	if (options.sendMethod === "replyTo" && !options.message)
 		throw new Error("You must provide a Message to use the 'replyTo' SendMethod");
@@ -72,13 +69,18 @@ async function dynaSend(options) {
 	/** @type {Message|null} */
 	let message = null;
 
+	// prettier-ignore
 	// Put together send data
 	let sendData = {
-		content: options.messageContent,
-		components: options.components,
-		embeds: options.embeds,
-		fetchReply: true,
-		allowedMentions: options.allowedMentions
+		content: options.messageContent || undefined,
+		components: options.components?.length || options.components
+			? jt.isArray(options.components).filter(c => c)
+			: [],
+		embeds: options.embeds?.length || options.embeds
+			? jt.isArray(options.embeds).filter(e => e)
+			: [],
+		allowedMentions: options.allowedMentions || {},
+		fetchReply: true
 	};
 
 	switch (options.sendMethod) {
