@@ -8,30 +8,32 @@
 	"ADMIN_IDS": [""],
 	"admin_bypass_ids": {},
 
-	"client_presence": {
+	"client_status": {
 		"host": {
-			"STATUS": "online",
-			"activity": {
-				"TYPE": "WATCHING",
-				"NAME": "/invite",
-				"STREAM_URL": ""
-			}
+			"INTERVAL": "1m",
+
+			"ACTIVITY": [
+				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need help? Use /help" },
+				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/yourserverhere" },
+				{ "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
+			]
 		},
 
 		"production": {
-			"STATUS": "online",
-			"activity": {
-				"TYPE": "WATCHING",
-				"NAME": "/invite",
-				"STREAM_URL": ""
-			}
+			"INTERVAL": "1m",
+
+			"ACTIVITY": [
+				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need any help? Use /help or !help" },
+				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/yourserverhere" },
+				{ "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
+			]
 		},
 
 		"dev": {
-			"STATUS": "dnd",
-			"activity": {
-				"TYPE": "PLAYING",
-				"NAME": "with unstable substances",
+			"ACTIVITY": {
+				"STATUS": "dnd",
+				"TYPE": "CUSTOM",
+				"NAME": "🧨 playing with unstable substances...",
 				"STREAM_URL": ""
 			}
 		}
