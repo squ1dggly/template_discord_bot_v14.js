@@ -1,4 +1,4 @@
-const models = { guild: require("../../models/guildModel").mode };
+const models = { guild: require("../../models/guildModel").model };
 
 /** @param {string} guild_id */
 async function exists(guild_id) {
