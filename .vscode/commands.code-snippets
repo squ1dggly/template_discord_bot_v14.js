@@ -3,37 +3,34 @@
 		"scope": "javascript",
 		"prefix": "cmd",
 		"body": [
-			"/** @typedef extra",
-			" * @property {string} cleanContent message content without the command name",
-			" * @property {string} cmdName command name",
-			" * @property {string} prefix prefix used */\n",
-
-			"const { Client, Message } = require(\"discord.js\");\n",
-
+			"const { Client, Message } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const jt = require(\"../modules/jsTools\");\n",
 
+			"/** @type {import(\"../configs/typedefs\").PrefixCommandExports} */",
 			"module.exports = {",
-			"    name: \"cookie\",",
-			"    aliases: [],",
-			"    description: \"Get a cookie or a glass of milk\",",
-			"    options: { icon: \"🍪\", botAdminOnly: false, guildAdminOnly: false },\n",
+			"    name: \"${1:cookie}\",",
+			"    description: \"${2:Get a cookie or a glass of milk}\",",
+			"    category: \"Fun\",\n",
 
-			"    /** @param {Client} client @param {Message} message @param {extra} extra */",
-			"    execute: async (client, message, { cleanContent, cmdName, prefix }) => {",
-			"        // prettier-ignore",
+			"    options: { icon: \"🍪\" },\n",
+
+			"    /** @param {Client} client @param {Message} message @param {import(\"../configs/typedefs\").PrefixCommandExtra} extra */",
+			"    execute: async (client, message) => {",
+			"        // Create an array of responses",
 			"        let choices = [",
 			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
-			"        // prettier-ignore",
-			"        let embed_cookie = new BetterEmbed({",
-			"            channel: message.channel, author: { user: message.author },",
+			"        // Create the embed :: { COOKIE }",
+			"        let embed_${1:cookie} = new BetterEmbed({",
+			"            author: { user: message.author },",
 			"            description: jt.choice(choices)",
 			"        });\n",
 
-			"        return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });$0",
+			"        // Reply to the user with the embed",
+			"        return await embed_${1:cookie}.reply(message, { allowedMentions: { repliedUser: false } });$0",
 			"    }",
 			"};",
 			""
@@ -44,13 +41,13 @@
 		"scope": "javascript",
 		"prefix": "slash",
 		"body": [
-			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");\n",
-
+			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../modules/discordTools\");",
 			"const jt = require(\"../modules/jsTools\");\n",
 
+			"/** @type {import(\"../configs/typedefs\").SlashCommandExports} */",
 			"module.exports = {",
-			"    options: { icon: \"🍪\", deferReply: false, botAdminOnly: false, guildAdminOnly: false },\n",
+			"    options: { icon: \"🍪\" },\n",
 
 			"    // prettier-ignore",
 			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
@@ -58,18 +55,20 @@
 
 			"    /** @param {Client} client @param {CommandInteraction} interaction */",
 			"    execute: async (client, interaction) => {",
-			"        // prettier-ignore",
+			"        // Create an array of responses",
 			"        let choices = [",
 			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
-			"        // prettier-ignore",
-			"        let embed_cookie = new BetterEmbed({",
-			"            interaction, description: jt.choice(choices)",
+			"        // Create the embed :: { COOKIE }",
+			"        let embed_${1:cookie} = new BetterEmbed({",
+			"            interaction,",
+			"            description: jt.choice(choices)",
 			"        });\n",
 
-			"        return await embed_cookie.send();$0",
+			"        // Reply to the interaction with the embed",
+			"        return await embed_${1:cookie}.send();$0",
 			"    }",
 			"};",
 			""
