@@ -1,5 +1,7 @@
 const config = require("./dT_config.json");
 
+const { PermissionFlagsBits } = require("discord.js");
+
 const BetterEmbed = require("./dT_betterEmbed");
 const EmbedNavigator = require("./dT_embedNavigator");
 
