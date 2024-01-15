@@ -6,8 +6,10 @@ const jt = require("../modules/jsTools");
 module.exports = {
 	name: "help",
 	description: "View a list of my commands",
-	category: "Miscellaneous",
 	usage: "<cmd?>",
+	category: "Utility",
+
+	options: { icon: "🏓" },
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message, { prefix }) => {
@@ -19,7 +21,7 @@ module.exports = {
 		);
 
 		// Check if there's available commands
-		if (!commands.length) return await new BetterEmbed({ title: "There aren't any commands available." }).reply(message);
+		if (!commands.length) return await new BetterEmbed({ title: "There are no any commands available." }).reply(message);
 
 		// Get the available categories
 		let command_categories = jt.unique(
@@ -39,8 +41,7 @@ module.exports = {
 			let _f = "- $ICON**$PREFIX$COMMAND**"
 				.replace("$ICON", cmd?.options?.icon ? `${cmd.options.icon} | ` : "")
 				.replace("$PREFIX", prefix)
-				.replace("$COMMAND", cmd.name)
-				.replace("$DESCRIPTION", cmd.description);
+				.replace("$COMMAND", cmd.name);
 
 			/* - - - - - { Extra Command Options } - - - - - */
 			let _extra = [];

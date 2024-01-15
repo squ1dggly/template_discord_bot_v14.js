@@ -1,6 +1,5 @@
 const { Client, Message } = require("discord.js");
 const { guildManager } = require("../modules/mongo");
-const jt = require("../modules/jsTools");
 
 /** @type {import("../configs/typedefs").PrefixCommandExports} */
 module.exports = {
@@ -9,7 +8,7 @@ module.exports = {
 	category: "Admin",
 	usage: "<prefix?>",
 
-	options: { guildAdminOnly: true },
+	options: { icon: "⚙️", guildAdminOnly: true },
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message, { cleanContent }) => {

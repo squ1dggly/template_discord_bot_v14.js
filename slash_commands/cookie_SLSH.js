@@ -4,6 +4,7 @@ const jt = require("../modules/jsTools");
 
 /** @type {import("../configs/typedefs").SlashCommandExports} */
 module.exports = {
+	category: "Fun",
 	options: { icon: "🍪" },
 
 	// prettier-ignore

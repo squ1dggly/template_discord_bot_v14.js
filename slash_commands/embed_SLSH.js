@@ -5,7 +5,6 @@ const {
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
 	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder
 } = require("discord.js");
-
 const { BetterEmbed } = require("../modules/discordTools");
 const jt = require("../modules/jsTools");
 
@@ -16,8 +15,10 @@ const timeouts = {
 	channelSelect: jt.parseTime(config.timeouts.CHANNEL_SELECT)
 };
 
+/** @type {import("../configs/typedefs").SlashCommandExports} */
 module.exports = {
-	options: { deferReply: false, guildAdminOnly: true },
+	category: "Utility",
+	options: { icon: "📝", guildAdminOnly: true },
 
 	// prettier-ignore
 	builder: new SlashCommandBuilder().setName("embed")

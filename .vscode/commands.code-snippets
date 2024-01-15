@@ -47,6 +47,7 @@
 
 			"/** @type {import(\"../configs/typedefs\").SlashCommandExports} */",
 			"module.exports = {",
+			"    category: \"Fun\",",
 			"    options: { icon: \"🍪\" },\n",
 
 			"    // prettier-ignore",

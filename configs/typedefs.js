@@ -4,6 +4,13 @@
  * @property {boolean} guildAdminOnly only allow guild admins to use this command
  * @property {boolean} hidden hide this command from the help command list */
 
+/** @typedef SlashCommandExports
+ * @property {string} category category of the command
+ * @property {string} categoryIcon icon of the command category
+ * @property {CommandOptions} options extra options for the command
+ * @property {SlashCommandBuilder} builder slash command builder
+ * @property {Function} execute executed when the command is used */
+
 /** @typedef PrefixCommandExports
  * @property {string} name name of the command
  * @property {string[]} aliases different ways this command can be called
@@ -18,5 +25,7 @@
  * @property {string} cleanContent message content without the command name
  * @property {string} cmdName command name
  * @property {string} prefix prefix used */
+
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = null;
