@@ -37,6 +37,48 @@
 		]
 	},
 
+	"Prefix Command (Perms)": {
+		"scope": "javascript",
+		"prefix": "cmd.perms",
+		"body": [
+			"const { Client, PermissionFlagsBits, Message } = require(\"discord.js\");",
+			"const { BetterEmbed } = require(\"../modules/discordTools\");",
+			"const jt = require(\"../modules/jsTools\");\n",
+
+			"/** @type {import(\"../configs/typedefs\").PrefixCommandExports} */",
+			"module.exports = {",
+			"    name: \"${1:cookie}\",",
+			"    description: \"${2:Get a cookie or a glass of milk}\",",
+			"    category: \"Fun\",\n",
+
+			"    options: { ",
+			"    	icon: \"🍪\",",
+			"    	specialUserPerms: [PermissionFlagsBits.ViewAuditLog],",
+			"    	specialBotPerms: [PermissionFlagsBits.ManageGuild]",
+			"    },\n",
+
+			"    /** @param {Client} client @param {Message} message @param {import(\"../configs/typedefs\").PrefixCommandExtra} extra */",
+			"    execute: async (client, message) => {",
+			"        // Create an array of responses",
+			"        let choices = [",
+			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"        ];\n",
+
+			"        // Create the embed :: { COOKIE }",
+			"        let embed_${1:cookie} = new BetterEmbed({",
+			"            author: { user: message.author },",
+			"            description: jt.choice(choices)",
+			"        });\n",
+
+			"        // Reply to the user with the embed",
+			"        return await embed_${1:cookie}.reply(message, { allowedMentions: { repliedUser: false } });$0",
+			"    }",
+			"};",
+			""
+		]
+	},
+
 	"Slash Command": {
 		"scope": "javascript",
 		"prefix": "slash",
@@ -49,6 +91,50 @@
 			"module.exports = {",
 			"    category: \"Fun\",",
 			"    options: { icon: \"🍪\" },\n",
+
+			"    // prettier-ignore",
+			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
+			"        .setDescription(\"${2:Get a cookie or a glass of milk}\"),\n",
+
+			"    /** @param {Client} client @param {CommandInteraction} interaction */",
+			"    execute: async (client, interaction) => {",
+			"        // Create an array of responses",
+			"        let choices = [",
+			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"        ];\n",
+
+			"        // Create the embed :: { COOKIE }",
+			"        let embed_${1:cookie} = new BetterEmbed({",
+			"            interaction,",
+			"            description: jt.choice(choices)",
+			"        });\n",
+
+			"        // Reply to the interaction with the embed",
+			"        return await embed_${1:cookie}.send();$0",
+			"    }",
+			"};",
+			""
+		]
+	},
+
+	"Slash Command (Perms)": {
+		"scope": "javascript",
+		"prefix": "slash.perms",
+		"body": [
+			"const { Client, PermissionFlagsBits, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
+			"const { BetterEmbed } = require(\"../modules/discordTools\");",
+			"const jt = require(\"../modules/jsTools\");\n",
+
+			"/** @type {import(\"../configs/typedefs\").SlashCommandExports} */",
+			"module.exports = {",
+			"    category: \"Fun\",\n",
+
+			"    options: { ",
+			"    	icon: \"🍪\",",
+			"    	specialUserPerms: [PermissionFlagsBits.ViewAuditLog],",
+			"    	specialBotPerms: [PermissionFlagsBits.ManageGuild]",
+			"    },\n",
 
 			"    // prettier-ignore",
 			"    builder: new SlashCommandBuilder().setName(\"${1:cookie}\")",
