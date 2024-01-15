@@ -9,7 +9,7 @@ module.exports = {
 	usage: "<cmd?>",
 	category: "Utility",
 
-	options: { icon: "🏓" },
+	options: { icon: "❓" },
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message, { prefix }) => {
@@ -21,7 +21,7 @@ module.exports = {
 		);
 
 		// Check if there's available commands
-		if (!commands.length) return await new BetterEmbed({ title: "There are no any commands available." }).reply(message);
+		if (!commands.length) return await new BetterEmbed({ title: "There aren't any commands available." }).reply(message);
 
 		// Get the available categories
 		let command_categories = jt.unique(
@@ -90,10 +90,9 @@ module.exports = {
 
 				// Create the embed :: { COMMANDS (PAGE) }
 				let _embed = new BetterEmbed({
-					title: `Help - ${category.name} #${_cmds.length}`,
+					title: `Help | ${category.icon ? `${category.icon} ` : ""}${category.name}`,
 					description: group.map(g => g.str).join("\n"),
-					footer: `Page ${i + 1} of ${_cmds_split.length}`,
-					timestamp: true
+					footer: `Page ${i + 1} of ${_cmds_split.length} | Total: ${_cmds.length}`
 				});
 
 				// Push the embed to the array
