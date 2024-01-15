@@ -7,7 +7,7 @@ const models = {
 	guild: require("../../models/guildModel").model
 };
 
-const config = { client: require("./configs/config_client.json") };
+const config = { client: require("../../configs/config_client.json") };
 
 const MONGO_URI = process.env.MONGO_URI || config.client.MONGO_URI;
 const MONGO_URI_DEV = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
@@ -16,7 +16,6 @@ module.exports = {
 	models,
 
 	guildManager: require("./guildManager"),
-	reminderManager: require("./reminderManager"),
 
 	/** Connect to MongoDB */
 	connect: async (uri = DEVMODE ? MONGO_URI_DEV : MONGO_URI) => {
