@@ -6,7 +6,6 @@ const jt = require("../modules/jsTools");
 module.exports = {
 	name: "help",
 	description: "View a list of my commands",
-	usage: "<cmd?>",
 	category: "Utility",
 
 	options: { icon: "❓" },
