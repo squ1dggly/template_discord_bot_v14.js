@@ -62,16 +62,16 @@ module.exports = {
 		try {
 			// Check for command options
 			if (prefixCommand?.options) {
-				let _botAdminOnly = prefixCommand.options?.botAdminOnly || null;
-				let _guildAdminOnly = prefixCommand.options?.guildAdminOnly || null;
-				let userPermissions = prefixCommand.options?.userPermissions || null;
-				let botPermissions = prefixCommand.options?.botPermissions || null;
-				userPermissions &&= jt.isArray(userPermissions);
-				botPermissions &&= jt.isArray(botPermissions);
+				let botAdminOnly = prefixCommand.options?.botAdminOnly || null;
+				let guildAdminOnly = prefixCommand.options?.guildAdminOnly || null;
+				let specialUserPerms = prefixCommand.options?.specialUserPerms || null;
+				let specialBotPerms = prefixCommand.options?.specialBotPerms || null;
+				specialUserPerms &&= jt.isArray(specialUserPerms);
+				specialBotPerms &&= jt.isArray(specialBotPerms);
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot
-				if (_botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await new BetterEmbed({
+				if (botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await new BetterEmbed({
 					color: "Red",
 					interaction: args.interaction,
 					description: `Only the developers of ${client.user} can use that command.`
@@ -79,24 +79,24 @@ module.exports = {
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
-				if (_guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await new BetterEmbed({
+				if (guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await new BetterEmbed({
 					color: "Red",
 					interaction: args.interaction,
 					description: "You need admin to use that command."
 				}).send({ ephemeral: true });
 
 				// Check if the user has the required permissions
-				if (userPermissions) {
-					let _userPermissions = hasSpecialPermissions(args.interaction.member, userPermissions);
+				if (specialUserPerms) {
+					let _specialUserPerms = hasSpecialPermissions(args.interaction.member, specialUserPerms);
 
-					if (!_userPermissions.passed) {
+					if (!_specialUserPerms.passed) {
 						// prettier-ignore
 						// Create the embed :: { MISSING PERMS USER }
 						let embed_missingPerms = new BetterEmbed({
 							color: "Red",
 							interaction: args.interaction,
-							title: `User Missing ${_userPermissions.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description:  _userPermissions.missing.join(", ")
+							title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+							description:  _specialUserPerms.missing.join(", ")
 						});
 
 						// Reply to the user with the embed
@@ -105,17 +105,17 @@ module.exports = {
 				}
 
 				// Check if the bot has the required permissions
-				if (botPermissions) {
-					let _botPermissions = hasSpecialPermissions(args.interaction.guild.members.me, botPermissions);
+				if (specialBotPerms) {
+					let _specialBotPerms = hasSpecialPermissions(args.interaction.guild.members.me, specialBotPerms);
 
-					if (!_botPermissions.passed) {
+					if (!_specialBotPerms.passed) {
 						// prettier-ignore
 						// Create the embed :: { MISSING PERMS BOT }
 						let embed_missingPerms = new BetterEmbed({
 							color: "Red",
 							interaction: args.interaction,
-							title: `Missing ${_botPermissions.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description: _botPermissions.missing.join(", ")
+							title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+							description: _specialBotPerms.missing.join(", ")
 						});
 
 						// Reply to the user with the embed
