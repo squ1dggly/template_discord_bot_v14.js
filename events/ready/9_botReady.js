@@ -2,7 +2,7 @@
 
 const { Client } = require("discord.js");
 const { name } = require("../../package.json");
-const logger = require("../../modules/logger");
+const logger = require("../../utils/logger");
 
 module.exports = {
 	name: "BOT_READY",

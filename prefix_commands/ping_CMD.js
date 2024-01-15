@@ -1,5 +1,5 @@
 const { Client, Message } = require("discord.js");
-const { ping } = require("../modules/mongo");
+const { ping } = require("../utils/mongo");
 
 /** @type {import("../configs/typedefs").PrefixCommandExports} */
 module.exports = {

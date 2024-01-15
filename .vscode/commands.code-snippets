@@ -4,8 +4,8 @@
 		"prefix": "cmd",
 		"body": [
 			"const { Client, Message } = require(\"discord.js\");",
-			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const jt = require(\"../modules/jsTools\");\n",
+			"const { BetterEmbed } = require(\"../utils/discordTools\");",
+			"const jt = require(\"../utils/jsTools\");\n",
 
 			"/** @type {import(\"../configs/typedefs\").PrefixCommandExports} */",
 			"module.exports = {",
@@ -42,8 +42,8 @@
 		"prefix": "cmd.perms",
 		"body": [
 			"const { Client, PermissionFlagsBits, Message } = require(\"discord.js\");",
-			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const jt = require(\"../modules/jsTools\");\n",
+			"const { BetterEmbed } = require(\"../utils/discordTools\");",
+			"const jt = require(\"../utils/jsTools\");\n",
 
 			"/** @type {import(\"../configs/typedefs\").PrefixCommandExports} */",
 			"module.exports = {",
@@ -84,8 +84,8 @@
 		"prefix": "slash",
 		"body": [
 			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
-			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const jt = require(\"../modules/jsTools\");\n",
+			"const { BetterEmbed } = require(\"../utils/discordTools\");",
+			"const jt = require(\"../utils/jsTools\");\n",
 
 			"/** @type {import(\"../configs/typedefs\").SlashCommandExports} */",
 			"module.exports = {",
@@ -123,8 +123,8 @@
 		"prefix": "slash.perms",
 		"body": [
 			"const { Client, PermissionFlagsBits, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
-			"const { BetterEmbed } = require(\"../modules/discordTools\");",
-			"const jt = require(\"../modules/jsTools\");\n",
+			"const { BetterEmbed } = require(\"../utils/discordTools\");",
+			"const jt = require(\"../utils/jsTools\");\n",
 
 			"/** @type {import(\"../configs/typedefs\").SlashCommandExports} */",
 			"module.exports = {",

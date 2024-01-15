@@ -1,7 +1,7 @@
 /** @file Executed as soon as the bot's connected to Discord @author xsqu1znt */
 
 const { Client, ActivityType } = require("discord.js");
-const jt = require("../../modules/jsTools");
+const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
 

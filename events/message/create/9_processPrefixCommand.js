@@ -1,8 +1,8 @@
 /** @file Execute commands requested by a user message @author xsqu1znt */
 
 const { Client, PermissionsBitField, GuildMember, Message, userMention } = require("discord.js");
-const { BetterEmbed } = require("../../../modules/discordTools");
-const logger = require("../../../modules/logger");
+const { BetterEmbed } = require("../../../utils/discordTools");
+const logger = require("../../../utils/logger");
 
 const config = { client: require("../../../configs/config_client.json") };
 

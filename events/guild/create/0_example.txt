@@ -1,7 +1,7 @@
 /** @file An example of an event function */
 
 const { Client, Guild } = require("discord.js');
-const logger = require("../../../modules/logger');
+const logger = require("../../../utils/logger');
 
 module.exports = {
     name: "EXAMPLE",

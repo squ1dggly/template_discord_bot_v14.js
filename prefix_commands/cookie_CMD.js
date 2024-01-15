@@ -1,6 +1,6 @@
 const { Client, Message } = require("discord.js");
-const { BetterEmbed } = require("../modules/discordTools");
-const jt = require("../modules/jsTools");
+const { BetterEmbed } = require("../utils/discordTools");
+const jt = require("../utils/jsTools");
 
 /** @type {import("../configs/typedefs").PrefixCommandExports} */
 module.exports = {

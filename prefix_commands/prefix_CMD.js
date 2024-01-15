@@ -1,5 +1,5 @@
 const { Client, Message } = require("discord.js");
-const { guildManager } = require("../modules/mongo");
+const { guildManager } = require("../utils/mongo");
 
 /** @type {import("../configs/typedefs").PrefixCommandExports} */
 module.exports = {

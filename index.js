@@ -3,10 +3,10 @@
 require("dotenv").config();
 
 const { Client, Collection, GatewayIntentBits, Partials } = require("discord.js");
-const slashCommandManager = require("./modules/slashCommandManager");
-const logger = require("./modules/logger");
-const mongo = require("./modules/mongo");
-const jt = require("./modules/jsTools");
+const slashCommandManager = require("./utils/slashCommandManager");
+const logger = require("./utils/logger");
+const mongo = require("./utils/mongo");
+const jt = require("./utils/jsTools");
 
 const config = { client: require("./configs/config_client.json") };
 
@@ -40,11 +40,11 @@ client.slashCommands = new Collection();
 client.prefixCommands = new Collection();
 
 // Run importers
-let importers_dir = jt.readDir("./modules/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
+let importers_dir = jt.readDir("./utils/importers").filter(fn => fn.startsWith("import_") && fn.endsWith(".js"));
 
 // prettier-ignore
 importers_dir.forEach(fn => {
-	try { require(`./modules/importers/${fn}`).init(client); }
+	try { require(`./utils/importers/${fn}`).init(client); }
 	catch (err) { logger.error("Importer failed to load", `\"${fn}\" could not initialize`, err); }
 });
 

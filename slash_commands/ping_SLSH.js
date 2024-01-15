@@ -1,6 +1,6 @@
 const { Client, CommandInteraction, SlashCommandBuilder } = require("discord.js");
-const { ping } = require("../modules/mongo");
-const jt = require("../modules/jsTools");
+const { ping } = require("../utils/mongo");
+const jt = require("../utils/jsTools");
 
 /** @type {import("../configs/typedefs").SlashCommandExports} */
 module.exports = {
