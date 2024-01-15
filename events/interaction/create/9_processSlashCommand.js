@@ -61,11 +61,11 @@ module.exports = {
 		/* - - - - - { Parse Prefix Command } - - - - - */
 		try {
 			// Check for command options
-			if (prefixCommand?.options) {
-				let botAdminOnly = prefixCommand.options?.botAdminOnly || null;
-				let guildAdminOnly = prefixCommand.options?.guildAdminOnly || null;
-				let specialUserPerms = prefixCommand.options?.specialUserPerms || null;
-				let specialBotPerms = prefixCommand.options?.specialBotPerms || null;
+			if (slashCommand?.options) {
+				let botAdminOnly = slashCommand.options?.botAdminOnly || null;
+				let guildAdminOnly = slashCommand.options?.guildAdminOnly || null;
+				let specialUserPerms = slashCommand.options?.specialUserPerms || null;
+				let specialBotPerms = slashCommand.options?.specialBotPerms || null;
 				specialUserPerms &&= jt.isArray(specialUserPerms);
 				specialBotPerms &&= jt.isArray(specialBotPerms);
 
