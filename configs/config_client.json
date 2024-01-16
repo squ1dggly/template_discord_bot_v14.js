@@ -1,7 +1,7 @@
 {
 	"TOKEN": "",
 	"MONGO_URI": "",
-	"MODE": "DEV",
+	"DEV_MODE": false,
 	"PREFIX": "!",
 
 	"OWNER_ID": "",
@@ -9,17 +9,7 @@
 	"admin_bypass_ids": {},
 
 	"client_status": {
-		"host": {
-			"INTERVAL": "1m",
-
-			"ACTIVITY": [
-				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need help? Use /help" },
-				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/yourserverhere" },
-				{ "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
-			]
-		},
-
-		"production": {
+		"default": {
 			"INTERVAL": "1m",
 
 			"ACTIVITY": [

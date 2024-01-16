@@ -12,11 +12,17 @@ const config = { client: require("./configs/config_client.json") };
 
 const TOKEN = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
+const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
-const MONGO_URI = process.env.MONGO_URI || config.client.MONGO_URI;
-const MONGO_URI_DEV = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
+/* - - - - - { Check for TOKEN } - - - - - */
+if (DEV_MODE && !TOKEN_DEV) return logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
+if (!TOKEN) return logger.error("TOKEN Missing", "TOKEN is not set");
 
-const DEVMODE = process.env.MODE || config.client.MODE === "DEV";
+// prettier-ignore
+// Let the user know if the bot's in dev mode
+if (DEV_MODE) logger.debug(
+	"DEV_MODE is enabled. You can change this by setting DEV_MODE to false in either .env or config_client.json"
+);
 
 logger.log("initializing...");
 
@@ -51,7 +57,7 @@ importers_dir.forEach(fn => {
 // Connect the client to discord
 logger.log("connecting to Discord...");
 // prettier-ignore
-client.login(DEVMODE ? TOKEN_DEV : TOKEN).then(async () => {
+client.login(DEV_MODE ? TOKEN_DEV : TOKEN).then(async () => {
 	// Register slash commands to a specific server :: { LOCAL }
 	// await slashCommandManager.push(client, { ids: "your_server_id" });
 
@@ -64,5 +70,5 @@ client.login(DEVMODE ? TOKEN_DEV : TOKEN).then(async () => {
 	// Remove commands (does nothing if commands were registered locally) :: { GLOBAL }
 	// await slashCommandManager.remove(client, { global: true });
 
-	// await mongo.connect(DEVMODE ? MONGO_URI_DEV : MONGO_URI);
+	// await mongo.connect();
 });

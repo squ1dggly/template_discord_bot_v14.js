@@ -11,6 +11,7 @@ const config = { client: require("../../configs/config_client.json") };
 
 const MONGO_URI = process.env.MONGO_URI || config.client.MONGO_URI;
 const MONGO_URI_DEV = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
+const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
 module.exports = {
 	models,
@@ -18,7 +19,11 @@ module.exports = {
 	guildManager: require("./guildManager"),
 
 	/** Connect to MongoDB */
-	connect: async (uri = DEVMODE ? MONGO_URI_DEV : MONGO_URI) => {
+	connect: async (uri = DEV_MODE ? MONGO_URI_DEV : MONGO_URI) => {
+		/* - - - - - { Check for MONGO_URI } - - - - - */
+		if (DEV_MODE && !MONGO_URI_DEV) return logger.error("MONGO_URI Missing", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
+		if (!MONGO_URI) return logger.error("MONGO_URI Missing", "MONGO_URI is not set");
+
 		// Try to connect to MongoDB
 		let connection = await new Promise((resolve, reject) => {
 			return mongoose

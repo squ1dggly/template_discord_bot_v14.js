@@ -1,4 +1,4 @@
-/** @file Executed as soon as the bot's connected to Discord @author xsqu1znt */
+/** @file Executed as soon as the bot's connected to Discord */
 
 const { Client } = require("discord.js");
 const { name } = require("../../package.json");

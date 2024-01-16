@@ -1,9 +1,10 @@
-/** @file Executed as soon as the bot's connected to Discord @author xsqu1znt */
+/** @file Executed as soon as the bot's connected to Discord */
 
 const { Client, ActivityType } = require("discord.js");
 const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
+const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
 module.exports = {
 	name: "SET_PRESENCE",
@@ -40,7 +41,7 @@ module.exports = {
 			lastActivity = _data;
 		};
 
-		let clientStatus = config.client.client_status[config.client.MODE.toLowerCase()];
+		let clientStatus = DEV_MODE ? config.client.client_status.dev : config.client.client_status.default;
 
 		// Randomize status
 		if (clientStatus?.INTERVAL) {
