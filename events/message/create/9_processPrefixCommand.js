@@ -1,6 +1,6 @@
 /** @file Execute commands requested by a user message @author xsqu1znt */
 
-const { Client, PermissionsBitField, GuildMember, Message, userMention } = require("discord.js");
+const { Client, PermissionFlagBits, GuildMember, Message, userMention } = require("discord.js");
 const { BetterEmbed } = require("../../../utils/discordTools");
 const { guildManager } = require("../../../utils/mongo");
 const logger = require("../../../utils/logger");
@@ -18,13 +18,13 @@ function userIsBotAdminOrBypass(message, commandName) {
 
 /** @param {Message} message @param {string} commandName */
 function userIsGuildAdminOrBypass(message, commandName) {
-	let isAdmin = message.member.permissions.has(PermissionsBitField.Flags.Administrator);
+	let isAdmin = message.member.permissions.has(PermissionFlagBits.Administrator);
 	let canBypass = userIsBotAdminOrBypass(message, commandName);
 
 	return isAdmin || canBypass;
 }
 
-/** @param {GuildMember} guildMember @param {PermissionsBitField[]} permissions */
+/** @param {GuildMember} guildMember @param {PermissionFlagBits[]} permissions */
 function hasSpecialPermissions(guildMember, permissions) {
 	let has = [];
 	let missing = [];
@@ -48,7 +48,7 @@ module.exports = {
 
 		// prettier-ignore
 		// Check if we have permission to send messages in this channel
-		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionsBitField.Flags.SendMessages)) return;
+		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionFlagBits.SendMessages)) return;
 
 		/* - - - - - { Check for Prefix } - - - - - */
 		let prefix = (await guildManager.fetchPrefix(args.message.guild.id)) || null;

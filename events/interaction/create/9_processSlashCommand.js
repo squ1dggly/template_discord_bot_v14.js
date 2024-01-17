@@ -1,6 +1,6 @@
 /** @file Execute commands requested by a command interaction @author xsqu1znt */
 
-const { Client, PermissionsBitField, GuildMember, BaseInteraction } = require("discord.js");
+const { Client, PermissionFlagBits, GuildMember, BaseInteraction } = require("discord.js");
 const { BetterEmbed } = require("../../../utils/discordTools");
 const logger = require("../../../utils/logger");
 
@@ -17,13 +17,13 @@ function userIsBotAdminOrBypass(interaction) {
 
 /** @param {BaseInteraction} interaction */
 function userIsGuildAdminOrBypass(interaction) {
-	let isAdmin = interaction.member.permissions.has(PermissionsBitField.Flags.Administrator);
+	let isAdmin = interaction.member.permissions.has(PermissionFlagBits.Flags.Administrator);
 	let canBypass = userIsBotAdminOrBypass(interaction);
 
 	return isAdmin || canBypass;
 }
 
-/** @param {GuildMember} guildMember @param {PermissionsBitField[]} permissions */
+/** @param {GuildMember} guildMember @param {PermissionFlagBits[]} permissions */
 function hasSpecialPermissions(guildMember, permissions) {
 	let has = [];
 	let missing = [];
