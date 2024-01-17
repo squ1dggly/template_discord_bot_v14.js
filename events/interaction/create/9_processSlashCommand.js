@@ -89,38 +89,26 @@ module.exports = {
 				if (specialUserPerms) {
 					let _specialUserPerms = hasSpecialPermissions(args.interaction.member, specialUserPerms);
 
-					if (!_specialUserPerms.passed) {
-						// prettier-ignore
-						// Create the embed :: { MISSING PERMS USER }
-						let embed_missingPerms = new BetterEmbed({
-							color: "Red",
-							interaction: args.interaction,
-							title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description:  _specialUserPerms.missing.join(", ")
-						});
-
-						// Reply to the user with the embed
-						return await embed_missingPerms.send();
-					}
+					// prettier-ignore
+					if (!_specialUserPerms.passed) return await new BetterEmbed({
+						color: "Red",
+						interaction: args.interaction,
+						title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+						description:  _specialUserPerms.missing.join(", ")
+					}).send();
 				}
 
 				// Check if the bot has the required permissions
 				if (specialBotPerms) {
 					let _specialBotPerms = hasSpecialPermissions(args.interaction.guild.members.me, specialBotPerms);
 
-					if (!_specialBotPerms.passed) {
-						// prettier-ignore
-						// Create the embed :: { MISSING PERMS BOT }
-						let embed_missingPerms = new BetterEmbed({
-							color: "Red",
-							interaction: args.interaction,
-							title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description: _specialBotPerms.missing.join(", ")
-						});
-
-						// Reply to the user with the embed
-						return await embed_missingPerms.send();
-					}
+					// prettier-ignore
+					if (!_specialBotPerms.passed) return await new BetterEmbed({
+						color: "Red",
+						interaction: args.interaction,
+						title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+						description: _specialBotPerms.missing.join(", ")
+					}).send();
 				}
 
 				// prettier-ignore

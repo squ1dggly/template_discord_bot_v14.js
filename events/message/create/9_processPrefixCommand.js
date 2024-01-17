@@ -106,36 +106,24 @@ module.exports = {
 				if (specialUserPerms) {
 					let _specialUserPerms = hasSpecialPermissions(args.message.member, specialUserPerms);
 
-					if (!_specialUserPerms.passed) {
-						// prettier-ignore
-						// Create the embed :: { MISSING PERMS USER }
-						let embed_missingPerms = new BetterEmbed({
-							color: "Red",
-							title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description:  _specialUserPerms.missing.join(", ")
-						});
-
-						// Reply to the user with the embed
-						return await embed_missingPerms.reply(args.message, { allowedMentions: { repliedUser: false } });
-					}
+					// prettier-ignore
+					if (!_specialUserPerms.passed) return await new BetterEmbed({
+						color: "Red",
+						title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+						description:  _specialUserPerms.missing.join(", ")
+					}).reply(args.message, { allowedMentions: { repliedUser: false } });
 				}
 
 				// Check if the bot has the required permissions
 				if (specialBotPerms) {
 					let _specialBotPerms = hasSpecialPermissions(args.message.guild.members.me, specialBotPerms);
 
-					if (!_specialBotPerms.passed) {
-						// prettier-ignore
-						// Create the embed :: { MISSING PERMS BOT }
-						let embed_missingPerms = new BetterEmbed({
-							color: "Red",
-							title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
-							description: _specialBotPerms.missing.join(", ")
-						});
-
-						// Reply to the user with the embed
-						return await embed_missingPerms.reply(args.message, { allowedMentions: { repliedUser: false } });
-					}
+					// prettier-ignore
+					if (!_specialBotPerms.passed) return await new BetterEmbed({
+						color: "Red",
+						title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+						description: _specialBotPerms.missing.join(", ")
+					}).reply(args.message, { allowedMentions: { repliedUser: false } });
 				}
 			}
 
