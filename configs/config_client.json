@@ -1,12 +1,24 @@
 {
 	"TOKEN": "",
 	"MONGO_URI": "",
+
+	"TOKEN_DEV": "",
+	"MONGO_URI_DEV": "",
 	"DEV_MODE": false,
+
 	"PREFIX": "!",
 
 	"OWNER_ID": "",
 	"ADMIN_IDS": [""],
 	"admin_bypass_ids": {},
+
+	"support_server": {
+		"INVITE_URL": "https://discord.gg/your_server",
+		"GUILD_ID": "",
+		"channels": {
+			"WELCOME": "1234"
+		}
+	},
 
 	"client_status": {
 		"default": {
@@ -14,7 +26,7 @@
 
 			"ACTIVITY": [
 				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need any help? Use /help or !help" },
-				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/yourserverhere" },
+				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Join our community! discord.gg/your_server" },
 				{ "STATUS": "online", "TYPE": "WATCHING", "NAME": "✨ $GUILD_COUNT servers" }
 			]
 		},
