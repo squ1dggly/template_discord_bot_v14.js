@@ -57,9 +57,9 @@ function unique(arr, prop = "", copy = false) {
 }
 
 /** Check if the given item is an array, return the item in an array if it isn't
- * @param {Array} item array to filter
+ * @param {Array} item item to be in an array
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
-function isArray(item, copy = false) {
+function forceArray(item, copy = false) {
 	if (!Array.isArray(item)) item = [item];
 	return copy ? structuredClone(item) : item;
 }
@@ -103,4 +103,4 @@ function toMap(arr, callback, copy = false) {
 	return map_new;
 }
 
-module.exports = { chunk, unique, isArray, betterMap, toMap };
+module.exports = { chunk, unique, forceArray, betterMap, toMap };

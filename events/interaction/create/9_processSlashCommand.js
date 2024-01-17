@@ -66,8 +66,8 @@ module.exports = {
 				let guildAdminOnly = slashCommand.options?.guildAdminOnly || null;
 				let specialUserPerms = slashCommand.options?.specialUserPerms || null;
 				let specialBotPerms = slashCommand.options?.specialBotPerms || null;
-				specialUserPerms &&= jt.isArray(specialUserPerms);
-				specialBotPerms &&= jt.isArray(specialBotPerms);
+				specialUserPerms &&= jt.forceArray(specialUserPerms);
+				specialBotPerms &&= jt.forceArray(specialBotPerms);
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot

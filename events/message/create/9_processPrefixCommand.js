@@ -85,8 +85,8 @@ module.exports = {
 				let guildAdminOnly = prefixCommand.options?.guildAdminOnly || null;
 				let specialUserPerms = prefixCommand.options?.specialUserPerms || null;
 				let specialBotPerms = prefixCommand.options?.specialBotPerms || null;
-				specialUserPerms &&= jt.isArray(specialUserPerms);
-				specialBotPerms &&= jt.isArray(specialBotPerms);
+				specialUserPerms &&= jt.forceArray(specialUserPerms);
+				specialBotPerms &&= jt.forceArray(specialBotPerms);
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot

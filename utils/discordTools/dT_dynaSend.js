@@ -36,8 +36,8 @@ async function dynaSend(options) {
 	};
 
 	/* - - - - - { Parse Options } - - - - - */
-	// options.embeds = jt.isArray(options.embeds);
-	// options.components = jt.isArray(options.components);
+	// options.embeds = jt.forceArray(options.embeds);
+	// options.components = jt.forceArray(options.components);
 	options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 	/* - - - - - { Error Checking } - - - - - */
@@ -74,10 +74,10 @@ async function dynaSend(options) {
 	let sendData = {
 		content: options.messageContent || undefined,
 		components: options.components?.length || options.components
-			? jt.isArray(options.components).filter(c => c)
+			? jt.forceArray(options.components).filter(c => c)
 			: [],
 		embeds: options.embeds?.length || options.embeds
-			? jt.isArray(options.embeds).filter(e => e)
+			? jt.forceArray(options.embeds).filter(e => e)
 			: [],
 		allowedMentions: options.allowedMentions || {},
 		fetchReply: true

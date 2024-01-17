@@ -423,7 +423,7 @@ class BetterEmbed extends EmbedBuilder {
 		options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 		// If a single component was given, convert it into an array
-		options.components = jt.isArray(options.components);
+		options.components = jt.forceArray(options.components);
 
 		// Send the message
 		return await dynaSend({ embeds: [this], ...options });
@@ -450,7 +450,7 @@ class BetterEmbed extends EmbedBuilder {
 		options.deleteAfter = jt.parseTime(options.deleteAfter);
 
 		// If a single component was given, convert it into an array
-		options.components = jt.isArray(options.components);
+		options.components = jt.forceArray(options.components);
 
 		// Send the message
 		return await dynaSend({ embeds: [this], sendMethod: "replyTo", ...options });
