@@ -143,7 +143,7 @@ module.exports = {
 
 			// Let the user know an error occurred
 			embed_fatalError
-				.reply(args.message, { components: aR_supportServer, allowedMentions: { repliedUser: false } })
+				.reply(args.message, { allowedMentions: { repliedUser: false } })
 				.catch(() => null);
 
 			// Log the error
