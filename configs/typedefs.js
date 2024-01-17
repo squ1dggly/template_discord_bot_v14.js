@@ -1,7 +1,7 @@
 /** @typedef CommandOptions
  * @property {boolean} deferReply defer the interaction
  * 
- * *required if your command can take longer than 3 seconds to execute*
+ * ***required if your command can take longer than 3 seconds to execute***
  * @property {string} icon icon to show in the help command list
  * @property {boolean} botAdminOnly only allow bot staff to use this command
  * @property {boolean} guildAdminOnly only allow guild admins to use this command
