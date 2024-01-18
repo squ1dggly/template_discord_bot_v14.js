@@ -104,24 +104,42 @@
 		]
 	},
 
-	"Interaction Create": {
+	"Event - Interaction Create": {
 		"scope": "javascript",
-		"prefix": "event_interactionCreate",
+		"prefix": "!interaction-create",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, BaseInteraction } = require(\"discord.js\");",
+			"const { Client, Events, BaseInteraction } = require("discord.js");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:interaction_create}\",\n",
+			"    name: \"${1:EVENT_NAME}\",",
+			"    event: Events.InteractionCreate,\n",
 
-			"    /** @param {Client} client @param {{interaction:BaseInteraction}} args */",
-			"    execute: async (client, args) => {",
-			"        logger.log(`${args.interaction.user.username} triggered an interaction`);$0",
+			"    /** @param {Client} client @param {BaseInteraction} interaction */",
+			"    execute: async (client, interaction) => {",
+			"        logger.log(`${interaction.user.username} triggered an interaction`);$0",
 			"    }",
 			"};"
+		]
+	},
+
+	"Event - Ready": {
+		"scope": "javascript",
+		"prefix": "!ready",
+		"body": [
+			"const { Client, Events } = require(\"discord.js\");",
+			"const logger = require(\"../../../utils/logger\");\n",
+
+			"module.exports = {",
+			"    name: \"${1:EVENT_NAME}\",",
+			"    eventType: Events.${2:ClientReady},\n",
+
+			"    /** @param {Client} client */",
+			"    execute: async (client) => {",
+			"        logger.log(\"client ready\");$0",
+			"    }",
+			"};",
+			""
 		]
 	}
 }

@@ -1,14 +1,12 @@
-/** @file Executed as soon as the bot's connected to Discord */
-
-const { Client, ActivityType } = require("discord.js");
+const { Client, Events, ActivityType } = require("discord.js");
 const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
 const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
 module.exports = {
-	name: "SET_PRESENCE",
-	event: "ready",
+	name: "setClientActivity",
+	eventType: Events.ClientReady,
 
 	/** @param {Client} client  */
 	execute: async client => {

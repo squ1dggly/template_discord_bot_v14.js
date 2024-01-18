@@ -1,18 +1,8 @@
 /** @file Import events and bind them to their appropriate client event trigger @author xsqu1znt */
 
-const { Client, Events } = require("discord.js");
+const { Client } = require("discord.js");
 const logger = require("../logger");
 const jt = require("../jsTools");
-
-const config = { client: require("../../configs/config_client.json") };
-
-function executeEvent(foo, ...args) {
-	try {
-		foo.execute.apply(null, args);
-	} catch (err) {
-		logger.error("Failed to execute function", `\'${foo.name}\' on event \'${foo.eventType}\'`, err);
-	}
-}
 
 function importEvents(path) {
 	let files = jt.readDir(path).filter(fn => fn.endsWith(".js"));
@@ -41,8 +31,26 @@ module.exports = client => {
 	// Group events by EventType
 	let eventsGrouped = eventTypes.map(type => events.filter(e => e.eventType === type));
 
-	// Iterate through events
+	// Iterate through grouped events
 	for (let group of eventsGrouped) {
-        // Bind it to the appropriate listener
+		// Iterate through events inside the group
+		for (let event of group) {
+			try {
+				// Bind it to the appropriate listener
+				client.on(event.eventType, async (...args) => {
+					try {
+						// Execute the event
+						event.execute.apply(null, args);
+					} catch (err) {
+						// Catch execution errors
+						logger.error("Failed to execute function", `\'${event.name}\' on event \'${event.eventType}\'`, err);
+					}
+				});
+			} catch (err) {
+				// prettier-ignore
+				// Invalid event type recieved
+				logger.error("Failed to bind event", `invalid event: \'${event.eventType}\' for function \'${event.name}\'`, err);
+			}
+		}
 	}
 };
