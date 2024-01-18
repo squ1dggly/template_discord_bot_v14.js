@@ -51,7 +51,7 @@ let importers_dir = jt.readDir("./utils/importers").filter(fn => fn.startsWith("
 // prettier-ignore
 importers_dir.forEach(fn => {
 	try { require(`./utils/importers/${fn}`).init(client); }
-	catch (err) { logger.error("Importer failed to load", `\"${fn}\" could not initialize`, err); }
+	catch (err) { logger.error("Importer failed to load", `\'${fn}\' could not initialize`, err); }
 });
 
 // Connect the client to discord
