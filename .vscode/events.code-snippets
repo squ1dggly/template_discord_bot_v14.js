@@ -1,138 +1,154 @@
 {
-	"Guild Create": {
+	"Client Event (EVENT)": {
 		"scope": "javascript",
-		"prefix": "event_guildCreate",
+		"prefix": ";event",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, Guild } = require(\"discord.js\");",
+			"const { Client, Events, ${4:Message} } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:guild_create}\",\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.${2:MessageCreate},\n",
 
-			"    /** @param {Client} client @param {{guild:Guild}} args */",
-			"    execute: async (client, args) => {",
-			"        return logger.log(`joined a guild named \"${args.guild.name}\"`);$0",
+			"    /** @param {Client} client @param {${4:Message}} ${3:message} */",
+			"    execute: async (client, ${3:message}) => {",
+			"        return logger.log(`message sent by ${message.author.username}`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Guild Delete": {
+	"Guild Create (EVENT)": {
 		"scope": "javascript",
-		"prefix": "event_guildDelete",
+		"prefix": ";event.guildCreate",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, Guild } = require(\"discord.js\");",
+			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:guild_delete}\",\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.GuildCreate,\n",
 
-			"    /** @param {Client} client @param {{guild:Guild}} args */",
-			"    execute: async (client, args) => {",
-			"        return logger.log(`left a guild named \"${args.guild.name}\"`);$0",
+			"    /** @param {Client} client @param {Guild} guild */",
+			"    execute: async (client, guild) => {",
+			"        return logger.log(`joined a guild named \"${guild.name}\"`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Message Create": {
+	"Guild Delete (EVENT)": {
 		"scope": "javascript",
-		"prefix": "event_messageCreate",
+		"prefix": ";event.guildDelete",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, Message } = require(\"discord.js\");",
+			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:message_create}\",\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.GuildDelete,\n",
 
-			"    /** @param {Client} client @param {{message:Message}} args */",
-			"    execute: async (client, args) => {",
-			"        return logger.log(`${args.message.author.username} sent a message`);$0",
+			"    /** @param {Client} client @param {Guild} guild */",
+			"    execute: async (client, guild) => {",
+			"        return logger.log(`left a guild named \"${guild.name}\"`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Message Delete": {
+	"Message Create (EVENT)": {
 		"scope": "javascript",
-		"prefix": "event_messageDelete",
+		"prefix": ";event.messageCreate",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, Message } = require(\"discord.js\");",
+			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:message_delete}\",\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.MessageCreate,\n",
 
-			"    /** @param {Client} client @param {{message:Message}} args */",
-			"    execute: async (client, args) => {",
-			"        return logger.log(`${args.message.author.username} deleted a message`);$0",
+			"    /** @param {Client} client @param {Message} message */",
+			"    execute: async (client, message) => {",
+			"        return logger.log(`${message.author.username} sent a message`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Message Update": {
+	"Message Delete (EVENT)": {
 		"scope": "javascript",
-		"prefix": "event_messageUpdate",
+		"prefix": ";event.messageDelete",
 		"body": [
-			"/** @file An example of an event function */\n",
-
-			"const { Client, Message } = require(\"discord.js\");",
+			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EXAMPLE}\",",
-			"    event: \"${2:message_update}\",\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.MessageDelete,\n",
 
-			"    /** @param {Client} client @param {{message:{before:Message, after:Message}}} args */",
-			"    execute: async (client, args) => {",
-			"        return logger.log(`${args.message.after.author.username} updated a message`);$0",
+			"    /** @param {Client} client @param {Message} message */",
+			"    execute: async (client, message) => {",
+			"        return logger.log(`${message.author.username} deleted a message`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Event - Interaction Create": {
+	"Message Update (EVENT)": {
 		"scope": "javascript",
-		"prefix": "!interaction-create",
+		"prefix": ";event.messageUpdate",
 		"body": [
-			"const { Client, Events, BaseInteraction } = require("discord.js");",
+			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EVENT_NAME}\",",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    event: Events.MessageUpdate,\n",
+
+			"    /** @param {Client} client @param {Message} before @param {Message} after */",
+			"    execute: async (client, before, after) => {",
+			"        return logger.log(`${after.author.username} updated a message`);$0",
+			"    }",
+			"};",
+			""
+		]
+	},
+
+	"Interaction Create (EVENT)": {
+		"scope": "javascript",
+		"prefix": ";event.interactionCreate",
+		"body": [
+			"const { Client, Events, BaseInteraction } = require(\"discord.js\");",
+			"const logger = require(\"../../../utils/logger\");\n",
+
+			"module.exports = {",
+			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.InteractionCreate,\n",
 
 			"    /** @param {Client} client @param {BaseInteraction} interaction */",
 			"    execute: async (client, interaction) => {",
 			"        logger.log(`${interaction.user.username} triggered an interaction`);$0",
 			"    }",
-			"};"
+			"};",
+			""
 		]
 	},
 
-	"Event - Ready": {
+	"Ready (EVENT)": {
 		"scope": "javascript",
-		"prefix": "!ready",
+		"prefix": ";event.ready",
 		"body": [
 			"const { Client, Events } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
 			"module.exports = {",
-			"    name: \"${1:EVENT_NAME}\",",
-			"    eventType: Events.${2:ClientReady},\n",
+			"    name: \"${TM_FILENAME_BASE}\",",
+			"    eventType: Events.ClientReady,\n",
 
 			"    /** @param {Client} client */",
 			"    execute: async (client) => {",

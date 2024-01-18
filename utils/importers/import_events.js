@@ -5,7 +5,7 @@ const logger = require("../logger");
 const jt = require("../jsTools");
 
 function importEvents(path) {
-	let files = jt.readDir(path).filter(fn => fn.endsWith(".js"));
+	let files = jt.readDir(path, { recursive: true }).filter(fn => fn.endsWith(".js"));
 	let events = [];
 
 	// Import files found in the given directory
