@@ -39,22 +39,22 @@ module.exports = {
 	name: "processSlashCommand",
 	eventType: Events.InteractionCreate,
 
-	/** @param {Client} client @param {{interaction:BaseInteraction}} args */
-	execute: async (client, args) => {
+	/** @param {Client} client @param {BaseInteraction} interaction */
+	execute: async (client, interaction) => {
 		// prettier-ignore
 		// Filter out DM interactions
-		if (!args.interaction.guildId) return args.interaction.reply({
+		if (!interaction.guildId) return interaction.reply({
 			content: "Commands cannot be used in DMs.", ephemeral: true
 		});
 
 		// Filter out non-guild and non-command interactions
-		if (!args.interaction.guild || !args.interaction.isCommand()) return;
+		if (!interaction.guild || !interaction.isCommand()) return;
 
 		// Get the slash command function from the client if it exists
-		let slashCommand = client.slashCommands.get(args.interaction.commandName) || null;
+		let slashCommand = client.slashCommands.get(interaction.commandName) || null;
 		// prettier-ignore
-		if (!slashCommand) return await args.interaction.reply({
-			content: `\`/${args.interaction.commandName}\` is not a command.`
+		if (!slashCommand) return await interaction.reply({
+			content: `\`/${interaction.commandName}\` is not a command.`
         });
 
 		/* - - - - - { Parse Prefix Command } - - - - - */
@@ -70,28 +70,28 @@ module.exports = {
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot
-				if (botAdminOnly && !userIsBotAdminOrBypass(args.interaction)) return await new BetterEmbed({
+				if (botAdminOnly && !userIsBotAdminOrBypass(interaction)) return await new BetterEmbed({
 					color: "Red",
-					interaction: args.interaction,
+					interaction: interaction,
 					description: `Only the developers of ${client.user} can use that command.`
 				}).send({ ephemeral: true });
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
-				if (guildAdminOnly && !userIsGuildAdminOrBypass(args.interaction)) return await new BetterEmbed({
+				if (guildAdminOnly && !userIsGuildAdminOrBypass(interaction)) return await new BetterEmbed({
 					color: "Red",
-					interaction: args.interaction,
+					interaction: interaction,
 					description: "You need admin to use that command."
 				}).send({ ephemeral: true });
 
 				// Check if the user has the required permissions
 				if (specialUserPerms) {
-					let _specialUserPerms = hasSpecialPermissions(args.interaction.member, specialUserPerms);
+					let _specialUserPerms = hasSpecialPermissions(interaction.member, specialUserPerms);
 
 					// prettier-ignore
 					if (!_specialUserPerms.passed) return await new BetterEmbed({
 						color: "Red",
-						interaction: args.interaction,
+						interaction: interaction,
 						title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description:  _specialUserPerms.missing.join(", ")
 					}).send();
@@ -99,12 +99,12 @@ module.exports = {
 
 				// Check if the bot has the required permissions
 				if (specialBotPerms) {
-					let _specialBotPerms = hasSpecialPermissions(args.interaction.guild.members.me, specialBotPerms);
+					let _specialBotPerms = hasSpecialPermissions(interaction.guild.members.me, specialBotPerms);
 
 					// prettier-ignore
 					if (!_specialBotPerms.passed) return await new BetterEmbed({
 						color: "Red",
-						interaction: args.interaction,
+						interaction: interaction,
 						title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description: _specialBotPerms.missing.join(", ")
 					}).send();
@@ -112,20 +112,20 @@ module.exports = {
 
 				// prettier-ignore
 				if (slashCommand.options?.deferReply)
-					await args.interaction.deferReply().catch(() => null);
+					await interaction.deferReply().catch(() => null);
 			}
 
 			/* - - - - - { Execute } - - - - - */
 			// prettier-ignore
-			return await slashCommand.execute(client, args.interaction).then(async message => {
+			return await slashCommand.execute(client, interaction).then(async message => {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
 			// Create the embed :: { FATAL ERROR }
 			let embed_fatalError = new BetterEmbed({
-				interaction: args.interaction,
+				interaction: interaction,
 				title: "⛔ Oh no!",
-				description: `An error occurred while using the **/\`${args.interaction.commandName}\`** command.`
+				description: `An error occurred while using the **/\`${interaction.commandName}\`** command.`
 			});
 
 			// Let the user know an error occurred
@@ -134,7 +134,7 @@ module.exports = {
 			// Log the error
 			return logger.error(
 				"Could not execute command",
-				`SLSH_CMD: /${args.interaction.commandName} | guildID: ${args.interaction.guild.id} | userID: ${args.interaction.user.id}`,
+				`SLSH_CMD: /${interaction.commandName} | guildID: ${interaction.guild.id} | userID: ${interaction.user.id}`,
 				err
 			);
 		}

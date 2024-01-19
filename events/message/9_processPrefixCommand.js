@@ -40,24 +40,24 @@ module.exports = {
 	name: "processPrefixCommand",
 	eventType: Events.MessageCreate,
 
-	/** @param {Client} client @param {{message:Message}} args */
-	execute: async (client, args) => {
+	/** @param {Client} client @param {Message} message */
+	execute: async (client, message) => {
 		// Filter out non-guild, non-user, and non-command messages
-		if (!args.message?.guild || !args.message?.author || args.message?.author?.bot || !args.message?.content) return;
+		if (!message?.guild || !message?.author || message?.author?.bot || !message?.content) return;
 
 		// prettier-ignore
 		// Check if we have permission to send messages in this channel
-		if (!args.message.guild.members.me.permissionsIn(args.message.channel).has(PermissionFlagsBits.SendMessages)) return;
+		if (!message.guild.members.me.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
 		/* - - - - - { Check for Prefix } - - - - - */
-		let prefix = (await guildManager.fetchPrefix(args.message.guild.id)) || null;
+		let prefix = (await guildManager.fetchPrefix(message.guild.id)) || null;
 
 		// Check if the message started with the prefix
-		let prefixWasUsed = args.message.content.toLowerCase().startsWith(prefix);
+		let prefixWasUsed = message.content.toLowerCase().startsWith(prefix);
 
 		// If that failed, check if the message started with a mention to the client
 		if (!prefixWasUsed) {
-			prefixWasUsed = args.message.content.startsWith(`${userMention(client.user.id)} `);
+			prefixWasUsed = message.content.startsWith(`${userMention(client.user.id)} `);
 			// Change the prefix to the client mention
 			prefix = `${userMention(client.user.id)} `;
 
@@ -66,7 +66,7 @@ module.exports = {
 		}
 
 		/* - - - - - { Parse the Message } - - - - - */
-		let cleanContent = args.message.content.replace(prefix, "");
+		let cleanContent = message.content.replace(prefix, "");
 		let commandName = cleanContent.split(" ")[0];
 		if (!commandName) return;
 
@@ -89,40 +89,40 @@ module.exports = {
 
 				// prettier-ignore
 				// Check if the command requires the user to be an admin for the bot
-				if (botAdminOnly && !userIsBotAdminOrBypass(args.message, commandName)) return await new BetterEmbed({
+				if (botAdminOnly && !userIsBotAdminOrBypass(message, commandName)) return await new BetterEmbed({
 					color: "Red",
 					description: `Only the developers of ${client.user} can use that command.`
-				}).reply(args.message, { allowedMentions: { repliedUser: false } });
+				}).reply(message, { allowedMentions: { repliedUser: false } });
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
-				if (guildAdminOnly && !userIsGuildAdminOrBypass(args.message, commandName)) return await new BetterEmbed({
+				if (guildAdminOnly && !userIsGuildAdminOrBypass(message, commandName)) return await new BetterEmbed({
 					color: "Red",
 					description: "You need admin to use that command."
-				}).reply(args.message, { allowedMentions: { repliedUser: false } });
+				}).reply(message, { allowedMentions: { repliedUser: false } });
 
 				// Check if the user has the required permissions
 				if (specialUserPerms) {
-					let _specialUserPerms = hasSpecialPermissions(args.message.member, specialUserPerms);
+					let _specialUserPerms = hasSpecialPermissions(message.member, specialUserPerms);
 
 					// prettier-ignore
 					if (!_specialUserPerms.passed) return await new BetterEmbed({
 						color: "Red",
 						title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description:  _specialUserPerms.missing.join(", ")
-					}).reply(args.message, { allowedMentions: { repliedUser: false } });
+					}).reply(message, { allowedMentions: { repliedUser: false } });
 				}
 
 				// Check if the bot has the required permissions
 				if (specialBotPerms) {
-					let _specialBotPerms = hasSpecialPermissions(args.message.guild.members.me, specialBotPerms);
+					let _specialBotPerms = hasSpecialPermissions(message.guild.members.me, specialBotPerms);
 
 					// prettier-ignore
 					if (!_specialBotPerms.passed) return await new BetterEmbed({
 						color: "Red",
 						title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description: _specialBotPerms.missing.join(", ")
-					}).reply(args.message, { allowedMentions: { repliedUser: false } });
+					}).reply(message, { allowedMentions: { repliedUser: false } });
 				}
 			}
 
@@ -130,7 +130,7 @@ module.exports = {
 			let _args = { cleanContent, cmdName: commandName, prefix };
 
 			// prettier-ignore
-			return await prefixCommand.execute(client, args.message, _args).then(async message => {
+			return await prefixCommand.execute(client, message, _args).then(async message => {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
@@ -141,12 +141,12 @@ module.exports = {
 			});
 
 			// Let the user know an error occurred
-			embed_fatalError.reply(args.message, { allowedMentions: { repliedUser: false } }).catch(() => null);
+			embed_fatalError.reply(message, { allowedMentions: { repliedUser: false } }).catch(() => null);
 
 			// Log the error
 			return logger.error(
 				"Could not execute command",
-				`PRFX_CMD: ${prefix}${commandName} | guildID: ${args.message.guild.id} | userID: ${args.message.author.id}`,
+				`PRFX_CMD: ${prefix}${commandName} | guildID: ${message.guild.id} | userID: ${message.author.id}`,
 				err
 			);
 		}
