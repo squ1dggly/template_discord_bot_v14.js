@@ -40,7 +40,7 @@ module.exports = client => {
 				client.on(event.eventType, async (...args) => {
 					try {
 						// Execute the event
-						event.execute.apply(null, args);
+						event.execute.apply(null, [client, ...args]);
 					} catch (err) {
 						// Catch execution errors
 						logger.error("Failed to execute function", `\'${event.name}\' on event \'${event.eventType}\'`, err);
