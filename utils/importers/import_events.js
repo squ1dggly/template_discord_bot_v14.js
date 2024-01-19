@@ -1,4 +1,4 @@
-/** @file Import events and bind them to their appropriate client event trigger @author xsqu1znt */
+/** @file Import events and bind them to their appropriate client event listener */
 
 const { Client } = require("discord.js");
 const logger = require("../logger");

@@ -1,18 +1,15 @@
-/** @file Import slash commands from `./slash_commands` @author xsqu1znt */
+/** @file Import slash commands from `./slash_commands` */
 
 const { Client } = require("discord.js");
 const logger = require("../logger");
 const jt = require("../jsTools");
-
-const config = { client: require("../../configs/config_client.json") };
-const hostMode = config.client.MODE === "HOST" ? true : false;
 
 function importCommands(path, recursive = false) {
 	let dirEntries = jt.readDir(path, { recursive });
 	let commands = [];
 
 	for (let entry of dirEntries) {
-		let _path = hostMode ? `${path}/${entry}` : `../.${path}/${entry}`;
+		let _path = `../.${path}/${entry}`;
 
 		// prettier-ignore
 		if (entry.endsWith("SLSH.js")) try {
@@ -25,14 +22,12 @@ function importCommands(path, recursive = false) {
 	return commands;
 }
 
-module.exports = {
-	/** @param {Client} client */
-	init: client => {
-		let _path = hostMode ? "../../slash_commands" : "./slash_commands";
-		let commands = importCommands(_path, false);
+/** @param {Client} client */
+module.exports = client => {
+	const directoryPath = "../../slash_commands";
+	let commands = importCommands(directoryPath, false);
 
-		// prettier-ignore
-		for (let command of commands)
-			client.slashCommands.set(command.builder.name, command);
-	}
+	// prettier-ignore
+	for (let command of commands)
+		client.slashCommands.set(command.builder.name, command);
 };
