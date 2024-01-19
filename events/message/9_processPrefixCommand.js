@@ -38,7 +38,7 @@ function hasSpecialPermissions(guildMember, permissions) {
 /** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
 	name: "processPrefixCommand",
-	event: Events.MessageCreate,
+	eventType: Events.MessageCreate,
 
 	/** @param {Client} client @param {{message:Message}} args */
 	execute: async (client, args) => {

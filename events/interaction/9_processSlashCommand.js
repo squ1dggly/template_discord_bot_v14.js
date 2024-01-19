@@ -37,7 +37,7 @@ function hasSpecialPermissions(guildMember, permissions) {
 /** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
 	name: "processSlashCommand",
-	event: Events.InteractionCreate,
+	eventType: Events.InteractionCreate,
 
 	/** @param {Client} client @param {{interaction:BaseInteraction}} args */
 	execute: async (client, args) => {
