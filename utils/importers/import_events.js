@@ -19,7 +19,7 @@ function importEvents(path) {
 
 /** @param {Client} client */
 module.exports = client => {
-	const directoryPath = "../../events";
+	const directoryPath = "./events";
 
 	// Import event files
 	let events = importEvents(directoryPath);

@@ -24,7 +24,7 @@ function importCommands(path, recursive = false) {
 
 /** @param {Client} client */
 module.exports = client => {
-	const directoryPath = "../../prefix_commands";
+	const directoryPath = "./prefix_commands";
 	let commands = importCommands(directoryPath, true);
 
 	for (let command of commands) {
