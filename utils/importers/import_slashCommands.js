@@ -25,7 +25,7 @@ function importCommands(path, recursive = false) {
 /** @param {Client} client */
 module.exports = client => {
 	const directoryPath = "../../slash_commands";
-	let commands = importCommands(directoryPath, false);
+	let commands = importCommands(directoryPath, true);
 
 	// prettier-ignore
 	for (let command of commands)

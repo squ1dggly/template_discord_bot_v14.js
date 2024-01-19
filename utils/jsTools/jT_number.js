@@ -2,20 +2,19 @@ const _oT = require("./jT_object");
 
 /** Get the sum of an array of numbers, negative values are subtracted from the sum
  * @param {number[] | string[] | object[]} arr array to sum
- * @param {string} prop path to the nested property */
-function sum(arr, prop = "") {
-	prop = prop.trim();
+ * @param {string} path path to a nested array property to sum
+ * @param {boolean} ignoreNaN ignore non-numerical values and use 0 instead */
+function sum(arr, path = "", ignoreNaN = false) {
+	path = path.trim();
 
-	arr = arr
-		// Unwrap the wanted property from the array
-		.map(a => (prop ? +_oT.getProp(a, prop) : +a))
-		// Filter out non-numbers
-		.filter(num => !isNaN(num));
+	return arr.reduce((a, b) => {
+		let _b = path ? +_oT.getProp(b, path) : +b;
 
-	if (!arr.length) throw new Error("Provided array does not contain numbers");
+		if (isNaN(b) && !ignoreNaN) throw new TypeError(`\'${b}\' is not a valid number`);
 
-	// Add them together
-	return arr.reduce((a, b) => a + b);
+		// prettier-ignore
+		return _b < 0 ? (a - -_b) : a + (_b || 0);
+	});
 }
 
 // prettier-ignore
