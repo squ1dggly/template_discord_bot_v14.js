@@ -4,6 +4,7 @@ const jt = require("../../utils/jsTools");
 const config = { client: require("../../configs/config_client.json") };
 const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
+/** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
 	name: "setClientActivity",
 	eventType: Events.ClientReady,

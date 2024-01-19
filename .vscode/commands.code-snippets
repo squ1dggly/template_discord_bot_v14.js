@@ -1,7 +1,7 @@
 {
 	"Prefix Command": {
 		"scope": "javascript",
-		"prefix": "cmd",
+		"prefix": ";cmd",
 		"body": [
 			"const { Client, Message } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../utils/discordTools\");",
@@ -39,7 +39,7 @@
 
 	"Prefix Command (Perms)": {
 		"scope": "javascript",
-		"prefix": "cmd.perms",
+		"prefix": ";cmd.perms",
 		"body": [
 			"const { Client, PermissionFlagsBits, Message } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../utils/discordTools\");",
@@ -81,7 +81,7 @@
 
 	"Slash Command": {
 		"scope": "javascript",
-		"prefix": "slash",
+		"prefix": ";cmd.slash",
 		"body": [
 			"const { Client, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../utils/discordTools\");",
@@ -120,7 +120,7 @@
 
 	"Slash Command (Perms)": {
 		"scope": "javascript",
-		"prefix": "slash.perms",
+		"prefix": ";cmd.slash.perms",
 		"body": [
 			"const { Client, PermissionFlagsBits, CommandInteraction, SlashCommandBuilder } = require(\"discord.js\");",
 			"const { BetterEmbed } = require(\"../utils/discordTools\");",

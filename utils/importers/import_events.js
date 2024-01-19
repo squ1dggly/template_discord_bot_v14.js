@@ -12,7 +12,7 @@ function importEvents(path) {
 	for (let fn of files) events.push(require(`../.${path}/${fn}`));
 
 	// Filter out files that don't have an eventType property
-	events.filter(f => f.eventType);
+	events.filter(f => f.eventType !== undefined && f.enabled !== false);
 
 	return events;
 }

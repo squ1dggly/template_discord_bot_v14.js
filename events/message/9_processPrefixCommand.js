@@ -1,11 +1,9 @@
-/** @file Execute commands requested by a user message @author xsqu1znt */
+const { Client, Events, PermissionFlagsBits, GuildMember, Message, userMention } = require("discord.js");
+const { BetterEmbed } = require("../../utils/discordTools");
+const { guildManager } = require("../../utils/mongo");
+const logger = require("../../utils/logger");
 
-const { Client, PermissionFlagsBits, GuildMember, Message, userMention } = require("discord.js");
-const { BetterEmbed } = require("../../../utils/discordTools");
-const { guildManager } = require("../../../utils/mongo");
-const logger = require("../../../utils/logger");
-
-const config = { client: require("../../../configs/config_client.json") };
+const config = { client: require("../../configs/config_client.json") };
 
 /** @param {Message} message @param {string} commandName */
 function userIsBotAdminOrBypass(message, commandName) {
@@ -37,9 +35,10 @@ function hasSpecialPermissions(guildMember, permissions) {
 	return { has, missing, passed: has.length === permissions.length };
 }
 
+/** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
 	name: "processPrefixCommand",
-	event: "message_create",
+	event: Events.MessageCreate,
 
 	/** @param {Client} client @param {{message:Message}} args */
 	execute: async (client, args) => {
@@ -142,9 +141,7 @@ module.exports = {
 			});
 
 			// Let the user know an error occurred
-			embed_fatalError
-				.reply(args.message, { allowedMentions: { repliedUser: false } })
-				.catch(() => null);
+			embed_fatalError.reply(args.message, { allowedMentions: { repliedUser: false } }).catch(() => null);
 
 			// Log the error
 			return logger.error(

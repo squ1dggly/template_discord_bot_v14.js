@@ -6,6 +6,7 @@
 			"const { Client, Events, ${4:Message} } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.${2:MessageCreate},\n",
@@ -26,6 +27,7 @@
 			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.GuildCreate,\n",
@@ -46,6 +48,7 @@
 			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.GuildDelete,\n",
@@ -66,6 +69,7 @@
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.MessageCreate,\n",
@@ -86,6 +90,7 @@
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.MessageDelete,\n",
@@ -106,6 +111,7 @@
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.MessageUpdate,\n",
@@ -126,6 +132,7 @@
 			"const { Client, Events, BaseInteraction } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    event: Events.InteractionCreate,\n",
@@ -146,6 +153,7 @@
 			"const { Client, Events } = require(\"discord.js\");",
 			"const logger = require(\"../../../utils/logger\");\n",
 
+			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
 			"    eventType: Events.ClientReady,\n",

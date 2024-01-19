@@ -1,10 +1,8 @@
-/** @file Execute commands requested by a command interaction @author xsqu1znt */
+const { Client, Events, PermissionFlagsBits, GuildMember, BaseInteraction } = require("discord.js");
+const { BetterEmbed } = require("../../utils/discordTools/index.js");
+const logger = require("../../utils/logger.js");
 
-const { Client, PermissionFlagsBits, GuildMember, BaseInteraction } = require("discord.js");
-const { BetterEmbed } = require("../../../utils/discordTools");
-const logger = require("../../../utils/logger");
-
-const config = { client: require("../../../configs/config_client.json") };
+const config = { client: require("../../configs/config_client.json") };
 
 /** @param {BaseInteraction} interaction */
 function userIsBotAdminOrBypass(interaction) {
@@ -36,9 +34,10 @@ function hasSpecialPermissions(guildMember, permissions) {
 	return { has, missing, passed: has.length === permissions.length };
 }
 
+/** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
 	name: "processSlashCommand",
-	event: "interaction_create",
+	event: Events.InteractionCreate,
 
 	/** @param {Client} client @param {{interaction:BaseInteraction}} args */
 	execute: async (client, args) => {
