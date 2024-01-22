@@ -4,7 +4,7 @@
 		"prefix": ";event",
 		"body": [
 			"const { Client, Events, ${4:Message} } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -25,7 +25,7 @@
 		"prefix": ";event.guildCreate",
 		"body": [
 			"const { Client, Events, Guild } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -46,7 +46,7 @@
 		"prefix": ";event.guildDelete",
 		"body": [
 			"const { Client, Events, Guild } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -67,7 +67,7 @@
 		"prefix": ";event.messageCreate",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -88,7 +88,7 @@
 		"prefix": ";event.messageDelete",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -109,7 +109,7 @@
 		"prefix": ";event.messageUpdate",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -130,7 +130,7 @@
 		"prefix": ";event.interactionCreate",
 		"body": [
 			"const { Client, Events, BaseInteraction } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
@@ -151,7 +151,7 @@
 		"prefix": ";event.ready",
 		"body": [
 			"const { Client, Events } = require(\"discord.js\");",
-			"const logger = require(\"../../../utils/logger\");\n",
+			"const logger = require(\"../../utils/logger\");\n",
 
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
