@@ -1,5 +1,5 @@
 const { Client, Events, PermissionFlagsBits, GuildMember, Message, userMention } = require("discord.js");
-const { BetterEmbed } = require("../../utils/discordTools");
+const { BetterEmbed, markdown } = require("../../utils/discordTools/index.js");
 const { guildManager } = require("../../utils/mongo");
 const logger = require("../../utils/logger");
 const jt = require("../../utils/jsTools");
