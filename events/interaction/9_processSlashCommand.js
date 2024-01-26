@@ -1,6 +1,7 @@
 const { Client, Events, PermissionFlagsBits, GuildMember, BaseInteraction } = require("discord.js");
-const { BetterEmbed } = require("../../utils/discordTools/index.js");
+const { BetterEmbed } = require("../../utils/discordTools");
 const logger = require("../../utils/logger.js");
+const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
 

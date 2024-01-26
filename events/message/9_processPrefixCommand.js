@@ -2,6 +2,7 @@ const { Client, Events, PermissionFlagsBits, GuildMember, Message, userMention }
 const { BetterEmbed } = require("../../utils/discordTools");
 const { guildManager } = require("../../utils/mongo");
 const logger = require("../../utils/logger");
+const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
 
