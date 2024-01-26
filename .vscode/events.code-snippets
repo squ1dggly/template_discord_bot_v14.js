@@ -1,7 +1,7 @@
 {
 	"Client Event (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event",
+		"prefix": "event",
 		"body": [
 			"const { Client, Events, ${4:Message} } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -22,7 +22,7 @@
 
 	"Guild Create (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.guildCreate",
+		"prefix": "event.guildCreate",
 		"body": [
 			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -43,7 +43,7 @@
 
 	"Guild Delete (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.guildDelete",
+		"prefix": "event.guildDelete",
 		"body": [
 			"const { Client, Events, Guild } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -64,7 +64,7 @@
 
 	"Message Create (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.messageCreate",
+		"prefix": "event.messageCreate",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -85,7 +85,7 @@
 
 	"Message Delete (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.messageDelete",
+		"prefix": "event.messageDelete",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -106,7 +106,7 @@
 
 	"Message Update (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.messageUpdate",
+		"prefix": "event.messageUpdate",
 		"body": [
 			"const { Client, Events, Message } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -127,7 +127,7 @@
 
 	"Interaction Create (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.interactionCreate",
+		"prefix": "event.interactionCreate",
 		"body": [
 			"const { Client, Events, BaseInteraction } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
@@ -148,7 +148,7 @@
 
 	"Ready (EVENT)": {
 		"scope": "javascript",
-		"prefix": ";event.ready",
+		"prefix": "event.ready",
 		"body": [
 			"const { Client, Events } = require(\"discord.js\");",
 			"const logger = require(\"../../utils/logger\");\n",
