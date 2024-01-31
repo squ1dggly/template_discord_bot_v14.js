@@ -9,7 +9,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.${2:MessageCreate},\n",
+			"    eventType: Events.${2:MessageCreate},\n",
 
 			"    /** @param {Client} client @param {${4:Message}} ${3:message} */",
 			"    execute: async (client, ${3:message}) => {",
@@ -30,7 +30,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.GuildCreate,\n",
+			"    eventType: Events.GuildCreate,\n",
 
 			"    /** @param {Client} client @param {Guild} guild */",
 			"    execute: async (client, guild) => {",
@@ -51,7 +51,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.GuildDelete,\n",
+			"    eventType: Events.GuildDelete,\n",
 
 			"    /** @param {Client} client @param {Guild} guild */",
 			"    execute: async (client, guild) => {",
@@ -72,7 +72,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.MessageCreate,\n",
+			"    eventType: Events.MessageCreate,\n",
 
 			"    /** @param {Client} client @param {Message} message */",
 			"    execute: async (client, message) => {",
@@ -93,7 +93,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.MessageDelete,\n",
+			"    eventType: Events.MessageDelete,\n",
 
 			"    /** @param {Client} client @param {Message} message */",
 			"    execute: async (client, message) => {",
@@ -114,7 +114,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.MessageUpdate,\n",
+			"    eventType: Events.MessageUpdate,\n",
 
 			"    /** @param {Client} client @param {Message} before @param {Message} after */",
 			"    execute: async (client, before, after) => {",
@@ -135,7 +135,7 @@
 			"/** @type {import(\"../../configs/typedefs\").EventExports} */",
 			"module.exports = {",
 			"    name: \"${TM_FILENAME_BASE}\",",
-			"    event: Events.InteractionCreate,\n",
+			"    eventType: Events.InteractionCreate,\n",
 
 			"    /** @param {Client} client @param {BaseInteraction} interaction */",
 			"    execute: async (client, interaction) => {",
