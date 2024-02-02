@@ -16,7 +16,7 @@ const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
 /* - - - - - { Check for TOKEN } - - - - - */
 if (DEV_MODE && !TOKEN_DEV) return logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
-if (!TOKEN) return logger.error("TOKEN Missing", "TOKEN is not set");
+if (!TOKEN && !TOKEN_DEV) return logger.error("TOKEN Missing", "TOKEN is not set");
 
 // prettier-ignore
 // Let the user know if the bot's in dev mode
