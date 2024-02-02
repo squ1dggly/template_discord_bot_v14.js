@@ -22,7 +22,7 @@ const config = { client: require("../configs/config_client.json") };
 const TOKEN = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
 
-const DEVMODE = process.env.MODE || config.client.MODE === "DEV";
+const DEVMODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
 
 // Create an instance of the REST api
 const rest = new REST().setToken(DEVMODE ? TOKEN_DEV : TOKEN);
@@ -114,7 +114,7 @@ module.exports = {
 		// Iterate through each guild ID and remove slash commands
 		return await Promise.all(options.ids.map(id => rest
             .put(Routes.applicationGuildCommands(client.user.id, id), { body: [] })
-            .catch(err => logger.error(`Failed to remove slash commands", "type: local | guildID: ${id}`, err)
+            .catch(err => logger.error("Failed to remove slash commands", `type: local | guildID: ${id}`, err)
         )))
             .then(sucessful => {
                 // Get the number of guilds that were successfully registered
