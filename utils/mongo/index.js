@@ -22,7 +22,7 @@ module.exports = {
 	connect: async (uri = DEV_MODE ? MONGO_URI_DEV : MONGO_URI) => {
 		/* - - - - - { Check for MONGO_URI } - - - - - */
 		if (DEV_MODE && !MONGO_URI_DEV) return logger.error("MONGO_URI Missing", "DEV_MODE is enabled, but MONGO_URI_DEV is not set");
-		if (!MONGO_URI) return logger.error("MONGO_URI Missing", "MONGO_URI is not set");
+		if (!uri) return logger.error("MONGO_URI Missing", "MONGO_URI is not set");
 
 		// Try to connect to MongoDB
 		let connection = await new Promise((resolve, reject) => {
