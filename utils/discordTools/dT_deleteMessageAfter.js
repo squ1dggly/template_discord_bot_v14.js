@@ -10,7 +10,7 @@ async function deleteMesssageAfter(message, time = config.timeouts.ERROR_MESSAGE
 	time = jt.parseTime(time);
 
 	// Wait until the given time has passed
-	await jt.wait(time);
+	await jt.sleep(time);
 
 	if (!message.deletable) return null;
 	return await message.delete().catch(() => null);

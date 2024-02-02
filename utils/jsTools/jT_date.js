@@ -48,7 +48,7 @@ function parseTime(str, options) {
  * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
  * @property {boolean} ignorePast leaves out "ago" if the result is in the past
  * @property {boolean} nullIfPast returns `null` if `end` is before `start`
- * @property {number} decimalLimit limits the number of digits after the decimal point **|** `0` is default
+ * @property {number} decimalLimit limits the number of digits after the decimal point for times longer than 1 week **|** `0` is default
  */
 
 /** Parse the time difference between 2 unix timestamps into a human-readable string
@@ -78,16 +78,18 @@ function eta(unix, options) {
 		{ name: "seconds", amount: 60 },
 		{ name: "minutes", amount: 60 },
 		{ name: "hours", amount: 24 },
-		{ name: "days", amount: 168 },
+		{ name: "days", amount: 7 },
 		{ name: "weeks", amount: 4 },
 		{ name: "months", amount: 12 },
 		{ name: "years", amount: Number.POSITIVE_INFINITY }
 	];
 
 	// Divide the difference until we reach a result
-	let result = divisions.find(div => {
+	let result = divisions.find((div, idx) => {
 		if (difference < div.amount) return div;
-		difference = Math.abs(difference / div.amount).toFixed(options.decimalLimit);
+		difference = Math.abs(difference / div.amount).toFixed(
+			["milliseconds", "seconds", "minutes", "hours", "days"].includes(div) ? 0 : options.decimalLimit
+		);
 	});
 
 	// Grammar adjustment
