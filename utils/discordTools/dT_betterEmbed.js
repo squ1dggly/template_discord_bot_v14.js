@@ -346,16 +346,23 @@ class BetterEmbed extends EmbedBuilder {
 
 	#_parseOptions() {
 		/* - - - - - { Cleanup Shorthand Configurations } - - - - - */
+		// prettier-ignore
 		if (typeof this.options.author === "string")
 			this.options.author = { user: null, text: this.options.author, iconURL: null, linkURL: null };
+		else if (!this.options.author)
+			this.options.author = { user: null, text: null, iconURL: null, linkURL: null };
 
 		// prettier-ignore
 		if (typeof this.options.title === "string")
 			this.options.title = { text: this.options.title, linkURL: null };
+		else if (!this.options.title)
+			this.options.title = { text: null, linkURL: null };
 
 		// prettier-ignore
 		if (typeof this.options.footer === "string")
 			this.options.footer = { text: this.options.footer, iconURL: null };
+		else if (!this.options.footer)
+			this.options.footer = { text: null, iconURL: null };
 
 		// Add the interaction's member as the author's user if needed
 		if (!this.options.author.user && this.options.interaction)
