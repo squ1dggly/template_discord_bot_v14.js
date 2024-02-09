@@ -11,7 +11,7 @@ const config = { client: require("../../configs/config_client.json") };
 
 const MONGO_URI = process.env.MONGO_URI || config.client.MONGO_URI;
 const MONGO_URI_DEV = process.env.MONGO_URI_DEV || config.client.MONGO_URI_DEV;
-const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
+const DEV_MODE = process.env.DEV_MODE === "true" ? true : false || config.client.DEV_MODE || false;
 
 module.exports = {
 	models,

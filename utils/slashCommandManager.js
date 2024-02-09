@@ -22,10 +22,10 @@ const config = { client: require("../configs/config_client.json") };
 const TOKEN = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
 
-const DEVMODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
+const DEV_MODE = process.env.DEV_MODE === "true" ? true : false || config.client.DEV_MODE || false;
 
 // Create an instance of the REST api
-const rest = new REST().setToken(DEVMODE ? TOKEN_DEV : TOKEN);
+const rest = new REST().setToken(DEV_MODE ? TOKEN_DEV : TOKEN);
 
 module.exports = {
 	/** Push slash commands to one or more guilds

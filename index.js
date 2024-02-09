@@ -12,7 +12,7 @@ const config = { client: require("./configs/config_client.json") };
 
 const TOKEN = process.env.TOKEN || config.client.TOKEN;
 const TOKEN_DEV = process.env.TOKEN_DEV || config.client.TOKEN_DEV;
-const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
+const DEV_MODE = process.env.DEV_MODE === "true" ? true : false || config.client.DEV_MODE || false;
 
 /* - - - - - { Check for TOKEN } - - - - - */
 if (DEV_MODE && !TOKEN_DEV) return logger.error("TOKEN Missing", "DEV_MODE is enabled, but TOKEN_DEV is not set");
