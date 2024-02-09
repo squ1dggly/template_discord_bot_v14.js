@@ -1,3 +1,4 @@
+const _oT = require("./jT_object");
 const _aT = require("./jT_array");
 
 // prettier-ignore
@@ -85,28 +86,17 @@ function choiceIndex(arr) {
 }
 
 // prettier-ignore
-/** Choose a psuedo-random object from an array based on the object's "rarity" property
+/** Choose a psuedo-random object from an array based on an object's rarity property
  * @param {array} arr array of objects to choose from
- * @param {boolean} copy return a deep copy of the array using structuredClone() */
-function choiceWeighted(arr, clone = false) {
+ * @param {boolean} copy return a deep copy of the array using structuredClone()
+ * @param {string} prop nested rarity property */
+function choiceWeighted(arr, clone = false, prop = "rarity") {
 	/// Error handling
 	if (!Array.isArray(arr)) throw new TypeError("You must provide a valid array");
 
-	// Check if the object array has a "rarity" property
-	arr.forEach((obj, idx) => {
-		if ((obj?.rarity || obj?.Rarity) === (null || undefined))
-			throw new Error(`An element at index ${idx} does not have a \"rarity\" property`);
-
-		// Convert "rarity" into a valid number
-		let rarity = +arr[idx].rarity || +arr[idx].Rarity;
-		arr[idx].rarity = rarity; delete arr[idx].Rarity;
-
-		if (isNaN(obj.rarity)) throw new TypeError(`Rarity at index ${idx} is not a valid number`);
-	});
-
 	/// Determine the element to return    
     let weights = _aT.betterMap(arr, (obj, idx, last) => {
-        return obj.rarity + (last || 0)
+        return _oT.getProp(obj, prop) + (last || 0)
     });
 
 	// Generates a random float and multiplies it by the largest sum in the array of weights

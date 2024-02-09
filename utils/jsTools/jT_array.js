@@ -38,7 +38,7 @@ function chunk(arr, size, copy = false) {
 
 /** Filter out non-unique items from an array
  * @param {Array} arr array to filter
- * @param {string} prop a nested property within each item to filter by
+ * @param {string} prop nested property within each item to filter by
  * @param {boolean} copy return a deep copy of the array using structuredClone() */
 function unique(arr, prop = "", copy = false) {
 	let arr_new = [];
