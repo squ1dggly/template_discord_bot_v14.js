@@ -8,7 +8,7 @@ module.exports = {
 	description: "View a list of my commands",
 	category: "Utility",
 
-	options: { icon: "❓" },
+	options: { hidden: true },
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message, { prefix }) => {
@@ -24,7 +24,7 @@ module.exports = {
 
 		// Get the available categories
 		let command_categories = jt.unique(
-			commands.map(cmd => ({ name: cmd.category || "Miscellaneous", icon: cmd.categoryIcon || null })),
+			commands.map(cmd => ({ name: cmd.category || "Other", icon: cmd.categoryIcon || null })),
 			"name"
 		);
 
@@ -61,7 +61,7 @@ module.exports = {
 			if (_extra.length) _f += `\n${_extra.join("\n")}`;
 
 			// Push the formatted command to the main array
-			commands_f.push({ str: _f, name: cmd.name, category: cmd.category || "Miscellaneous" });
+			commands_f.push({ str: _f, name: cmd.name, category: cmd.category || "Other" });
 		}
 
 		// Create an array to store each group of embeds for each command category
@@ -75,7 +75,7 @@ module.exports = {
 			if (!_cmds.length) continue;
 
 			// Sort commands by alphabetical order
-			_cmds.sort((a, b) => a.name - b.name);
+			_cmds.sort((a, b) => a.name.localeCompare(b.name));
 
 			// Make it a max of 10 command per page
 			let _cmds_split = jt.chunk(_cmds, 10);

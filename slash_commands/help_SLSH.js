@@ -1,11 +1,11 @@
 const { Client, CommandInteraction, SlashCommandBuilder } = require("discord.js");
-const { BetterEmbed, EmbedNavigator } = require("../utils/discordTools");
-const jt = require("../utils/jsTools");
+const { BetterEmbed, EmbedNavigator } = require("../../utils/discordTools");
+const jt = require("../../utils/jsTools");
 
-/** @type {import("../configs/typedefs").SlashCommandExports} */
+/** @type {import("../../configs/typedefs").SlashCommandExports} */
 module.exports = {
 	category: "Utility",
-	options: { icon: "❓" },
+	options: { hidden: true },
 
 	// prettier-ignore
 	builder: new SlashCommandBuilder().setName("help")
@@ -22,12 +22,12 @@ module.exports = {
 
 		// Get the available categories
 		let command_categories = jt.unique(
-			commands.map(cmd => ({ name: cmd.category || "Miscellaneous", icon: cmd.categoryIcon || null })),
+			commands.map(cmd => ({ name: cmd.category || "Other", icon: cmd.categoryIcon || null })),
 			"name"
 		);
 
 		// Sort the categories alphabetically
-		command_categories.sort((a, b) => a.name - b.name);
+		command_categories.sort((a, b) => a.name.localeCompare(b.name));
 
 		// Parse slash commands into a readable format
 		let commands_f = [];
@@ -50,7 +50,7 @@ module.exports = {
 			if (_extra.length) _f += `\n${_extra.join("\n")}`;
 
 			// Push the formatted command to the main array
-			commands_f.push({ str: _f, name: cmd.builder.name, category: cmd.category || "Miscellaneous" });
+			commands_f.push({ str: _f, name: cmd.builder.name, category: cmd.category || "Other" });
 		}
 
 		// Create an array to store each group of embeds for each command category
@@ -64,7 +64,7 @@ module.exports = {
 			if (!_cmds.length) continue;
 
 			// Sort commands by alphabetical order
-			_cmds.sort((a, b) => a.name - b.name);
+			_cmds.sort((a, b) => a.name.localeCompare(b.name));
 
 			// Make it a max of 10 command per page
 			let _cmds_split = jt.chunk(_cmds, 10);
