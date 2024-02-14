@@ -119,7 +119,7 @@ module.exports = {
             .then(sucessful => {
                 // Get the number of guilds that were successfully registered
                 let sucessful_count = sucessful.filter(s => s).length;
-                logger.success(`slash commands registered for ${sucessful_count} ${sucessful_count === 1 ? "guild" : "guilds"} (local)`)
+                logger.success(`slash commands removed for ${sucessful_count} ${sucessful_count === 1 ? "guild" : "guilds"} (local)`)
             }).catch(err => logger.error("Failed to remove slash commands", "type: local", err));
 	},
 
