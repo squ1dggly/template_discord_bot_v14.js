@@ -9,11 +9,14 @@ const config = require("./dT_config.json");
 async function deleteMesssageAfter(message, time = config.timeouts.ERROR_MESSAGE) {
 	time = jt.parseTime(time);
 
+	// Make sure the message object's resolved
+	let _msg = await Promise.resolve(message);
+
 	// Wait until the given time has passed
 	await jt.sleep(time);
 
-	if (!message.deletable) return null;
-	return await message.delete().catch(() => null);
+	if (!_msg?.deletable) return null;
+	return await _msg.delete().catch(() => null);
 }
 
 module.exports = deleteMesssageAfter;
