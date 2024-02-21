@@ -7,16 +7,16 @@ const _oT = require("./jT_object");
 function sum(arr, path = "", ignoreNaN = false) {
 	path = path.trim();
 
-	return arr.reduce((a, b) => {
-		let _b = path ? +_oT.getProp(b, path) : +b;
+	let _arr = path ? arr.map(a => Number(_oT.getProp(a, path))) : arr;
 
-		let invalid = isNaN(_b);
+	return _arr.reduce((a, b) => {
+		let invalid = isNaN(b);
 
-		if (invalid && !ignoreNaN) throw new TypeError(`\'${_b}\' is not a valid number`);
-		if (invalid && ignoreNaN) _b = 0;
+		if (invalid && !ignoreNaN) throw new TypeError(`\'${b}\' is not a valid number`);
+		if (invalid && ignoreNaN) b = 0;
 
 		// prettier-ignore
-		return _b < 0 ? (a - -_b) : a + (_b || 0);
+		return b < 0 ? (a - -b) : a + (b || 0);
 	});
 }
 
