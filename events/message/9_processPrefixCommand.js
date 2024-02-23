@@ -51,7 +51,7 @@ module.exports = {
 		if (!message.guild.members.me.permissionsIn(message.channel).has(PermissionFlagsBits.SendMessages)) return;
 
 		/* - - - - - { Check for Prefix } - - - - - */
-		let prefix = (await guildManager.fetchPrefix(message.guild.id)) || null;
+		let prefix = await guildManager.fetchPrefix(message.guild.id);
 
 		// Check if the message started with the prefix
 		let prefixWasUsed = message.content.toLowerCase().startsWith(prefix);
