@@ -88,9 +88,9 @@ function choiceIndex(arr) {
 // prettier-ignore
 /** Choose a psuedo-random object from an array based on an object's rarity property
  * @param {array} arr array of objects to choose from
- * @param {boolean} copy return a deep copy of the array using structuredClone()
- * @param {string} prop nested rarity property */
-function choiceWeighted(arr, clone = false, prop = "rarity") {
+ * @param {string} prop nested rarity property
+ * @param {boolean} copy return a deep copy of the array using structuredClone() */
+function choiceWeighted(arr, prop = "rarity", clone = false) {
 	/// Error handling
 	if (!Array.isArray(arr)) throw new TypeError("You must provide a valid array");
 
