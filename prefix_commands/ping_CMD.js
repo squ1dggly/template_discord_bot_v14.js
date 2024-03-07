@@ -5,7 +5,7 @@ const { ping } = require("../utils/mongo");
 module.exports = {
 	name: "ping",
 	description: "Check my ping",
-	category: "Miscellaneous",
+	category: "Other",
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message) => {
