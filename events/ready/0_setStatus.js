@@ -2,7 +2,7 @@ const { Client, Events, ActivityType } = require("discord.js");
 const jt = require("../../utils/jsTools");
 
 const config = { client: require("../../configs/config_client.json") };
-const DEV_MODE = process.env.DEV_MODE || config.client.DEV_MODE || false;
+const DEV_MODE = process.env.DEV_MODE === "true" ? true : false || config.client.DEV_MODE || false;
 
 /** @type {import("../../configs/typedefs.js").EventExports} */
 module.exports = {
