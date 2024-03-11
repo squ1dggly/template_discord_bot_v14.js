@@ -11,10 +11,15 @@ module.exports = {
 
 	/** @param {Client} client  */
 	execute: async client => {
+		let clientStatus = DEV_MODE ? config.client.client_status.dev : config.client.client_status.default;
+
+		let activityIndex = 0;
 		let lastActivity = null;
 
-		const setStatus = data => {
-			let _data = structuredClone(data);
+		const parseStatusData = async () => {
+			let _data = clientStatus?.RANDOM_ACTIVITY
+				? jt.choice(clientStatus.ACTIVITY)
+				: structuredClone(clientStatus.ACTIVITY[activityIndex]);
 
 			// prettier-ignore
 			// Replace data.activity.TYPE with the proper ActivityType enum
@@ -27,42 +32,55 @@ module.exports = {
 				case "competing": _data.TYPE = ActivityType.Competing; break;
 			}
 
-			// Formatting
-			_data.NAME = _data.NAME.replace("$GUILD_COUNT", jt.format(client.guilds.cache.size));
+			/* - - - - - { Formatting } - - - - - */
+			// prettier-ignore
+			_data.NAME = _data.NAME
+				.replace("$USER_COUNT", jt.format(client.users.cache.size))
+				.replace("$GUILD_COUNT", jt.format(client.guilds.cache.size))
+				.replace("$INVITE", config.client.support_server.INVITE_URL);
+
+			// prettier-ignore
+			if (_data.NAME.includes("$SUPPORT_SERVER_MEMBER_COUNT")) {
+				await client.guilds.fetch(config.client.support_server.GUILD_ID).then(guild => {
+					if (!guild) return _data.NAME = _data.NAME.replace("$SUPPORT_SERVER_MEMBER_COUNT", 0);
+
+					// Guild member count
+					_data.NAME = _data.NAME.replace("$SUPPORT_SERVER_MEMBER_COUNT", jt.format(guild.members.cache.size));
+				}).catch(err => console.log("Failed to fetch the support server for client status", err));
+			}
+
+			// Avoid duplicates if RANDOM is enabled
+			if (clientStatus?.RANDOM && !lastActivity?.NAME === _data.NAME) return await parseStatusData();
+
+			// Increment activity index
+			if (!clientStatus?.RANDOM)
+				if (activityIndex < clientStatus.ACTIVITY.length - 1) activityIndex++;
+				else activityIndex = 0;
+
+			// Cache the last activity
+			lastActivity = _data;
+
+			return _data;
+		};
+
+		const setStatus = async () => {
+			let _data = await parseStatusData();
 
 			// Set the status
-			// checking if the new status is different to avoid rate limiting
-			if (_data.STATUS !== lastActivity?.STATUS) client.user.setStatus(_data.STATUS);
+			client.user.setStatus(_data.STATUS);
 			// Set the activity
 			client.user.setActivity({ type: _data.TYPE, name: _data.NAME, url: _data?.STREAM_URL || undefined });
 
-			// Cache the activity
-			lastActivity = _data;
+			if (clientStatus?.INTERVAL) {
+				// Sleep
+				await jt.sleep(jt.parseTime(clientStatus.INTERVAL));
+
+				// Run it back
+				return await setStatus();
+			}
 		};
 
-		let clientStatus = DEV_MODE ? config.client.client_status.dev : config.client.client_status.default;
-
-		// Randomize status
-		if (clientStatus?.INTERVAL) {
-			// Apply the status ASAP
-			setStatus(jt.choice(clientStatus.ACTIVITY));
-
-			// Create an interval to change the client's status every interval
-			setInterval(() => {
-				// Pick a random activity
-				let _activity = jt.choice(clientStatus.ACTIVITY);
-
-				// prettier-ignore
-				// Avoid duplicates
-				if (lastActivity) while (_activity.NAME === lastActivity?.NAME)
-					_activity = jt.choice(clientStatus.ACTIVITY);
-
-				// Apply the status
-				setStatus(_activity);
-			}, jt.parseTime(clientStatus.INTERVAL));
-		} else {
-			// Apply the status
-			setStatus(clientStatus.ACTIVITY);
-		}
+		// Set the client's status
+		return await setStatus();
 	}
 };

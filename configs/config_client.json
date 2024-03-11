@@ -23,6 +23,7 @@
 	"client_status": {
 		"default": {
 			"INTERVAL": "1m",
+			"RANDOM_ACTIVITY": false,
 
 			"ACTIVITY": [
 				{ "STATUS": "online", "TYPE": "CUSTOM", "NAME": "Need any help? Use /help or !help" },
