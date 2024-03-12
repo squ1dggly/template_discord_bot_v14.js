@@ -17,9 +17,11 @@ module.exports = {
 		let lastActivity = null;
 
 		const parseStatusData = async () => {
-			let _data = clientStatus?.RANDOM_ACTIVITY
-				? jt.choice(clientStatus.ACTIVITY)
-				: structuredClone(clientStatus.ACTIVITY[activityIndex]);
+			let _data = clientStatus.ACTIVITY?.length
+				? clientStatus?.RANDOM_ACTIVITY
+					? jt.choice(clientStatus.ACTIVITY)
+					: structuredClone(clientStatus.ACTIVITY[activityIndex])
+				: clientStatus.ACTIVITY;
 
 			// prettier-ignore
 			// Replace data.activity.TYPE with the proper ActivityType enum
