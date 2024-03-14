@@ -16,7 +16,7 @@ function userIsBotAdminOrBypass(interaction) {
 
 /** @param {BaseInteraction} interaction */
 function userIsGuildAdminOrBypass(interaction) {
-	let isAdmin = interaction.member.permissions.has(PermissionFlagsBits.Flags.Administrator);
+	let isAdmin = interaction.member.permissions.has(PermissionFlagsBits.Administrator);
 	let canBypass = userIsBotAdminOrBypass(interaction);
 
 	return isAdmin || canBypass;
