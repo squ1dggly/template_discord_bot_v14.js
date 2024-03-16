@@ -1,10 +1,3 @@
-/** @typedef eta_options
- * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
- * @property {boolean} ignorePast leaves out "ago" if the result is in the past
- * @property {boolean} nullIfPast returns `null` if `end` is before `start`
- * @property {number} decimalLimit limits the number of digits after the decimal point for times longer than 1 week **|** `0` is default
- */
-
 const _nT = require("./jT_number");
 
 /** @typedef parse_options
@@ -68,6 +61,12 @@ function parseTime(str, options) {
 	return sum;
 }
 
+/** @typedef eta_options
+ * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
+ * @property {boolean} ignorePast leaves out "ago" if the result is in the past
+ * @property {boolean} nullIfPast returns `null` if `end` is before `start`
+ * @property {number} decimalLimit limits the number of digits after the decimal point for times longer than 1 week **|** `0` is default */
+
 /** Parse the time difference between 2 unix timestamps into a human-readable string
  * @param {number|string} unix in milliseconds
  * @param {eta_options} options
@@ -90,6 +89,7 @@ function eta(unix, options) {
 	if (!difference && options.nullIfPast) return null;
 	if (!difference) return "now";
 
+	/* - - - - - { Preform Calculations } - - - - - */
 	let divisions = [
 		{ name: "milliseconds", amount: 1000 },
 		{ name: "seconds", amount: 60 },
@@ -115,18 +115,23 @@ function eta(unix, options) {
 	return `${difference} ${result.name}${isPast && !options.ignorePast ? " ago" : ""}`;
 }
 
-/** Parse the time difference between 2 unix timestamps into a dynamic "H, M, S" string
+/** @typedef etaHMS_options
+ * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
+ * @property {boolean} ignorePast leaves out "ago" if the result is in the past
+ * @property {boolean} nullIfPast returns `null` if `end` is before `start` */
+
+/** Parse the time difference between 2 unix timestamps into a dynamic "H, M, S" format
  * @param {number|string} unix in milliseconds
  * @param {eta_options} options
  *
  * @example
  * eta(1703001733955) // returns "1 hour, 0 minutes, 0 seconds" (from now)
  * eta(1702994533936, { nullIfPast: true }) // returns null */
-function eta_HMS(unix, options) {
+function etaHMS(unix, options) {
 	unix = Number(unix);
 	if (isNaN(unix)) throw new Error("unix must be a number or string");
 
-	options = { since: Date.now(), ignorePast: false, nullIfPast: false, decimalLimit: 0, ...options };
+	options = { since: Date.now(), ignorePast: false, nullIfPast: false, ...options };
 
 	/// Get the difference between the 2 times
 	let isPast = unix - options.since < 0;
@@ -137,7 +142,7 @@ function eta_HMS(unix, options) {
 	if (!difference && options.nullIfPast) return null;
 	if (!difference) return "now";
 
-	/* - - - - - { Calculate } - - - - - */
+	/* - - - - - { Preform Calculations } - - - - - */
 	let seconds = _nT.msToSec(difference);
 
 	let h = Math.floor(seconds / 3600);
@@ -157,4 +162,4 @@ function eta_HMS(unix, options) {
 	return result.join(", ");
 }
 
-module.exports = { parseTime, eta, eta_HMS };
+module.exports = { parseTime, eta, etaHMS };
