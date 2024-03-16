@@ -1,3 +1,10 @@
+/** @typedef eta_options
+ * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
+ * @property {boolean} ignorePast leaves out "ago" if the result is in the past
+ * @property {boolean} nullIfPast returns `null` if `end` is before `start`
+ * @property {number} decimalLimit limits the number of digits after the decimal point for times longer than 1 week **|** `0` is default
+ */
+
 const _nT = require("./jT_number");
 
 /** @typedef parse_options
@@ -61,22 +68,15 @@ function parseTime(str, options) {
 	return sum;
 }
 
-/** @typedef eta_options
- * @property {number|string} since the anchor to go off of, a unix timestamp in milliseconds **|** `Date.now()` is default
- * @property {boolean} ignorePast leaves out "ago" if the result is in the past
- * @property {boolean} nullIfPast returns `null` if `end` is before `start`
- * @property {number} decimalLimit limits the number of digits after the decimal point for times longer than 1 week **|** `0` is default
- */
-
 /** Parse the time difference between 2 unix timestamps into a human-readable string
- * @param {number|string} unix
+ * @param {number|string} unix in milliseconds
  * @param {eta_options} options
  *
  * @example
  * eta(1703001733955) // returns "1 hour" (from now)
  * eta(1702994533936, { nullIfPast: true }) // returns null */
 function eta(unix, options) {
-	unix = +unix;
+	unix = Number(unix);
 	if (isNaN(unix)) throw new Error("unix must be a number or string");
 
 	options = { since: Date.now(), ignorePast: false, nullIfPast: false, decimalLimit: 0, ...options };
@@ -115,4 +115,46 @@ function eta(unix, options) {
 	return `${difference} ${result.name}${isPast && !options.ignorePast ? " ago" : ""}`;
 }
 
-module.exports = { parseTime, eta };
+/** Parse the time difference between 2 unix timestamps into a dynamic "H, M, S" string
+ * @param {number|string} unix in milliseconds
+ * @param {eta_options} options
+ *
+ * @example
+ * eta(1703001733955) // returns "1 hour, 0 minutes, 0 seconds" (from now)
+ * eta(1702994533936, { nullIfPast: true }) // returns null */
+function eta_HMS(unix, options) {
+	unix = Number(unix);
+	if (isNaN(unix)) throw new Error("unix must be a number or string");
+
+	options = { since: Date.now(), ignorePast: false, nullIfPast: false, decimalLimit: 0, ...options };
+
+	/// Get the difference between the 2 times
+	let isPast = unix - options.since < 0;
+	if (options.nullIfPast && isPast) return null;
+
+	let difference = Math.abs(unix - options.since);
+	/// Return if there's no difference
+	if (!difference && options.nullIfPast) return null;
+	if (!difference) return "now";
+
+	/* - - - - - { Calculate } - - - - - */
+	let seconds = _nT.msToSec(difference);
+
+	let h = Math.floor(seconds / 3600);
+	let m = Math.floor((seconds % 3600) / 60);
+	let s = Math.floor((seconds % 3600) % 60);
+
+	let h_f = h > 0 ? `${h} ${h === 1 ? "hour" : "hours"}` : "";
+	let m_f = h > 0 ? `${m} ${m === 1 ? "minute" : "minutes"}` : "";
+	let s_f = h > 0 ? `${s} ${s === 1 ? "second" : "seconds"}` : "";
+
+	let result = [];
+
+	if (h) result.push(h_f);
+	if (m) result.push(m_f);
+	if (s) result.push(s_f);
+
+	return result.join(", ");
+}
+
+module.exports = { parseTime, eta, eta_HMS };
