@@ -120,9 +120,9 @@ function eta(unix, options) {
  * @property {boolean} ignorePast leaves out "ago" if the result is in the past
  * @property {boolean} nullIfPast returns `null` if `end` is before `start` */
 
-/** Parse the time difference between 2 unix timestamps into a dynamic "H, M, S" format
+/** Parse the time difference between 2 unix timestamps into a dynamic "H, M, and S" format
  * @param {number|string} unix in milliseconds
- * @param {eta_options} options
+ * @param {etaHMS_options} options
  *
  * @example
  * eta(1703001733955) // returns "1 hour, 0 minutes, 0 seconds" (from now)
@@ -159,7 +159,10 @@ function etaHMS(unix, options) {
 	if (m) result.push(m_f);
 	if (s) result.push(s_f);
 
-	return result.join(", ");
+	// Grammar adjustment
+	if (result.length > 1) result.splice(-1, 0, "&");
+
+	return result.join(", ").replace("&,", "and");
 }
 
 module.exports = { parseTime, eta, etaHMS };
