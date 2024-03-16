@@ -125,7 +125,7 @@ function eta(unix, options) {
  * @param {etaHMS_options} options
  *
  * @example
- * eta(1703001733955) // returns "1 hour, 0 minutes, 0 seconds" (from now)
+ * eta(1703001733955) // returns "1 hour, 0 minutes, and 0 seconds" (from now)
  * eta(1702994533936, { nullIfPast: true }) // returns null */
 function etaHMS(unix, options) {
 	unix = Number(unix);
