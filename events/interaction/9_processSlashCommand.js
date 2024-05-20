@@ -1,4 +1,5 @@
-const { Client, Events, PermissionFlagsBits, GuildMember, BaseInteraction } = require("discord.js");
+// prettier-ignore
+const { Client, Events, PermissionFlagsBits, GuildMember, BaseInteraction, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require("discord.js");
 const { BetterEmbed, markdown } = require("../../utils/discordTools/index.js");
 const logger = require("../../utils/logger.js");
 const jt = require("../../utils/jsTools");
@@ -7,11 +8,11 @@ const config = { client: require("../../configs/config_client.json") };
 
 /** @param {BaseInteraction} interaction */
 function userIsBotAdminOrBypass(interaction) {
-	return [
-		config.client.OWNER_ID,
-		...config.client.ADMIN_IDS,
-		...(config.client.admin_bypass_ids[interaction.commandName] || [])
-	].includes(interaction.user.id);
+	let bypass = config.client.admin_bypass.find(b => b.COMMAND_NAME === interaction.commandName) || null;
+
+	return [config.client.OWNER_ID, ...config.client.ADMIN_IDS, ...(bypass ? bypass.USER_IDS : [])].includes(
+		interaction.user.id
+	);
 }
 
 /** @param {BaseInteraction} interaction */
@@ -42,21 +43,21 @@ module.exports = {
 
 	/** @param {Client} client @param {BaseInteraction} interaction */
 	execute: async (client, interaction) => {
-		// prettier-ignore
-		// Filter out DM interactions
-		if (!interaction.guildId) return interaction.reply({
-			content: "Commands cannot be used in DMs.", ephemeral: true
-		});
+		if (!interaction.commandName || !interaction.isCommand()) return;
 
-		// Filter out non-guild and non-command interactions
-		if (!interaction.guild || !interaction.isCommand()) return;
+		let slashCommand = client.slashCommands.all.get(interaction.commandName) || null;
 
-		// Get the slash command function from the client if it exists
-		let slashCommand = client.slashCommands.get(interaction.commandName) || null;
 		// prettier-ignore
+		// Slash command not found
 		if (!slashCommand) return await interaction.reply({
 			content: `\`/${interaction.commandName}\` is not a command.`
-        });
+		}).catch(() => null);
+
+		// prettier-ignore
+		// Check if the slash command is guild Only
+		if (slashCommand?.options?.guildOnly && !interaction.guildId) return interaction.reply({
+			content: "This command cannot be used outside of a guild.", ephemeral: true
+		});
 
 		/* - - - - - { Parse Prefix Command } - - - - - */
 		try {
@@ -73,17 +74,15 @@ module.exports = {
 				// Check if the command requires the user to be an admin for the bot
 				if (botAdminOnly && !userIsBotAdminOrBypass(interaction)) return await new BetterEmbed({
 					color: "Red",
-					interaction: interaction,
-					description: `Only the developers of ${client.user} can use that command.`
-				}).send({ ephemeral: true });
+					description: `Only the developers of ${client.user} can use this command.`
+				}).send(interaction, { ephemeral: true });
 
 				// prettier-ignore
 				// Check if the command requires the user to have admin permission in the current guild
 				if (guildAdminOnly && !userIsGuildAdminOrBypass(interaction)) return await new BetterEmbed({
 					color: "Red",
-					interaction: interaction,
-					description: "You need admin to use that command."
-				}).send({ ephemeral: true });
+					description: "You need admin to use this command."
+				}).send(interaction, { ephemeral: true });
 
 				// Check if the user has the required permissions
 				if (specialUserPerms) {
@@ -92,10 +91,9 @@ module.exports = {
 					// prettier-ignore
 					if (!_specialUserPerms.passed) return await new BetterEmbed({
 						color: "Red",
-						interaction: interaction,
 						title: `User Missing ${_specialUserPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description:  _specialUserPerms.missing.join(", ")
-					}).send();
+					}).send(interaction);
 				}
 
 				// Check if the bot has the required permissions
@@ -105,10 +103,9 @@ module.exports = {
 					// prettier-ignore
 					if (!_specialBotPerms.passed) return await new BetterEmbed({
 						color: "Red",
-						interaction: interaction,
-						title: `Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
+						title: `Bot Missing ${_specialBotPerms.missing.length === 1 ? "Permission" : "Permissions"}`,
 						description: _specialBotPerms.missing.join(", ")
-					}).send();
+					}).send(interaction);
 				}
 
 				// prettier-ignore
@@ -117,25 +114,48 @@ module.exports = {
 			}
 
 			/* - - - - - { Execute } - - - - - */
-			// prettier-ignore
 			return await slashCommand.execute(client, interaction).then(async message => {
 				// TODO: run code here after the command is finished
 			});
 		} catch (err) {
-			// Create the embed :: { FATAL ERROR }
-			let embed_fatalError = new BetterEmbed({
-				interaction: interaction,
-				title: "⛔ Oh no!",
-				description: `An error occurred while using the **/\`${interaction.commandName}\`** command.`
-			});
+			if (config.client.support_server.INVITE_URL) {
+				// Create the embed :: { FATAL ERROR }
+				let embed_fatalError = new BetterEmbed({
+					title: "⛔ Oh no!",
+					description: `An error occurred while using the **/\`${interaction.commandName}\`** command.`
+				});
 
-			// Let the user know an error occurred
-			embed_fatalError.send({ ephemeral: true }).catch(() => null);
+				// Let the user know an error occurred
+				embed_fatalError.send(interaction, { ephemeral: true });
+			} else {
+				// Create a button :: { SUPPORT SERVER }
+				let btn_supportServer = new ButtonBuilder()
+					.setStyle(ButtonStyle.Link)
+					.setURL(config.client.support_server.INVITE_URL)
+					.setLabel("Support Server");
 
-			// Log the error
+				// Create an action row :: { SUPPORT SERVER }
+				let aR_supportServer = new ActionRowBuilder().setComponents(btn_supportServer);
+
+				// Create the embed :: { FATAL ERROR }
+				let embed_fatalError = new BetterEmbed({
+					color: "Red",
+					title: "⛔ Ruh-roh raggy!",
+					description: `An error occurred while using the **/\`${interaction.commandName}\`** command.\nYou should probably report this unfortunate occurrence somewhere.`,
+					footer: "but frankly, I'd rather you didn't"
+				});
+
+				// Let the user know an error occurred
+				embed_fatalError.send(interaction, {
+					components: interaction.guild.id !== config.client.support_server.GUILD_ID ? aR_supportServer : [],
+					ephemeral: true
+				});
+			}
+
+			// Log the error to the console
 			return logger.error(
 				"Could not execute command",
-				`SLSH_CMD: /${interaction.commandName} | guildID: ${interaction.guild.id} | userID: ${interaction.user.id}`,
+				`SLSH_CMD: /${interaction.commandName} | guildID: '${interaction.guild.id}' | userID: '${interaction.user.id}'`,
 				err
 			);
 		}

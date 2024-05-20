@@ -14,7 +14,7 @@ module.exports = {
 	/** @param {Client} client @param {CommandInteraction} interaction */
 	execute: async (client, interaction) => {
 		// Get the current slash commands and filter out ones that are set to be hidden
-		let commands = [...client.slashCommands.values()].filter(cmd => !cmd?.options?.hidden);
+		let commands = [...client.slashCommands.all.values()].filter(cmd => !cmd?.options?.hidden);
 
 		// Check if there's available commands
 		if (!commands.length)

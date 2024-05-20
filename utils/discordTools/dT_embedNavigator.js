@@ -1,61 +1,72 @@
 /** @typedef {"short"|"shortJump"|"long"|"longJump"} PaginationType */
 
 /** @typedef eN_paginationOptions
- * @property {PaginationType} type
- * @property {boolean} useReactions
- * @property {boolean} dynamic */
-
-/** @typedef eN_options
- * @property {CommandInteraction} interaction
- * @property {Message} message
- * @property {TextChannel} channel
- * @property {GuildMember|User|Array<GuildMember|User>} users extra users that are allowed to use the navigator
- * @property {EmbedBuilder|BetterEmbed} embeds can be an array/contain nested arrays
- * @property {boolean} selectMenuEnabled
- * @property {eN_paginationOptions} pagination
- * @property {number|string|null} timeout set to `null` to never timeout */
+ * @property {PaginationType} type The type of navigation.
+ * @property {boolean} useReactions Whether to use reactions instead of buttons.
+ * @property {boolean} dynamic Whether to dynamically add the `Page Jump` button only when needed. */
 
 /** @typedef eN_selectMenuOptionData
- * @property {string} emoji
- * @property {string} label
- * @property {string} description
- * @property {string} value
- * @property {string} isDefault */
+ * @property {string} emoji The emoji to be displayed to the left of the option.
+ * @property {string} label The main text to be displayed.
+ * @property {string} description The description to be displayed.
+ * @property {string} value The index of the option.
+ * @property {string} isDefault Whether this is the default option. */
+
+/** @typedef eN_options
+ * @property {GuildMember|User|Array<GuildMember|User>} userAccess Other users that are allowed to use the navigator. ***(optional)***
+ * @property {EmbedBuilder|BetterEmbed} embeds The embeds to paginate through.
+ * @property {boolean} selectMenuEnabled Enables the select menu.
+ *
+ * *Only visible if options are added.*
+ * @property {eN_paginationOptions} pagination Pagination configuration options.
+ * @property {number|string|null} timeout How long to wait before timing out. Use `null` to never timeout.
+ *
+ * This utilizes `jsTools.parseTime()`, letting you also use "10s", "1m", or "1m 30s" for example. */
 
 /** @typedef eN_sendOptions
- * @property {import("./dT_dynaSend").SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
- * @property {import("discord.js").MessageMentionOptions} allowedMentions
- * @property {boolean} deleteAfter
- * @property {boolean} ephemeral */
-
-/** @typedef eN_replyOptions
- * @property {import("discord.js").MessageMentionOptions} allowedMentions
- * @property {boolean} deleteAfter
- * @property {boolean} ephemeral */
-
-const config = require("./dT_config.json");
+ * @property {ActionRowBuilder|ActionRowBuilder[]} components The components to send with the embed
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions The allowed mentions of the message.
+ * @property {import("./dT_dynaSend").SendMethod} sendMethod The method to send the embed.
+ *
+ * **1.** By default, "reply" is used if a `CommandInteraction` is provided as the handler. If "reply" fails, "editReply" is used.
+ *
+ * **2.** By default, "sendToChannel" is used if a `Channel` is provided as the handler.
+ *
+ * **3.** By default, "messageReply" is used if a `Message` is provided as the handler.
+ * @property {boolean} ephemeral If the message should be ephemeral. This only works for the "reply" `SendMethod`.
+ * @property {number|string} deleteAfter The amount of time to wait in **MILLISECONDS** before deleting the message. */
 
 // prettier-ignore
-const {
-    CommandInteraction, TextChannel, GuildMember, User,
-    Message, InteractionCollector, ReactionCollector, ComponentType,
-    EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle
-} = require("discord.js");
+const { CommandInteraction, GuildMember, User, Message, InteractionCollector, ReactionCollector, ComponentType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const deleteMesssageAfter = require("./dT_deleteMessageAfter");
 const BetterEmbed = require("./dT_betterEmbed");
 const dynaSend = require("./dT_dynaSend");
 
-const jt = require("../jsTools");
 const logger = require("../logger");
+const jt = require("../jsTools");
 
-/// Global Variables
-// Get thhe name of each pagination reaction
+const config = require("./dT_config.json");
+
+// Get the name of each pagination reaction
 // this will be used as a filter when getting the current reactions from the message
-const allPaginationReactionNames = Object.values(config.navigator.buttons).map(btnData => btnData.emoji.NAME);
+const paginationReactionNames = Object.values(config.navigator.buttons).map(data => data.emoji.NAME);
+
+function createButton(data, id) {
+	let button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: id });
+
+	if (data.TEXT) button.setLabel(data.TEXT);
+	else if (data.emoji.ID) button.setEmoji(data.emoji.ID);
+	else
+		throw new Error(
+			"[EmbedNavigator>createButton] You must provide text or an emoji ID for this navigator button in '_dT_config.json'."
+		);
+
+	return button;
+}
 
 class EmbedNavigator {
-	/// -- Configuration --
-	#_updatePage() {
+	/* - - - - - { Configuration } - - - - - */
+	#_configurePage() {
 		/// Clamp page index :: { CURRENT }
 		if (this.data.pages.idx.current < 0)
 			this.data.pages.idx.current = jt.clamp(this.options.embeds.length - 1, { min: 0 });
@@ -63,8 +74,8 @@ class EmbedNavigator {
 
 		/// Clamp page index :: { NESTED }
 		if (this.data.pages.idx.nested < 0)
-			this.data.pages.idx.nested = jt.clamp(this.data.pages.nested_length - 1, { min: 0 });
-		if (this.data.pages.idx.nested > this.data.pages.nested_length - 1) this.data.pages.idx.nested = 0;
+			this.data.pages.idx.nested = jt.clamp(this.data.pages.nestedLength - 1, { min: 0 });
+		if (this.data.pages.idx.nested > this.data.pages.nestedLength - 1) this.data.pages.idx.nested = 0;
 
 		let _page = this.options.embeds[this.data.pages.idx.current];
 
@@ -76,7 +87,7 @@ class EmbedNavigator {
 			this.data.pages.current = _page;
 
 		// Count how many nested pages there are currently
-		this.data.pages.nested_length = Array.isArray(_page) ? _page.length : 0;
+		this.data.pages.nestedLength = Array.isArray(_page) ? _page.length : 0;
 
 		// Check if pagination is required
 		this.data.pagination.required = Array.isArray(_page) ? _page.length >= 2 : false;
@@ -88,10 +99,9 @@ class EmbedNavigator {
 		this.data.pagination.canJump = Array.isArray(_page) ? _page.length >= 4 : false;
 	}
 
-	#_configureMessageComponents() {
+	#_configureComponents() {
 		this.data.messageComponents = [];
 
-		// prettier-ignore
 		// Add the StringSelectMenu if enabled
 		if (this.options.selectMenuEnabled && this.data.components.selectMenu.options.length)
 			this.data.messageComponents.push(this.data.actionRows.selectMenu);
@@ -149,11 +159,10 @@ class EmbedNavigator {
 			);
 	}
 
-	/// -- Components --
+	/* - - - - - { Component Management } - - - - - */
 	async #_messageComponents_remove() {
-		if (!this.data.message) return;
-		// prettier-ignore
-		try { return this.data.message.edit({ components: [] }); } catch {}
+		if (this.data.message?.editable) return await this.data.message.edit({ components: [] }).catch(() => null);
+		return null;
 	}
 
 	async #_paginationReactions_add() {
@@ -162,7 +171,7 @@ class EmbedNavigator {
 
 		// Get each reaction currently on the message
 		let _messageReactions = this.data.message.reactions.cache.filter(reaction =>
-			allPaginationReactionNames.includes(reaction.emoji.name)
+			paginationReactionNames.includes(reaction.emoji.name)
 		);
 
 		// Update pagination reactions if necessary
@@ -170,26 +179,23 @@ class EmbedNavigator {
 			// Remove pagination reactions
 			await this.#_paginationReactions_remove();
 
-			try {
-				// prettier-ignore
-				// Add pagination reactions
-				for (let _reaction of this.data.pagination.reactions)
-					await this.data.message.react(_reaction.ID);
-			} catch {}
+			// Add pagination reactions
+			for (let _reaction of this.data.pagination.reactions)
+				await this.data.message.react(_reaction.ID).catch(() => null);
 		}
 	}
 
 	async #_paginationReactions_remove() {
-		// prettier-ignore
-		try { await this.data.message.reactions.removeAll();} catch {}
+		if (this.data.message) return await this.data.message.reaction.removeAll().catch(() => null);
+		return null;
 	}
 
-	/// -- Pagination --
+	/* - - - - - { Utility } - - - - - */
 	async #_askPageNumber(user) {
 		/// Error handling
 		if (!this.data.message) return null;
 		if (!user) {
-			logger.error("Failed to await user's choice", "EmbedNavigator_askPageNumber", "user not defined");
+			logger.error("[EmbedNavigator>askPageNumber]:", "User not defined.");
 			return null;
 		}
 
@@ -198,7 +204,7 @@ class EmbedNavigator {
 
 		// Send a message to the channel asking the user to respond with a number
 		_message = await this.data.message
-			.reply({ content: `${user} say the number you want to jump to` })
+			.reply({ content: config.navigator.ASK_PAGE_NUMBER_MESSAGE.replace("$USER_MENTION", user) })
 			.catch(() => null);
 
 		// + Error handling
@@ -229,10 +235,13 @@ class EmbedNavigator {
 				if (!isNaN(_number) && _message_user.deletable) await _message_user.delete().catch(() => null);
 
 				// Check if the response was within our page length
-				if (!_number || _number > this.data.pages.nested_length) {
+				if (!_number || _number > this.data.pages.nestedLength) {
+					// prettier-ignore
 					/// Send a self destructing error message
 					let _message_error = await this.data.message.reply({
-						content: `${user} \`${_message_user.content}\` is not a valid page number`
+						content: config.navigator.ASK_PAGE_NUMBER_ERROR
+							.replace("$USER_MENTION", user)
+							.replace("$MESSAGE_CONTENT", _message_user.content)
 					});
 
 					deleteMesssageAfter(_message_error, _timeouts.error);
@@ -250,7 +259,7 @@ class EmbedNavigator {
 			});
 	}
 
-	/// -- Collectors --
+	/* - - - - - { Collector } - - - - - */
 	async #_collect_reactions() {
 		// Error handling
 		if (this.data.collectors.reaction) {
@@ -281,34 +290,34 @@ class EmbedNavigator {
 				if (filter_userIDs.length && !filter_userIDs.includes(_user.id)) return;
 
 				// Filter out non-relevant reactions
-				if (!allPaginationReactionNames.includes(_reaction.emoji.name)) return;
+				if (!paginationReactionNames.includes(_reaction.emoji.name)) return;
 
 				try {
 					// prettier-ignore
 					switch (_reaction.emoji.name) {	
 						case config.navigator.buttons.to_first.emoji.NAME:
 							this.data.pages.idx.nested = 0;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case config.navigator.buttons.back.emoji.NAME:
 							this.data.pages.idx.nested--;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case config.navigator.buttons.jump.emoji.NAME:
 							return await this.#_askPageNumber(_user).then(async idx => {
 								if (isNaN(idx)) return;
 
 								this.data.pages.idx.nested = idx;
-								this.#_updatePage(); return await this.refresh();
+								this.#_configurePage(); return await this.refresh();
 							});
 	
 						case config.navigator.buttons.next.emoji.NAME:
 							this.data.pages.idx.nested++;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case config.navigator.buttons.to_last.emoji.NAME:
-							this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
-							this.#_updatePage(); return await this.refresh();
+							this.data.pages.idx.nested = (this.data.pages.nestedLength - 1);
+							this.#_configurePage(); return await this.refresh();
 	
 						default: return;
 					}
@@ -373,31 +382,31 @@ class EmbedNavigator {
 							this.data.components.selectMenu.options[this.data.pages.idx.current].setDefault(true);
 						
 							// Update the page
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case "btn_to_first":
 							this.data.pages.idx.nested = 0;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case "btn_back":
 							this.data.pages.idx.nested--;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case "btn_jump":
 							return await this.#_askPageNumber(_interaction.user).then(async idx => {
 								if (isNaN(idx)) return;
 
 								this.data.pages.idx.nested = idx;
-								this.#_updatePage(); return await this.refresh();
+								this.#_configurePage(); return await this.refresh();
 							});
 	
 						case "btn_next":
 							this.data.pages.idx.nested++;
-							this.#_updatePage(); return await this.refresh();
+							this.#_configurePage(); return await this.refresh();
 	
 						case "btn_to_last":
-							this.data.pages.idx.nested = (this.data.pages.nested_length - 1);
-							this.#_updatePage(); return await this.refresh();
+							this.data.pages.idx.nested = (this.data.pages.nestedLength - 1);
+							this.#_configurePage(); return await this.refresh();
 	
 						default: return;
 					}
@@ -416,58 +425,38 @@ class EmbedNavigator {
 		});
 	}
 
-	/// -- Constructor --
-	#_createButton(label, customID) {
-		let _button = new ButtonBuilder({ style: ButtonStyle.Secondary, custom_id: customID });
-
-		if (label.TEXT) _button.setLabel(label.TEXT);
-		else if (label.emoji.ID) _button.setEmoji(label.emoji.ID);
-		else throw new Error("You must provide text or an emoji ID for this navigator button in '_dT_config.json'");
-
-		return _button;
-	}
-
-	/** @param {eN_options} options  */
+	/** A utility to create pagination between multiple embeds using `Reactions`, `Buttons`, and or `SelectMenus`.
+	 * @param {eN_options} options */
 	constructor(options) {
-		/// Error handling
-		if (!options?.interaction && !options?.channel)
-			throw new Error("You must provide either an Interaction or a TextChannel");
-		if (options?.pagination?.useReactions)
-			// prettier-ignore
-			for (let [key, val] of Object.entries(config.navigator.buttons)) {
-				if (!val.emoji.ID) throw new Error(
-					`\`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'_dT_config.json\'`
-				);
-			
-				if (!val.emoji.NAME) throw new Error(
-					`\`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'_dT_config.json\'`
-				);
-			}
-
-		// Embeds
-		if (!options.embeds) throw new Error("You must provide at least 1 embed");
-		if (Array.isArray(options.embeds) && !options.embeds.length) throw new Error("Embeds cannot be an empty array");
-
-		/// Parse options
-		// prettier-ignore
 		this.options = {
-			interaction: null, channel: null, users: null, embeds: null,
+			userAccess: [],
+			embeds: [],
 			selectMenuEnabled: false,
-			pagination: { type: null, useReactions: false, dynamic: false },
-			timeout: config.timeouts.PAGINATION, ...options
+			pagination: { type: "", useReactions: false, dynamic: false },
+			...options
 		};
 
-		if (!Array.isArray(this.options.users) && this.options.users) this.options.users = [this.options.users];
-		if (!Array.isArray(this.options.embeds) && this.options.embeds) this.options.embeds = [this.options.embeds];
-		this.options.timeout = jt.parseTime(this.options.timeout);
+		/* - - - - - { Error Checking } - - - - - */
+		if (this.options?.pagination?.useReactions)
+			// prettier-ignore
+			for (let [key, val] of Object.entries(config.navigator.buttons)) {
+				if (!val.emoji.ID) throw new Error(`[EmbedNavigator]: \`${key}.ID\` is an empty value; This is required to be able to add it as a reaction. Fix this in \'_dT_config.json\'.`);
+				if (!val.emoji.NAME) throw new Error(`[EmbedNavigator]: \`${key}.NAME\` is an empty value; This is required to determine which reaction a user reacted to. Fix this in \'_dT_config.json\'.`);
+            }
 
-		/// Configure data & variables
-		// prettier-ignore
+		if (!this.options.embeds || (Array.isArray(this.options.embeds) && !this.options.embeds.length))
+			throw new Error("[EmbedNavigator]: You must provide at least 1 embed");
+
+		/* - - - - - { Parse Options } - - - - - */
+		this.options.userAccess = jt.forceArray(this.options.userAccess);
+		this.options.embeds = jt.forceArray(this.options.embeds);
+
 		this.data = {
 			pages: {
 				/** @type {EmbedBuilder|BetterEmbed} */
 				current: null,
-				nested_length: 0, idx: { current: 0, nested: 0 }
+				nestedLength: 0,
+				idx: { current: 0, nested: 0 }
 			},
 
 			selectMenu: { optionValues: [] },
@@ -475,7 +464,9 @@ class EmbedNavigator {
 			pagination: {
 				/** @type {{NAME:string, ID:string}[]} */
 				reactions: [],
-				required: false, requiresLong: false, canJump: false 
+				required: false,
+				canUseLong: false,
+				canJump: false
 			},
 
 			collectors: {
@@ -493,14 +484,14 @@ class EmbedNavigator {
 			components: {
 				selectMenu: new StringSelectMenuBuilder()
 					.setCustomId("ssm_pageSelect")
-					.setPlaceholder("choose a page to view..."),
-				
+					.setPlaceholder(config.navigator.DEFAULT_SELECT_MENU_PLACEHOLDER),
+
 				pagination: {
-					to_first: this.#_createButton(config.navigator.buttons.to_first, "btn_to_first"),
-					back: this.#_createButton(config.navigator.buttons.back, "btn_back"),
-					jump: this.#_createButton(config.navigator.buttons.jump, "btn_jump"),
-					next: this.#_createButton(config.navigator.buttons.next, "btn_next"),
-					to_last: this.#_createButton(config.navigator.buttons.to_last, "btn_to_last")
+					to_first: createButton(config.navigator.buttons.to_first, "btn_to_first"),
+					back: createButton(config.navigator.buttons.back, "btn_back"),
+					jump: createButton(config.navigator.buttons.jump, "btn_jump"),
+					next: createButton(config.navigator.buttons.next, "btn_next"),
+					to_last: createButton(config.navigator.buttons.to_last, "btn_to_last")
 				}
 			},
 
@@ -513,75 +504,101 @@ class EmbedNavigator {
 		this.data.actionRows.selectMenu.setComponents(this.data.components.selectMenu);
 	}
 
-	/** @param {...eN_selectMenuOptionData} options */
+	/** Add new options to the select menu.
+	 * @param {...eN_selectMenuOptionData} options The options you want to add. */
 	addSelectMenuOptions(...options) {
-		for (let _data of options) {
-			/// Error handling
-			if (Array.isArray(_data))
-				throw new TypeError("You can't pass an array as an argument for `eN_selectMenuOptionData`");
-			if (!_data.emoji && !_data.label) throw new Error("You must provide either an emoji or label");
+		for (let data of options) {
+			/* - - - - - { Error Checking } - - - - - */
+			if (Array.isArray(data))
+				throw new TypeError("[EmbedNavigator>addSelectMenuOptions]: You can't pass an array as an argument.");
 
+			if (!data.emoji && !data.label)
+				throw new Error("[EmbedNavigator>addSelectMenuOptions]: You must provide either an emoji or label.");
+
+			/* - - - - - { Configure and Add Option } - - - - - */
 			let idx_current = this.data.selectMenu.optionValues.length;
 			let idx_new = this.data.selectMenu.optionValues.length + 1;
 
-			// prettier-ignore
-			_data = {
-				emoji: "", label: `page ${idx_new}`, description: "",
-				value: `ssm_o_${idx_new}`, isDefault: idx_current === 0 ? true : false, ..._data
+			data = {
+				emoji: "",
+				label: `page ${idx_new}`,
+				description: "",
+				value: `ssm_o_${idx_new}`,
+				isDefault: idx_current === 0 ? true : false,
+				...data
 			};
 
 			// Add the new option ID (value) to our selectMenuOptionValues array
-			this.data.selectMenu.optionValues.push(_data.value);
+			this.data.selectMenu.optionValues.push(data.value);
 
 			// Create a new StringSelectMenuOption
-			let option = new StringSelectMenuOptionBuilder();
+			let ssm_option = new StringSelectMenuOptionBuilder();
 
 			// Configure options
-			if (_data.emoji) option.setEmoji(_data.emoji);
-			if (_data.label) option.setLabel(_data.label);
-			if (_data.description) option.setDescription(_data.description);
-			if (_data.value) option.setValue(_data.value);
-			if (_data.isDefault) option.setDefault(_data.isDefault);
+			if (data.emoji) ssm_option.setEmoji(data.emoji);
+			if (data.label) ssm_option.setLabel(data.label);
+			if (data.description) ssm_option.setDescription(data.description);
+			if (data.value) ssm_option.setValue(data.value);
+			if (data.isDefault) ssm_option.setDefault(data.isDefault);
 
 			// Add the new StringSelectMenuOption to the SelectMenu
-			this.data.components.selectMenu.addOptions(option);
+			this.data.components.selectMenu.addOptions(ssm_option);
 		}
+
+		return this;
 	}
 
-	/** @param {Number} idx */
-	removeSelectMenuOptions(...idx) {
-		for (let i of idx) this.data.components.selectMenu.spliceOptions(i, 1);
+	/** Remove options from the select menu.
+	 * @param {Number} index The index of the options you want to remove. */
+	removeSelectMenuOptions(...index) {
+		for (let i of index) this.data.components.selectMenu.spliceOptions(i, 1);
+		return this;
 	}
 
-	// prettier-ignore
+	/** Enable/disable the select menu.
+	 * @param {boolean} enabled `true` to enable, `false` to disable. */
 	async setSelectMenuEnabled(enabled) {
 		this.options.selectMenuEnabled = enabled;
-		await this.refresh(); return;
+		await this.refresh();
+		return this;
 	}
 
-	// prettier-ignore
-	/** @param {PaginationType} type */
+	/** Set the type of pagination.
+	 * @param {PaginationType} type The new value you want to set. */
 	async setPaginationType(type) {
 		this.options.pagination.type = type;
-		await this.refresh(); return;
+		await this.refresh();
+		return this;
 	}
 
-	/** @param {eN_sendOptions} options */
-	async send(options) {
-		/// Update the configuration
-		this.#_updatePage();
-		this.#_configureMessageComponents();
+	/** Send the embeds with navigation.
+	 * @param {CommandInteraction|import("discord.js").Channel|Message} handler ***REQUIRED*** to send the message.
+	 *
+	 * The type of handler depends on the `SendMethod` you choose to use.
+	 *
+	 * **1.** `CommandInteraction` is required for `Interaction` based `SendMethods`.
+	 *
+	 * **2.** `Channel` is required for the "sendToChannel" `SendMethod`.
+	 *
+	 * **3.** `Message` is required for `Message` based `SendMethods`.
+	 * @param {eN_sendOptions} options Extra send options. */
+	async send(handler, options) {
+		/* - - - - - { Configure } - - - - - */
+		this.#_configurePage();
+		this.#_configureComponents();
 		this.#_configurePagination();
 
-		// prettier-ignore
-		// Send the message
+		/* - - - - - { Send the Navigator } - - - - - */
 		this.data.message = await dynaSend({
-			interaction: this.options.interaction, channel: this.options.channel,
-			components: this.data.messageComponents, embeds: [this.data.pages.current],
-			...options
+			interaction: handler instanceof CommandInteraction ? handler : null,
+			channel: handler instanceof BaseChannel ? handler : null,
+			message: handler instanceof Message ? handler : null,
+			...options,
+			embeds: this.options.embeds,
+			components: this.data.messageComponents
 		});
 
-		// Check if the send failed
+		// Return null if failed
 		if (!this.data.message) return null;
 
 		// Add reactions for pagination if enabled
@@ -598,55 +615,22 @@ class EmbedNavigator {
 		return this.data.message;
 	}
 
-	/** @param {Message} message @param {eN_replyOptions} options */
-	async reply(message, options) {
-		/// Update the configuration
-		this.#_updatePage();
-		this.#_configureMessageComponents();
-		this.#_configurePagination();
-
-		// Send the message
-		this.data.message = await dynaSend({
-			message,
-			components: this.data.messageComponents,
-			embeds: [this.data.pages.current],
-			sendMethod: "replyTo",
-			...options
-		});
-
-		// Check if the send failed
-		if (!this.data.message) return null;
-
-		// Add reactions for pagination if enabled
-		// NOTE: this is not awaited since we want to be able to use the reactions while they're being added
-		if (this.data.pagination.required && this.options.pagination.useReactions) this.#_paginationReactions_add();
-
-		/// Start collectors if needed
-		// Collect message reactions
-		if (this.data.pagination.reactions.length) this.#_collect_reactions();
-		// Collect message component interactions
-		if (this.data.messageComponents.length) this.#_collect_components();
-
-		// Return the message
-		return this.data.message;
-	}
-
-	/** Refresh the message and its components */
+	/** Refresh the navigater's message and components. */
 	async refresh() {
 		/// Error handling
 		if (!this.data.message) {
-			logger.error(`Failed to refresh EmbedNavigator`, `message not sent`);
+			logger.error("[EmbedNavigator]:", "Could not refresh navigator; message not sent.");
 			return null;
 		}
 
 		if (!this.data.message.editable) {
-			logger.error(`Failed to refresh EmbedNavigator`, `message not editable`);
+			logger.error("[EmbedNavigator]:", "Could not refresh navigator; message not editable.");
 			return null;
 		}
 
 		/// Update the configuration
-		this.#_updatePage();
-		this.#_configureMessageComponents();
+		this.#_configurePage();
+		this.#_configureComponents();
 		this.#_configurePagination();
 		this.#_paginationReactions_add();
 
@@ -660,10 +644,10 @@ class EmbedNavigator {
 		// Collect message component interactions
 		if (this.data.messageComponents.length) this.#_collect_components();
 
-		// prettier-ignore
 		// Edit & return the message
 		this.data.message = await this.data.message.edit({
-			embeds: [this.data.pages.current], components: this.data.messageComponents
+			embeds: [this.data.pages.current],
+			components: this.data.messageComponents
 		});
 
 		return this.data.message;

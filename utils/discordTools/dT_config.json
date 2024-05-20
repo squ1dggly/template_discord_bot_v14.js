@@ -1,7 +1,7 @@
 {
 	"INVIS_CHAR": "\u200b",
 	"EMBED_COLOR": ["#2B2D31"],
-	"CONFIRMATION_TITLE": "⚠️ Please confirm this action",
+	"EMBED_COLOR_DEV": ["#2B2D31"],
 
 	"timeouts": {
 		"PAGINATION": "30s",
@@ -10,6 +10,10 @@
 	},
 
 	"navigator": {
+		"DEFAULT_SELECT_MENU_PLACEHOLDER": "Choose a page to view...",
+		"ASK_PAGE_NUMBER_MESSAGE": "$USER_MENTION say the page number you would like to view.",
+		"ASK_PAGE_NUMBER_ERROR": "$USER_MENTION `$MESSAGE_CONTENT` is not a valid page.",
+
 		"buttons": {
 			"to_first": { "TEXT": "◀◀", "emoji": { "NAME": "⏮️", "ID": "⏮️" } },
 			"back": { "TEXT": "◀", "emoji": { "NAME": "◀️", "ID": "◀️" } },

@@ -5,8 +5,8 @@ const {
 	ActionRowBuilder, ButtonBuilder, ChannelSelectMenuBuilder,
 	ButtonStyle, ComponentType, TextInputStyle, StringSelectMenuBuilder
 } = require("discord.js");
-const { BetterEmbed } = require("../utils/discordTools");
-const jt = require("../utils/jsTools");
+const { BetterEmbed } = require("../../utils/discordTools");
+const jt = require("../../utils/jsTools");
 
 const config = require("./embed_config.json");
 
@@ -15,7 +15,7 @@ const timeouts = {
 	channelSelect: jt.parseTime(config.timeouts.CHANNEL_SELECT)
 };
 
-/** @type {import("../configs/typedefs").SlashCommandExports} */
+/** @type {import("../../configs/typedefs").SlashCommandExports} */
 module.exports = {
 	category: "Utility",
 	options: { icon: "📝", guildAdminOnly: true },
@@ -532,10 +532,10 @@ module.exports = {
 					_templateJSON = { meta: { name: "Untitled Template", value: "untitled_template" }, ..._templateJSON };
 
 					// Convert JSON into an attachment
-					let attachment_json = new AttachmentBuilder(Buffer.from(
-						JSON.stringify(_templateJSON, null, 4)),
-						{ name: "template.json", description: "untitled template" }
-					);
+					let attachment_json = new AttachmentBuilder(Buffer.from(JSON.stringify(_templateJSON, null, 4)), {
+						name: "template.json",
+						description: "untitled template"
+					});
 
 					// Send the attachment
 					return await i.reply({ files: [attachment_json], ephemeral: true });
@@ -620,11 +620,11 @@ function formatTemplate(client, user, template) {
 	// Uses negative lookbehind for "\" to allow escaping
 	const parse = str => `${str}`
 		// User mentions
-		.replace(/(?<!\\|<)@[0-9]{18}(?!>)/g, s => `<@${s.substring(1)}>`)
+		.replace(/(?<!\\|<)@[0-9]+(?!>)/g, s => `<@${s.substring(1)}>`)
 		// Role mentions
-		.replace(/(?<!\\|<)@&[0-9]{18}(?!>)/g, s => `<@&${s.substring(2)}>`)
+		.replace(/(?<!\\|<)@&[0-9]+(?!>)/g, s => `<@&${s.substring(2)}>`)
 		// Channel mentions
-		.replace(/(?<!\\|<)#[0-9]{19}(?!>)/g, s => `<#${s.substring(1)}>`)
+		.replace(/(?<!\\|<)#[0-9]+(?!>)/g, s => `<#${s.substring(1)}>`)
 
 		// Self mention
 		.replace(/(?<!\\)\$USER\b/g, user.toString())

@@ -1,94 +1,97 @@
-/** @typedef {"reply"|"editReply"|"followUp"|"channel"|"edit"|"replyTo"} SendMethod */
+/** @typedef {"reply"|"editReply"|"followUp"|"sendToChannel"|"messageReply"|"messageEdit"} SendMethod */
 
 /** @typedef dS_options
- * @property {CommandInteraction} interaction
- * @property {TextChannel} channel
- * @property {Message} message
- * @property {string} messageContent
- * @property {EmbedBuilder|BetterEmbed|Array<EmbedBuilder|BetterEmbed>} embeds
- * @property {ActionRowBuilder|ActionRowBuilder[]} components
- * @property {import("discord.js").MessageMentionOptions} allowedMentions
- * @property {SendMethod} sendMethod if `reply` fails, `editReply` will be used **|** `reply` is default
- * @property {boolean} ephemeral
- * @property {number|string} deleteAfter amount of time to wait in milliseconds */
+ * @property {CommandInteraction} interaction Used for the "reply", "editReply", and "followUp" `SendMethod`.
+ * @property {TextChannel} channel Used for the "sendToChannel" `SendMethod`.
+ * @property {Message} message Used for the "messageReply", and "messageEdit" `SendMethod`.
+ * @property {string} content The text content to send in the message.
+ * @property {EmbedBuilder|BetterEmbed|Array<EmbedBuilder|BetterEmbed>} embeds One or more `Embeds` to send.
+ * @property {ActionRowBuilder|ActionRowBuilder[]} components The components to add in the message.
+ * @property {import("discord.js").MessageMentionOptions} allowedMentions The allowed mentions of the message.
+ * @property {SendMethod} sendMethod The method to send the message.
+ *
+ * Default is "reply". If "reply" fails, "editReply" is used.
+ * @property {boolean} ephemeral If the message should be ephemeral. This only works for the "reply" `SendMethod`.
+ * @property {number|string} deleteAfter The amount of time to wait in **MILLISECONDS** before deleting the message.
+ *
+ * This utilizes `jsTools.parseTime()`, letting you also use "10s", "1m", or "1m 30s" for example.
+ * @property {boolean} fetchReply Whether to return the `Message` object after sending. `true` by default. */
 
-const { CommandInteraction, TextChannel, Message, ActionRowBuilder, EmbedBuilder } = require("discord.js");
-
+const { CommandInteraction, TextChannel, Message, EmbedBuilder, ActionRowBuilder } = require("discord.js");
 const deleteMessageAfter = require("./dT_deleteMessageAfter");
 const BetterEmbed = require("./dT_betterEmbed");
 const logger = require("../logger");
 const jt = require("../jsTools");
 
-/** @param {dS_options} options  */
+/** @param {dS_options} options */
 async function dynaSend(options) {
 	options = {
 		interaction: null,
 		channel: null,
 		message: null,
-		messageContent: "",
+		content: undefined,
 		embeds: [],
 		components: [],
 		allowedMentions: {},
 		sendMethod: "reply",
 		ephemeral: false,
-		deleteAfter: 0,
+		deleteAfter: null,
+		fetchReply: true,
 		...options
 	};
 
 	/* - - - - - { Parse Options } - - - - - */
-	// options.embeds = jt.forceArray(options.embeds);
-	// options.components = jt.forceArray(options.components);
-	options.deleteAfter = jt.parseTime(options.deleteAfter);
+	// prettier-ignore
+	options.embeds = options.embeds?.length || options.embeds ? jt.forceArray(options.embeds).filter(c => c) : [];
+
+	// prettier-ignore
+	options.components = options.components?.length || options.components ? jt.forceArray(options.components).filter(c => c) : [];
+
+	options.deleteAfter = jt?.parseTime ? jt.parseTime(options.deleteAfter) : options.deleteAfter;
 
 	/* - - - - - { Error Checking } - - - - - */
 	if (!options.interaction && !options.channel && !options.message)
-		throw new Error("You must provide either a CommandInteraction, Channel, or Message");
+		throw new Error("[DynaSend]: You must provide either a CommandInteraction, Channel, or Message");
 
-	if (options.sendMethod === ("reply" || "editReply" || "followUp") && options.channel && !options.interaction)
-		throw new Error(`The '${options.sendMethod}' SendMethod cannot be used when a Channel is provided`);
+	if (options.deleteAfter && isNaN(options.deleteAfter))
+		throw new Error("[DynaSend]: You must provide a valid time string, or milliseconds for 'deleteAfter'");
 
-	if (options.sendMethod === "replyTo" && !options.message)
-		throw new Error("You must provide a Message to use the 'replyTo' SendMethod");
+	if (["messageEdit", "messageReply"].includes(options.sendMethod) && !options.message)
+		throw new Error("[DynaSend]: You must provide a Message to use the 'messageEdit' or 'messageReply' SendMethod");
 
-	if (options.sendMethod === "edit" && !options.message)
-		throw new Error("You must provide a Message to use the 'edit' SendMethod");
-
-	if (options.sendMethod === ("replyTo" || "channel") && options.ephemeral)
-		logger.debug("Ephemeral can only be used with interaction based SendMethods (except 'editReply')");
+	if (["reply", "followUp"].includes(options.sendMethod) && options.ephemeral)
+		logger.debug("[DynaSend]: Ephemeral can only be used with interaction based SendMethods (excluding 'editReply')");
 
 	if (options.deleteAfter && options.deleteAfter < 1000)
-		logger.debug("dT_dynaSend deleteAfter is less than 1 second; Is this intentional?");
+		logger.debug("[DynaSend]: deleteAfter is less than 1 second; Is this intentional?");
 
-	if (options.components.length > 5) throw new Error("You cannot send more than 5 components per message");
-
-	/* - - - - - { SendMethod Fallback } - - - - - */
-	if (options.sendMethod === "reply" && (options.interaction.replied || options.interaction.deferred))
-		options.sendMethod = "editReply";
+	// prettier-ignore
+	// Interaction based SendMethod fallback
+	if (options.sendMethod === "reply" && options.interaction && (options.interaction.replied || options.interaction.deferred))
+        options.sendMethod = "editReply";
 
 	/* - - - - - { Send the Message } - - - - - */
 	/** @type {Message|null} */
 	let message = null;
 
-	// prettier-ignore
-	// Put together send data
+	// Create the send data
 	let sendData = {
-		content: options.messageContent || undefined,
-		components: options.components?.length || options.components
-			? jt.forceArray(options.components).filter(c => c)
-			: [],
-		embeds: options.embeds?.length || options.embeds
-			? jt.forceArray(options.embeds).filter(e => e)
-			: [],
-		allowedMentions: options.allowedMentions || {},
-		fetchReply: true
+		content: options.content,
+		components: options.components,
+		embeds: options.embeds,
+		// Add allowedMentions, if applicable
+		...(Object.keys(options.allowedMentions).length ? { allowedMentions: options.allowedMentions } : {}),
+		// Add ephemeral, if applicable
+		...(["reply", "followUp"].includes(options.sendMethod) ? { ephemeral: options.ephemeral } : {}),
+		fetchReply: options.fetchReply
 	};
 
 	switch (options.sendMethod) {
 		case "reply":
-			message = await options.interaction.reply({ ephemeral: options.ephemeral, ...sendData }).catch(err => {
+			message = await options.interaction.reply(sendData).catch(err => {
 				logger.error(
-					"Failed to send message",
-					`DynaSend | reply to interaction | sendMethod: ${options.sendMethod}`,
+					"[DynaSend]: Failed to send message",
+					`REPLY_TO_INTERACTION | SendMethod: '${options.sendMethod}'`,
 					err
 				);
 				return null;
@@ -99,8 +102,8 @@ async function dynaSend(options) {
 		case "editReply":
 			message = await options.interaction.editReply(sendData).catch(err => {
 				logger.error(
-					"Failed to edit message",
-					`DynaSend | edit interaction message | sendMethod: ${options.sendMethod}`,
+					"[DynaSend]: Failed to edit message",
+					`EDIT_INTERACTION | SendMethod: '${options.sendMethod}'`,
 					err
 				);
 				return null;
@@ -109,10 +112,10 @@ async function dynaSend(options) {
 			break;
 
 		case "followUp":
-			message = await options.interaction.followUp({ ephemeral: options.ephemeral, ...sendData }).catch(err => {
+			message = await options.interaction.followUp(sendData).catch(err => {
 				logger.error(
-					"Failed to send message",
-					`DynaSend | follow-up interaction message | sendMethod: ${options.sendMethod}`,
+					"[DynaSend]: Failed to send message",
+					`FOLLOW_UP_INTERACTION | SendMethod: '${options.sendMethod}'`,
 					err
 				);
 				return null;
@@ -120,11 +123,11 @@ async function dynaSend(options) {
 
 			break;
 
-		case "channel":
+		case "sendToChannel":
 			message = await options.channel.send(sendData).catch(err => {
 				logger.error(
-					"Failed to send message",
-					`DynaSend | send to channel | sendMethod: ${options.sendMethod}`,
+					"[DynaSend]: Failed to send message",
+					`SEND_TO_CHANNEL | SendMethod: '${options.sendMethod}'`,
 					err
 				);
 				return null;
@@ -132,25 +135,29 @@ async function dynaSend(options) {
 
 			break;
 
-		case "edit":
+		case "messageEdit":
 			// Check if the message can be edited
-			if (!options.message.editable) {
+			if (!options?.message?.editable) {
 				logger.debug("The provided message could not be edited");
 				break;
 			}
 
 			message = await options.message.edit(sendData).catch(err => {
-				logger.error("Failed to edit message", `DynaSend | edit message | sendMethod: ${options.sendMethod}`, err);
+				logger.error(
+					"[DynaSend]: Failed to edit message",
+					`EDIT_MESSAGE | SendMethod: '${options.sendMethod}'`,
+					err
+				);
 				return null;
 			});
 
 			break;
 
-		case "replyTo":
+		case "messageReply":
 			message = await options.message.reply(sendData).catch(err => {
 				logger.error(
-					"Failed to send message",
-					`DynaSend | reply to message | sendMethod: ${options.sendMethod}`,
+					"[DynaSend]: Failed to send message",
+					`REPLY_TO_MESSAGE | SendMethod: '${options.sendMethod}'`,
 					err
 				);
 				return null;

@@ -125,8 +125,8 @@ function eta(unix, options) {
  * @param {etaHMS_options} options
  *
  * @example
- * eta(1703001733955) // returns "1 hour, 0 minutes, and 0 seconds" (from now)
- * eta(1702994533936, { nullIfPast: true }) // returns null */
+ * etaHMS(1703001733955) // returns "1 hour, 0 minutes, and 0 seconds" (from now)
+ * etaHMS(1702994533936, { nullIfPast: true }) // returns null */
 function etaHMS(unix, options) {
 	unix = Number(unix);
 	if (isNaN(unix)) throw new Error("unix must be a number or string");
@@ -150,8 +150,8 @@ function etaHMS(unix, options) {
 	let s = Math.floor((seconds % 3600) % 60);
 
 	let h_f = h > 0 ? `${h} ${h === 1 ? "hour" : "hours"}` : "";
-	let m_f = h > 0 ? `${m} ${m === 1 ? "minute" : "minutes"}` : "";
-	let s_f = h > 0 ? `${s} ${s === 1 ? "second" : "seconds"}` : "";
+	let m_f = m > 0 ? `${m} ${m === 1 ? "minute" : "minutes"}` : "";
+	let s_f = s > 0 ? `${s} ${s === 1 ? "second" : "seconds"}` : "";
 
 	let result = [];
 

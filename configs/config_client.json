@@ -10,7 +10,7 @@
 
 	"OWNER_ID": "",
 	"ADMIN_IDS": [""],
-	"admin_bypass_ids": {},
+	"admin_bypass": [{ "COMMAND_NAME": "", "USER_IDS": [] }],
 
 	"support_server": {
 		"INVITE_URL": "https://discord.gg/your_server",

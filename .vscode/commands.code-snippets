@@ -19,8 +19,8 @@
 			"    execute: async (client, message) => {",
 			"        // Create an array of responses",
 			"        let choices = [",
-			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
 			"        // Create the embed :: { COOKIE }",
@@ -30,7 +30,7 @@
 			"        });\n",
 
 			"        // Reply to the user with the embed",
-			"        return await embed_${1:cookie}.reply(message, { allowedMentions: { repliedUser: false } });$0",
+			"        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
 			"    }",
 			"};",
 			""
@@ -61,8 +61,8 @@
 			"    execute: async (client, message) => {",
 			"        // Create an array of responses",
 			"        let choices = [",
-			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
 			"        // Create the embed :: { COOKIE }",
@@ -72,7 +72,7 @@
 			"        });\n",
 
 			"        // Reply to the user with the embed",
-			"        return await embed_${1:cookie}.reply(message, { allowedMentions: { repliedUser: false } });$0",
+			"        return await embed_${1:cookie}.send(message, { allowedMentions: { repliedUser: false } });$0",
 			"    }",
 			"};",
 			""
@@ -100,18 +100,18 @@
 			"    execute: async (client, interaction) => {",
 			"        // Create an array of responses",
 			"        let choices = [",
-			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
 			"        // Create the embed :: { COOKIE }",
 			"        let embed_${1:cookie} = new BetterEmbed({",
-			"            interaction,",
+			"            context: { interaction },",
 			"            description: jt.choice(choices)",
 			"        });\n",
 
 			"        // Reply to the interaction with the embed",
-			"        return await embed_${1:cookie}.send();$0",
+			"        return await embed_${1:cookie}.send(interaction);$0",
 			"    }",
 			"};",
 			""
@@ -144,18 +144,61 @@
 			"    execute: async (client, interaction) => {",
 			"        // Create an array of responses",
 			"        let choices = [",
-			"            \"What's up, **\\$USERNAME**! Have a cookie! :cookie:\",",
-			"            \"Hey, **\\$USERNAME**! Have a glass of milk! :milk:\"",
+			"            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
 			"        ];\n",
 
 			"        // Create the embed :: { COOKIE }",
 			"        let embed_${1:cookie} = new BetterEmbed({",
-			"            interaction,",
+			"            context: { interaction },",
 			"            description: jt.choice(choices)",
 			"        });\n",
 
 			"        // Reply to the interaction with the embed",
-			"        return await embed_${1:cookie}.send();$0",
+			"        return await embed_${1:cookie}.send(interaction);$0",
+			"    }",
+			"};",
+			""
+		]
+	},
+
+	"Raw Command": {
+		"scope": "javascript",
+		"prefix": "cmd.raw",
+		"body": [
+			"const { Client, CommandInteraction } = require(\"discord.js\");",
+			"const { BetterEmbed } = require(\"../utils/discordTools\");",
+			"const jt = require(\"../utils/jsTools\");\n",
+
+			"/** @type {import(\"../configs/typedefs\").RawCommandExports} */",
+			"module.exports = {",
+			"    category: \"Fun\",",
+			"    options: { icon: \"🍪\" },\n",
+
+			"    commandData: {",
+			"    	name: \"${1:cookie}\",",
+			"    	description: \"${2:Get a cookie or a glass of milk}\",",
+			"    	type: 1,",
+			"    	integration_types: [0, 1],",
+			"    	context: [0, 1, 2],",
+			"    },\n",
+
+			"    /** @param {Client} client @param {CommandInteraction} interaction */",
+			"    execute: async (client, interaction) => {",
+			"        // Create an array of responses",
+			"        let choices = [",
+			"            \"What's up, **\\$USER_NAME**! Have a cookie! :cookie:\",",
+			"            \"Hey, **\\$USER_NAME**! Have a glass of milk! :milk:\"",
+			"        ];\n",
+
+			"        // Create the embed :: { COOKIE }",
+			"        let embed_${1:cookie} = new BetterEmbed({",
+			"            context: { interaction },",
+			"            description: jt.choice(choices)",
+			"        });\n",
+
+			"        // Reply to the interaction with the embed",
+			"        return await embed_${1:cookie}.send(interaction);$0",
 			"    }",
 			"};",
 			""

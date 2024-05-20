@@ -12,17 +12,20 @@ module.exports = {
 
 	/** @param {Client} client @param {Message} message @param {import("../configs/typedefs").PrefixCommandExtra} extra */
 	execute: async (client, message) => {
+		// Create an array of responses
 		let choices = [
 			"What's up, **$USERNAME**! Have a cookie! :cookie:",
 			"Hey, **$USERNAME**! Have a glass of milk! :milk:"
 		];
 
-		// prettier-ignore
+		// Create the embed :: { COOKIE }
 		let embed_cookie = new BetterEmbed({
-			channel: message.channel, author: { user: message.author },
+			context: { channel: message.channel },
+			author: { user: message.author },
 			description: jt.choice(choices)
 		});
 
+		// Reply to the interaction with the embed
 		return await embed_cookie.reply(message, { allowedMentions: { repliedUser: false } });
 	}
 };

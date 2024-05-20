@@ -17,11 +17,13 @@ module.exports = {
 		let lastActivity = null;
 
 		const parseStatusData = async () => {
-			let _data = clientStatus.ACTIVITY?.length
+			let _data = structuredClone(clientStatus.ACTIVITY?.length
 				? clientStatus?.RANDOM_ACTIVITY
 					? jt.choice(clientStatus.ACTIVITY)
-					: structuredClone(clientStatus.ACTIVITY[activityIndex])
-				: clientStatus.ACTIVITY;
+					: clientStatus.ACTIVITY[activityIndex]
+				: clientStatus.ACTIVITY);
+
+			if (!_data) return;
 
 			// prettier-ignore
 			// Replace data.activity.TYPE with the proper ActivityType enum
@@ -52,10 +54,10 @@ module.exports = {
 			}
 
 			// Avoid duplicates if RANDOM is enabled
-			if (clientStatus?.RANDOM && !lastActivity?.NAME === _data.NAME) return await parseStatusData();
+			if (clientStatus?.RANDOM_ACTIVITY && !lastActivity?.NAME === _data.NAME) return await parseStatusData();
 
 			// Increment activity index
-			if (!clientStatus?.RANDOM)
+			if (!clientStatus?.RANDOM_ACTIVITY)
 				if (activityIndex < clientStatus.ACTIVITY.length - 1) activityIndex++;
 				else activityIndex = 0;
 

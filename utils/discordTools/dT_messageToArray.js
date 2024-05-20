@@ -1,8 +1,10 @@
 const { Message } = require("discord.js");
 
-/** Returns the content of the provided message, including `Embeds`, split by each word 
- * @param {Message} message
- * @param {Number|null} embedDepth amount of `embeds` to parse in the `Message` | `null` (unlimited) is default */
+/** Returns the content of the provided message, including `Embeds`, split by each word.
+ * @param {Message} message The message.
+ * @param {Number|null} embedDepth The amount of embeds to parse in the message.
+ * 
+ * `null` (unlimited) is default. */
 function messageToArray(message, embedDepth = null) {
 	let content = [];
 
