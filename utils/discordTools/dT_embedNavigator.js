@@ -37,7 +37,7 @@
  * @property {number|string} deleteAfter The amount of time to wait in **MILLISECONDS** before deleting the message. */
 
 // prettier-ignore
-const { CommandInteraction, GuildMember, User, Message, InteractionCollector, ReactionCollector, ComponentType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { CommandInteraction, GuildMember, User, BaseChannel, Message, InteractionCollector, ReactionCollector, ComponentType, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const deleteMesssageAfter = require("./dT_deleteMessageAfter");
 const BetterEmbed = require("./dT_betterEmbed");
 const dynaSend = require("./dT_dynaSend");
@@ -268,8 +268,7 @@ class EmbedNavigator {
 		}
 
 		/// Variables
-		let filter_userIDs = this.options.users ? this.options.users.map(user => user.id) : [];
-		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
+		let filter_userIDs = this.options.userAccess?.length ? this.options.userAccess.map(user => user.id) : [];
 
 		/// Create the reaction collector
 		const collector = this.data.message.createReactionCollector(
@@ -342,8 +341,7 @@ class EmbedNavigator {
 		}
 
 		/// Variables
-		let filter_userIDs = this.options.users?.length ? this.options.users.map(user => user.id) : [];
-		if (this.options.interaction) filter_userIDs.push(this.options.interaction.user.id);
+		let filter_userIDs = this.options.userAccess?.length ? this.options.userAccess.map(user => user.id) : [];
 
 		/// Create the component collector
 		const collector = this.data.message.createMessageComponentCollector(
@@ -433,8 +431,12 @@ class EmbedNavigator {
 			embeds: [],
 			selectMenuEnabled: false,
 			pagination: { type: "", useReactions: false, dynamic: false },
+			timeout: config.timeouts.PAGINATION,
 			...options
 		};
+
+		// Parse timeout string
+		this.options.timeout = jt.parseTime(this.options.timeout);
 
 		/* - - - - - { Error Checking } - - - - - */
 		if (this.options?.pagination?.useReactions)
@@ -445,7 +447,7 @@ class EmbedNavigator {
             }
 
 		if (!this.options.embeds || (Array.isArray(this.options.embeds) && !this.options.embeds.length))
-			throw new Error("[EmbedNavigator]: You must provide at least 1 embed");
+			throw new Error("[EmbedNavigator]: You must provide at least 1 embed.");
 
 		/* - - - - - { Parse Options } - - - - - */
 		this.options.userAccess = jt.forceArray(this.options.userAccess);
@@ -594,7 +596,7 @@ class EmbedNavigator {
 			channel: handler instanceof BaseChannel ? handler : null,
 			message: handler instanceof Message ? handler : null,
 			...options,
-			embeds: this.options.embeds,
+			embeds: this.data.pages.current,
 			components: this.data.messageComponents
 		});
 
